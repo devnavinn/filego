@@ -45,7 +45,7 @@ async function fileToImageData(file: File): Promise<ImageData> {
 async function imageDataToCanvasBlob(
     imageData: ImageData,
     type: "image/jpeg" | "image/png",
-    quality?: number
+    quality?: number,
 ): Promise<Blob> {
     const canvas = new OffscreenCanvas(imageData.width, imageData.height);
     const ctx = canvas.getContext("2d");
@@ -53,6 +53,7 @@ async function imageDataToCanvasBlob(
     if (!ctx) throw new Error("Canvas context unavailable");
 
     ctx.putImageData(imageData, 0, 0);
+
     return await canvas.convertToBlob({
         type,
         quality,
@@ -73,7 +74,10 @@ self.onmessage = async (event: MessageEvent<WorkerInput>) => {
         let ext: string;
 
         if (outputFormat === "webp") {
-            const encoded = await encodeWebp(imageData, { quality, effort });
+            const encoded = await encodeWebp(imageData, {
+                quality,
+                method: effort,
+            });
             blob = new Blob([encoded], { type: "image/webp" });
             ext = "webp";
         } else if (outputFormat === "avif") {

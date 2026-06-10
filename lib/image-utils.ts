@@ -35,9 +35,10 @@ export async function compressToWebp(
     options: { quality: number; effort: number }
 ): Promise<CompressedImage> {
     const imageData = await fileToImageData(file);
+
     const encoded = await encodeWebp(imageData, {
         quality: options.quality,
-        effort: options.effort,
+        method: options.effort,
     });
 
     const blob = new Blob([encoded], { type: "image/webp" });

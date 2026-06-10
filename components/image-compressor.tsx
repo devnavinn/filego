@@ -2,11 +2,24 @@
 
 import { useMemo, useRef, useState } from "react";
 import JSZip from "jszip";
-import { Download, FolderOpen, ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
+import {
+  Download,
+  FolderOpen,
+  ImagePlus,
+  Loader2,
+  Trash2,
+  Upload,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -14,7 +27,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { formatBytes, sanitizeZipPath } from "@/lib/image-utils";
-import { pickFolderImagesViaFSAccess, pickFolderImagesViaInput } from "@/lib/folder-utils";
+import {
+  pickFolderImagesViaFSAccess,
+  pickFolderImagesViaInput,
+} from "@/lib/folder-utils";
 
 type OutputFormat = "webp" | "avif" | "jpeg" | "png";
 
@@ -62,6 +78,8 @@ export function ImageCompressor() {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  const showEffortControl = outputFormat === "webp" || outputFormat === "avif";
+
   const stats = useMemo(() => {
     const total = items.length;
     const done = items.filter((i) => i.status === "done").length;
@@ -79,16 +97,41 @@ export function ImageCompressor() {
     };
   }, [items]);
 
-  const addFiles = async (entries: { file: File; relativePath: string }[]) => {
-    const next: QueueItem[] = entries.map((entry) => ({
-      id: crypto.randomUUID(),
-      file: entry.file,
-      relativePath: entry.relativePath,
-      status: "pending",
-      originalSize: entry.file.size,
-    }));
+  const resetProcessedState = () => {
+    setItems((prev) =>
+      prev.map((item) => ({
+        ...item,
+        status: "pending",
+        outputSize: undefined,
+        outputName: undefined,
+        outputRelativePath: undefined,
+        blob: undefined,
+        error: undefined,
+      })),
+    );
+    setProgress(0);
+  };
 
-    setItems((prev) => [...prev, ...next]);
+  const addFiles = async (entries: { file: File; relativePath: string }[]) => {
+    setItems((prev) => {
+      const existingKeys = new Set(
+        prev.map((item) => `${item.relativePath}::${item.originalSize}`),
+      );
+
+      const next: QueueItem[] = entries
+        .filter(
+          (entry) => !existingKeys.has(`${entry.relativePath}::${entry.file.size}`),
+        )
+        .map((entry) => ({
+          id: crypto.randomUUID(),
+          file: entry.file,
+          relativePath: entry.relativePath,
+          status: "pending" as const,
+          originalSize: entry.file.size,
+        }));
+
+      return [...prev, ...next];
+    });
   };
 
   const onPickSingle = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,80 +143,85 @@ export function ImageCompressor() {
 
   const onPickMultiple = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
+
     const entries = Array.from(e.target.files).map((file) => ({
       file,
       relativePath: file.name,
     }));
+
     await addFiles(entries);
     e.target.value = "";
   };
 
   const onPickFolderFallback = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
+
     const entries = await pickFolderImagesViaInput(e.target.files);
     await addFiles(entries);
     e.target.value = "";
   };
 
- const onPickFolderFS = async () => {
-  try {
-    const entries = await pickFolderImagesViaFSAccess();
-    if (!entries.length) return;
-    await addFiles(entries);
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return;
+  const onPickFolderFS = async () => {
+    try {
+      const entries = await pickFolderImagesViaFSAccess();
+      if (!entries.length) return;
+      await addFiles(entries);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      console.error("Folder picker failed:", error);
     }
+  };
 
-    console.error("Folder picker failed:", error);
-  }
-};
-
- const compressAll = async () => {
-  const pending = items.filter(
-    (item) => item.status === "pending" || item.status === "error"
-  );
-  if (!pending.length) return;
-
-  setRunning(true);
-  setProgress(0);
-
-  let processed = 0;
-
-  for (const item of pending) {
-    setItems((prev) =>
-      prev.map((row) =>
-        row.id === item.id
-          ? { ...row, status: "processing", error: undefined }
-          : row
-      )
+  const compressAll = async () => {
+    const pending = items.filter(
+      (item) => item.status === "pending" || item.status === "error",
     );
 
-    const worker = new Worker(
-      new URL("@/workers/compress.worker.ts", import.meta.url),
-      { type: "module" }
-    );
+    if (!pending.length) return;
 
-    const result = await new Promise<WorkerResponse>((resolve) => {
-      worker.onmessage = (event: MessageEvent<WorkerResponse>) => resolve(event.data);
+    setRunning(true);
+    setProgress(0);
 
-      worker.postMessage({
-        id: item.id,
-        file: item.file,
-        relativePath: item.relativePath,
-        quality,
-        effort,
-        outputFormat,
-      });
-    });
+    let processed = 0;
 
-    worker.terminate();
-
-    if (result.status === "done") {
+    for (const item of pending) {
       setItems((prev) =>
         prev.map((row) =>
-          row.id === result.id
-            ? {
+          row.id === item.id
+            ? { ...row, status: "processing", error: undefined }
+            : row,
+        ),
+      );
+
+      const worker = new Worker(
+        new URL("../workers/compress.worker.ts", import.meta.url),
+        { type: "module" },
+      );
+
+      const result = await new Promise<WorkerResponse>((resolve) => {
+        worker.onmessage = (event: MessageEvent<WorkerResponse>) =>
+          resolve(event.data);
+
+        worker.postMessage({
+          id: item.id,
+          file: item.file,
+          relativePath: item.relativePath,
+          quality,
+          effort,
+          outputFormat,
+        });
+      });
+
+      worker.terminate();
+
+      if (result.status === "done") {
+        setItems((prev) =>
+          prev.map((row) =>
+            row.id === result.id
+              ? {
                 ...row,
                 status: "done",
                 outputSize: result.outputSize,
@@ -181,32 +229,33 @@ export function ImageCompressor() {
                 outputRelativePath: result.relativePath,
                 blob: result.blob,
               }
-            : row
-        )
-      );
-    } else {
-      setItems((prev) =>
-        prev.map((row) =>
-          row.id === result.id
-            ? {
+              : row,
+          ),
+        );
+      } else {
+        setItems((prev) =>
+          prev.map((row) =>
+            row.id === result.id
+              ? {
                 ...row,
                 status: "error",
                 error: result.error,
               }
-            : row
-        )
-      );
+              : row,
+          ),
+        );
+      }
+
+      processed += 1;
+      setProgress(Math.round((processed / pending.length) * 100));
     }
 
-    processed += 1;
-    setProgress(Math.round((processed / pending.length) * 100));
-  }
-
-  setRunning(false);
-};
+    setRunning(false);
+  };
 
   const downloadOne = (item: QueueItem) => {
     if (!item.blob || !item.outputName) return;
+
     const url = URL.createObjectURL(item.blob);
     const a = document.createElement("a");
     a.href = url;
@@ -245,7 +294,8 @@ export function ImageCompressor() {
         <CardHeader>
           <CardTitle>Controls</CardTitle>
           <CardDescription>
-            Single image, multi-image, folder import, and ZIP export. Everything runs locally.
+            Compress and convert single images, batches, or folders locally with ZIP
+            export.
           </CardDescription>
         </CardHeader>
 
@@ -257,33 +307,50 @@ export function ImageCompressor() {
               min={1}
               max={100}
               step={1}
-              onValueChange={(value) => setQuality(value[0] ?? 75)}
+              onValueChange={(value) => {
+                setQuality(value[0] ?? 75);
+                resetProcessedState();
+              }}
             />
           </div>
 
           <div className="space-y-3">
-            <Label>Effort: {effort}</Label>
+            <Label className={!showEffortControl ? "text-muted-foreground" : ""}>
+              Effort: {effort}
+            </Label>
             <Slider
               value={[effort]}
               min={0}
               max={6}
               step={1}
-              onValueChange={(value) => setEffort(value[0] ?? 4)}
+              disabled={!showEffortControl}
+              onValueChange={(value) => {
+                setEffort(value[0] ?? 4);
+                resetProcessedState();
+              }}
             />
+            <p className="text-xs text-muted-foreground">
+              {showEffortControl
+                ? "Higher effort can improve compression but takes more time."
+                : "Effort is only used for modern codec outputs like WebP or AVIF."}
+            </p>
           </div>
-      
+
           <div className="space-y-3">
-           <Label htmlFor="output-format">Output format</Label>
-           <select
-           id="output-format"
-           value={outputFormat}
-           onChange={(e) => setOutputFormat(e.target.value as OutputFormat)}
-           className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm"
-           >
-             <option value="webp">WebP</option>
-             <option value="avif">AVIF</option>
+            <Label htmlFor="output-format">Output format</Label>
+            <select
+              id="output-format"
+              value={outputFormat}
+              onChange={(e) => {
+                setOutputFormat(e.target.value as OutputFormat);
+                resetProcessedState();
+              }}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="webp">WebP</option>
+              <option value="avif">AVIF</option>
               <option value="jpeg">JPEG</option>
-             <option value="png">PNG</option>
+              <option value="png">PNG</option>
             </select>
           </div>
 
@@ -313,25 +380,44 @@ export function ImageCompressor() {
               multiple
               className="hidden"
               onChange={onPickFolderFallback}
-              {...({ webkitdirectory: "true", directory: "true" } as React.InputHTMLAttributes<HTMLInputElement>)}
+              {...({
+                webkitdirectory: "true",
+                directory: "true",
+              } as React.InputHTMLAttributes<HTMLInputElement>)}
             />
 
-            <Button onClick={() => singleInputRef.current?.click()} variant="secondary" className="justify-start">
+            <Button
+              onClick={() => singleInputRef.current?.click()}
+              variant="secondary"
+              className="justify-start"
+            >
               <ImagePlus className="mr-2 size-4" />
               Select single image
             </Button>
 
-            <Button onClick={() => multiInputRef.current?.click()} variant="secondary" className="justify-start">
+            <Button
+              onClick={() => multiInputRef.current?.click()}
+              variant="secondary"
+              className="justify-start"
+            >
               <Upload className="mr-2 size-4" />
               Select multiple images
             </Button>
 
-            <Button onClick={onPickFolderFS} variant="secondary" className="justify-start">
+            <Button
+              onClick={onPickFolderFS}
+              variant="secondary"
+              className="justify-start"
+            >
               <FolderOpen className="mr-2 size-4" />
               Pick folder (Chromium)
             </Button>
 
-            <Button onClick={() => folderInputRef.current?.click()} variant="outline" className="justify-start">
+            <Button
+              onClick={() => folderInputRef.current?.click()}
+              variant="outline"
+              className="justify-start"
+            >
               <FolderOpen className="mr-2 size-4" />
               Folder fallback input
             </Button>
@@ -400,7 +486,8 @@ export function ImageCompressor() {
         <CardHeader>
           <CardTitle>Queue</CardTitle>
           <CardDescription>
-            Files stay on the user device. Output is WebP and ZIP is generated in-browser.
+            Files stay on the user device. Output format is selected by the user and
+            ZIP is generated in-browser.
           </CardDescription>
         </CardHeader>
 
@@ -414,10 +501,7 @@ export function ImageCompressor() {
               ) : null}
 
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-xl border bg-card p-4 shadow-sm"
-                >
+                <div key={item.id} className="rounded-xl border bg-card p-4 shadow-sm">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{item.relativePath}</p>
@@ -436,8 +520,8 @@ export function ImageCompressor() {
                           item.status === "done"
                             ? "default"
                             : item.status === "error"
-                            ? "destructive"
-                            : "secondary"
+                              ? "destructive"
+                              : "secondary"
                         }
                       >
                         {item.status}

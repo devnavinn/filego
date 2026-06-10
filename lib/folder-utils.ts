@@ -40,9 +40,9 @@ export async function pickFolderImagesViaFSAccess(): Promise<InputImage[]> {
             const nextPath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
 
             if (entry.kind === "directory") {
-                await walk(entry, nextPath, depth + 1);
+                await walk(entry as FileSystemDirectoryHandle, nextPath, depth + 1);
             } else if (entry.kind === "file") {
-                const file = await entry.getFile();
+                const file = await (entry as FileSystemFileHandle).getFile();
                 if (isSupportedImage(file)) {
                     results.push({
                         file,
