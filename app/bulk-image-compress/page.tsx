@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { ImageCompressor } from "@/components/image-compressor";
 
 export const metadata: Metadata = {
-  title: "Image Compressor",
+  title: "Compress Multiple Images Without Losing Quality | Filego",
   description:
-    "Compress and convert images with Filego using a fast, privacy-first workflow. Optimize JPG, PNG, WebP, AVIF, GIF, BMP, and more directly on your device.",
+    "Free bulk image compressor for JPG, PNG, WebP, AVIF, GIF, and BMP. Compress and convert multiple images locally with fast browser-based processing.",
   alternates: {
     canonical: "/bulk-image-compress",
   },
 };
 
-export default function Page() {
+export default function BulkImageCompressPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto max-w-7xl px-4 py-8">

@@ -246,7 +246,7 @@ export function ImageSquooshEditor() {
 
   return (
     <div className="overflow-hidden rounded-3xl border bg-card shadow-sm">
-      {!originalUrl ? (
+      {!file || !originalUrl ? (
         <section className="relative min-h-[720px] overflow-hidden bg-[#f7f7f7] text-slate-900">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] bg-[size:22px_22px]" />
 

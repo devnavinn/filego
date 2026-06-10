@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { ImageSquooshEditor } from "@/components/image-squoosh-editor";
 
 export const metadata: Metadata = {
-  title: "Single Image Optimizer",
+  title: "Image Compressor Without Losing Quality | PDFMatcher",
   description:
-    "Optimize one image at a time with a Squoosh-style local editor. Compare before and after, resize, tune quality and effort, and export locally.",
+    "Free image compressor without losing quality. Compress JPG, PNG, WebP, and AVIF locally with live preview, resize controls, quality tuning, and instant download.",
   alternates: {
     canonical: "/image-squoosh",
   },
 };
 
-export default function Page() {
+export default function ImageCompressPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto max-w-7xl px-4 py-8">
