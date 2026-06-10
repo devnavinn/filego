@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { ImageCompressor } from "@/components/image-compressor";
+import { ImageSquooshEditor } from "@/components/image-squoosh-editor";
 
 export const metadata: Metadata = {
-  title: "Image Compressor",
+  title: "Single Image Optimizer",
   description:
-    "Compress and convert images with Filego using a fast, privacy-first workflow. Optimize JPG, PNG, WebP, AVIF, GIF, BMP, and more directly on your device.",
+    "Optimize one image at a time with a Squoosh-style local editor. Compare before and after, resize, tune quality and effort, and export locally.",
   alternates: {
-    canonical: "/image-compress",
+    canonical: "/image-squoosh",
   },
 };
 
@@ -16,17 +16,16 @@ export default function Page() {
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold tracking-tight">
-            Compress and convert images locally
+            Single image optimizer
           </h1>
-
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Optimize a single image directly in your browser with no server
-            upload. Compare the original and processed result, tweak quality,
-            resize, and export.
+            Upload one image, compare before and after with a live slider,
+            adjust quality and effort, and download the optimized result without
+            server upload.
           </p>
         </div>
 
-        <ImageCompressor />
+        <ImageSquooshEditor />
       </div>
     </main>
   );

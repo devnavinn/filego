@@ -29,7 +29,11 @@ const menuGroups = [
     items: [
       { title: "Merge PDF", href: "/merge-pdf", icon: FileText },
       { title: "Split PDF", href: "/split-pdf", icon: FileText },
-      { title: "Compress Image", href: "/image-compress", icon: FileImage },
+      {
+        title: "Compress Image",
+        href: "/bulk-image-compress",
+        icon: FileImage,
+      },
       { title: "Scan to PDF", href: "/scan-to-pdf", icon: ScanText },
     ],
   },
@@ -55,7 +59,7 @@ const menuGroups = [
 
 const mobileLinks = [
   { title: "Home", href: "/" },
-  { title: "Compress Image", href: "/image-compress" },
+  { title: "Compress Image", href: "/bulk-image-compress" },
   { title: "Merge PDF", href: "/merge-pdf" },
   { title: "Split PDF", href: "/split-pdf" },
   { title: "JPG to PDF", href: "/jpg-to-pdf" },
@@ -76,7 +80,9 @@ export function Navbar() {
             <FilegoLogo className="h-4 w-4" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-base font-semibold tracking-tight">Filego</span>
+            <span className="text-base font-semibold tracking-tight">
+              Filego
+            </span>
             <span className="text-xs text-muted-foreground">
               File tools, simplified
             </span>
@@ -162,7 +168,7 @@ export function Navbar() {
           </Button>
 
           <Button asChild className="rounded-xl">
-            <Link href="/image-compress">
+            <Link href="/bulk-image-compress">
               Start free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
@@ -193,7 +199,7 @@ export function Navbar() {
 
                 <div className="border-t pt-4">
                   <Button asChild className="w-full rounded-xl">
-                    <Link href="/image-compress">Start free</Link>
+                    <Link href="/bulk-image-compress">Start free</Link>
                   </Button>
                 </div>
               </div>

@@ -3,7 +3,7 @@ import { FilegoLogo } from "@/components/filego-logo";
 
 const footerLinks = {
   Product: [
-    { label: "Compress Image", href: "/image-compress" },
+    { label: "Compress Image", href: "/bulk-image-compress" },
     { label: "Merge PDF", href: "/merge-pdf" },
     { label: "Split PDF", href: "/split-pdf" },
     { label: "JPG to PDF", href: "/jpg-to-pdf" },

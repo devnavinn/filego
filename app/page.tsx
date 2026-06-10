@@ -45,13 +45,18 @@ export default function HomePage() {
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-12 rounded-xl px-6">
-                <Link href="/image-compress">
+                <Link href="/bulk-image-compress">
                   Try Compress Image
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
 
-              <Button asChild size="lg" variant="outline" className="h-12 rounded-xl px-6">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 rounded-xl px-6"
+              >
                 <Link href="/tools">Browse all tools</Link>
               </Button>
             </div>
@@ -131,7 +136,9 @@ export default function HomePage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="font-medium">{item.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{item.desc}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {item.desc}
+                  </p>
                 </div>
               </Link>
             );
@@ -139,7 +146,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="compress-image" className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+      <section
+        id="compress-image"
+        className="mx-auto max-w-7xl px-4 py-16 md:px-6"
+      >
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <div className="mb-3 text-sm font-medium text-muted-foreground">
@@ -151,23 +161,28 @@ export default function HomePage() {
             </h2>
 
             <p className="mt-4 max-w-xl text-muted-foreground">
-              Upload a single image, a full folder, or download a ZIP after batch
-              compression. Filego keeps the flow simple and fast with a clean,
-              focused interface.
+              Upload a single image, a full folder, or download a ZIP after
+              batch compression. Filego keeps the flow simple and fast with a
+              clean, focused interface.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="rounded-xl">
-                <Link href="/image-compress">Open compressor</Link>
+                <Link href="/bulk-image-compress">Open compressor</Link>
               </Button>
 
-              <Button asChild size="lg" variant="outline" className="rounded-xl">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="rounded-xl"
+              >
                 <Link href="/tools">See all tools</Link>
               </Button>
             </div>
           </div>
 
-          <Link href="/image-compress" className="block">
+          <Link href="/bulk-image-compress" className="block">
             <div className="rounded-3xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
               <div className="rounded-2xl border bg-background p-4">
                 <div className="mb-4 flex items-center justify-between">

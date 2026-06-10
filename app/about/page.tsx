@@ -66,19 +66,21 @@ export default function AboutPage() {
       <section className="border-b">
         <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium text-muted-foreground">About Filego</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              About Filego
+            </p>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-6xl">
               File tools that feel lighter, faster, and easier to trust.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-              Filego is built to make everyday file work simpler. From image compression
-              to PDF workflows, we focus on tools that are fast to open, easy to use,
-              and practical for real work.
+              Filego is built to make everyday file work simpler. From image
+              compression to PDF workflows, we focus on tools that are fast to
+              open, easy to use, and practical for real work.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="rounded-xl">
-                <Link href="/image-compress">
+                <Link href="/bulk-image-compress">
                   Try Filego
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -117,26 +119,32 @@ export default function AboutPage() {
       <section className="border-t">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:px-6 md:grid-cols-[1.1fr_0.9fr] md:py-24">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Our story</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Our story
+            </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              We built Filego because file tasks are still more frustrating than they should be.
+              We built Filego because file tasks are still more frustrating than
+              they should be.
             </h2>
           </div>
 
           <div className="space-y-5 text-sm leading-7 text-muted-foreground md:text-base">
             <p>
-              Too many file tools feel cluttered, slow, or overly aggressive with uploads,
-              paywalls, and confusing flows. We wanted a cleaner alternative that focuses
-              on the core job: helping people get from input to output with less friction.
+              Too many file tools feel cluttered, slow, or overly aggressive
+              with uploads, paywalls, and confusing flows. We wanted a cleaner
+              alternative that focuses on the core job: helping people get from
+              input to output with less friction.
             </p>
             <p>
-              Filego is designed around practical workflows. That means faster actions,
-              clearer interfaces, and tools that work well for freelancers, teams, students,
-              and businesses that deal with files every day.
+              Filego is designed around practical workflows. That means faster
+              actions, clearer interfaces, and tools that work well for
+              freelancers, teams, students, and businesses that deal with files
+              every day.
             </p>
             <p>
-              Our goal is not to overload the product with everything at once. It is to
-              make the most useful file operations dependable, polished, and easy to return to.
+              Our goal is not to overload the product with everything at once.
+              It is to make the most useful file operations dependable,
+              polished, and easy to return to.
             </p>
           </div>
         </div>
@@ -161,7 +169,9 @@ export default function AboutPage() {
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold">{value.title}</h3>
+                    <h3 className="mt-4 text-lg font-semibold">
+                      {value.title}
+                    </h3>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       {value.description}
                     </p>
@@ -180,7 +190,8 @@ export default function AboutPage() {
               <p className="text-sm text-muted-foreground">Focus</p>
               <p className="mt-2 text-2xl font-semibold">Useful tools</p>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                We prioritize file actions people actually need every week, not novelty features.
+                We prioritize file actions people actually need every week, not
+                novelty features.
               </p>
             </CardContent>
           </Card>
@@ -190,7 +201,8 @@ export default function AboutPage() {
               <p className="text-sm text-muted-foreground">Approach</p>
               <p className="mt-2 text-2xl font-semibold">Product-first</p>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Clear interfaces, fast execution, and steady iteration shape how we improve Filego.
+                Clear interfaces, fast execution, and steady iteration shape how
+                we improve Filego.
               </p>
             </CardContent>
           </Card>
@@ -200,7 +212,8 @@ export default function AboutPage() {
               <p className="text-sm text-muted-foreground">Promise</p>
               <p className="mt-2 text-2xl font-semibold">Less friction</p>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Every feature should reduce time, clicks, confusion, or unnecessary handling.
+                Every feature should reduce time, clicks, confusion, or
+                unnecessary handling.
               </p>
             </CardContent>
           </Card>
@@ -209,18 +222,20 @@ export default function AboutPage() {
 
       <section className="border-t">
         <div className="mx-auto max-w-4xl px-4 py-16 text-center md:px-6 md:py-24">
-          <p className="text-sm font-medium text-muted-foreground">Get started</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            Get started
+          </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
             Start with one task and see how fast file work can feel.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-            Try Filego with image compression, PDF utilities, and more. No steep learning curve,
-            just focused tools built for getting work done.
+            Try Filego with image compression, PDF utilities, and more. No steep
+            learning curve, just focused tools built for getting work done.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild className="rounded-xl">
-              <Link href="/image-compress">
+              <Link href="/bulk-image-compress">
                 Start free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
