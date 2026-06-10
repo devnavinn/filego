@@ -105,6 +105,9 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  verification: {
+    google: "w3_i8bMsxgPtWnzLjemY6GnNZj9r4EWfU27RSHCnkD8",
+  },
 };
 
 export default function RootLayout({
@@ -121,7 +124,7 @@ export default function RootLayout({
         geistSans.variable,
         geistMono.variable,
         "font-sans",
-        inter.variable
+        inter.variable,
       )}
     >
       <body className="min-h-full flex flex-col">
