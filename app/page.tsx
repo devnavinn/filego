@@ -1,65 +1,211 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CheckCircle2,
+  FileImage,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 
-export default function Home() {
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+const tools = [
+  { name: "Compress Image", href: "/image-compress" },
+  { name: "Merge PDF", href: "/merge-pdf" },
+  { name: "Split PDF", href: "/split-pdf" },
+  { name: "JPG to PDF", href: "/jpg-to-pdf" },
+  { name: "PDF to JPG", href: "/pdf-to-jpg" },
+  { name: "PDF to Word", href: "/pdf-to-word" },
+  { name: "Word to PDF", href: "/word-to-pdf" },
+  { name: "Unlock PDF", href: "/unlock-pdf" },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-background text-foreground">
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.10),transparent_40%)]" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-4 inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
+              Fast file tools for PDF, image, and document workflows
+            </div>
+
+            <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
+              All your file tools in one clean workspace
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
+              Compress images, convert files, merge PDFs, secure documents, and
+              batch-process uploads with a fast, privacy-first experience.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 rounded-xl px-6">
+                <Link href="/image-compress">
+                  Try Compress Image
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
+              <Button asChild size="lg" variant="outline" className="h-12 rounded-xl px-6">
+                <Link href="/tools">Browse all tools</Link>
+              </Button>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Local-first tools
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Batch processing
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Clean exports
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {tools.map((tool) => (
+              <Link key={tool.name} href={tool.href} className="block">
+                <Card className="rounded-2xl border-border/60 bg-card/70 shadow-none transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted">
+                      <FileImage className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{tool.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Fast and simple
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="border-y bg-muted/30">
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 md:grid-cols-4 md:px-6">
+          {[
+            {
+              title: "Privacy first",
+              desc: "Keep workflows simple with secure file handling.",
+              icon: ShieldCheck,
+              href: "/security",
+            },
+            {
+              title: "Fast processing",
+              desc: "Run conversions and compression without friction.",
+              icon: Zap,
+              href: "/tools",
+            },
+            {
+              title: "Smart tools",
+              desc: "Organize and optimize files in fewer steps.",
+              icon: Sparkles,
+              href: "/tools",
+            },
+            {
+              title: "Built for teams",
+              desc: "Use one place for everyday document tasks.",
+              icon: CheckCircle2,
+              href: "/pricing",
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <Link key={item.title} href={item.href} className="block">
+                <div className="rounded-2xl border bg-background p-5 transition-colors hover:bg-muted/40">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-medium">{item.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{item.desc}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section id="compress-image" className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <div className="mb-3 text-sm font-medium text-muted-foreground">
+              Featured tool
+            </div>
+
+            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+              Compress images without breaking your workflow
+            </h2>
+
+            <p className="mt-4 max-w-xl text-muted-foreground">
+              Upload a single image, a full folder, or download a ZIP after batch
+              compression. Filego keeps the flow simple and fast with a clean,
+              focused interface.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="rounded-xl">
+                <Link href="/image-compress">Open compressor</Link>
+              </Button>
+
+              <Button asChild size="lg" variant="outline" className="rounded-xl">
+                <Link href="/tools">See all tools</Link>
+              </Button>
+            </div>
+          </div>
+
+          <Link href="/image-compress" className="block">
+            <div className="rounded-3xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
+              <div className="rounded-2xl border bg-background p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">Compress Image</div>
+                    <div className="text-sm text-muted-foreground">
+                      JPG, PNG, folder upload, ZIP export
+                    </div>
+                  </div>
+
+                  <div className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                    Local-first
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+                  Drop files here or choose a folder to start compression
+                </div>
+
+                <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                  <div className="rounded-xl bg-muted p-3">
+                    <div className="text-muted-foreground">Quality</div>
+                    <div className="mt-1 font-medium">75%</div>
+                  </div>
+                  <div className="rounded-xl bg-muted p-3">
+                    <div className="text-muted-foreground">Effort</div>
+                    <div className="mt-1 font-medium">4</div>
+                  </div>
+                  <div className="rounded-xl bg-muted p-3">
+                    <div className="text-muted-foreground">Export</div>
+                    <div className="mt-1 font-medium">ZIP</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }
