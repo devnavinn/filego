@@ -16,6 +16,8 @@ import { Slider } from "@/components/ui/slider";
 import { formatBytes, sanitizeZipPath } from "@/lib/image-utils";
 import { pickFolderImagesViaFSAccess, pickFolderImagesViaInput } from "@/lib/folder-utils";
 
+type OutputFormat = "webp" | "avif" | "jpeg" | "png";
+
 type QueueItem = {
   id: string;
   file: File;
@@ -53,6 +55,7 @@ export function ImageCompressor() {
   const multiInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>("webp");
   const [quality, setQuality] = useState(75);
   const [effort, setEffort] = useState(4);
   const [items, setItems] = useState<QueueItem[]>([]);
@@ -126,74 +129,81 @@ export function ImageCompressor() {
   }
 };
 
-  const compressAll = async () => {
-    const pending = items.filter((item) => item.status === "pending" || item.status === "error");
-    if (!pending.length) return;
+ const compressAll = async () => {
+  const pending = items.filter(
+    (item) => item.status === "pending" || item.status === "error"
+  );
+  if (!pending.length) return;
 
-    setRunning(true);
-    setProgress(0);
+  setRunning(true);
+  setProgress(0);
 
-    let processed = 0;
+  let processed = 0;
 
-    for (const item of pending) {
+  for (const item of pending) {
+    setItems((prev) =>
+      prev.map((row) =>
+        row.id === item.id
+          ? { ...row, status: "processing", error: undefined }
+          : row
+      )
+    );
+
+    const worker = new Worker(
+      new URL("@/workers/compress.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+
+    const result = await new Promise<WorkerResponse>((resolve) => {
+      worker.onmessage = (event: MessageEvent<WorkerResponse>) => resolve(event.data);
+
+      worker.postMessage({
+        id: item.id,
+        file: item.file,
+        relativePath: item.relativePath,
+        quality,
+        effort,
+        outputFormat,
+      });
+    });
+
+    worker.terminate();
+
+    if (result.status === "done") {
       setItems((prev) =>
         prev.map((row) =>
-          row.id === item.id ? { ...row, status: "processing", error: undefined } : row
+          row.id === result.id
+            ? {
+                ...row,
+                status: "done",
+                outputSize: result.outputSize,
+                outputName: result.outputName,
+                outputRelativePath: result.relativePath,
+                blob: result.blob,
+              }
+            : row
         )
       );
-
-      const worker = new Worker(new URL("@/workers/compress.worker.ts", import.meta.url), {
-        type: "module",
-      });
-
-      const result = await new Promise<WorkerResponse>((resolve) => {
-        worker.onmessage = (event: MessageEvent<WorkerResponse>) => resolve(event.data);
-        worker.postMessage({
-          id: item.id,
-          file: item.file,
-          relativePath: item.relativePath,
-          quality,
-          effort,
-        });
-      });
-
-      worker.terminate();
-
-      if (result.status === "done") {
-        setItems((prev) =>
-          prev.map((row) =>
-            row.id === result.id
-              ? {
-                  ...row,
-                  status: "done",
-                  outputSize: result.outputSize,
-                  outputName: result.outputName,
-                  outputRelativePath: result.relativePath,
-                  blob: result.blob,
-                }
-              : row
-          )
-        );
-      } else {
-        setItems((prev) =>
-          prev.map((row) =>
-            row.id === result.id
-              ? {
-                  ...row,
-                  status: "error",
-                  error: result.error,
-                }
-              : row
-          )
-        );
-      }
-
-      processed += 1;
-      setProgress(Math.round((processed / pending.length) * 100));
+    } else {
+      setItems((prev) =>
+        prev.map((row) =>
+          row.id === result.id
+            ? {
+                ...row,
+                status: "error",
+                error: result.error,
+              }
+            : row
+        )
+      );
     }
 
-    setRunning(false);
-  };
+    processed += 1;
+    setProgress(Math.round((processed / pending.length) * 100));
+  }
+
+  setRunning(false);
+};
 
   const downloadOne = (item: QueueItem) => {
     if (!item.blob || !item.outputName) return;
@@ -261,6 +271,21 @@ export function ImageCompressor() {
               onValueChange={(value) => setEffort(value[0] ?? 4)}
             />
           </div>
+      
+          <div className="space-y-3">
+           <Label htmlFor="output-format">Output format</Label>
+           <select
+           id="output-format"
+           value={outputFormat}
+           onChange={(e) => setOutputFormat(e.target.value as OutputFormat)}
+           className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm"
+           >
+             <option value="webp">WebP</option>
+             <option value="avif">AVIF</option>
+              <option value="jpeg">JPEG</option>
+             <option value="png">PNG</option>
+            </select>
+          </div>
 
           <Separator />
 
@@ -268,7 +293,7 @@ export function ImageCompressor() {
             <Input
               ref={singleInputRef}
               type="file"
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg"
               className="hidden"
               onChange={onPickSingle}
             />
@@ -277,7 +302,7 @@ export function ImageCompressor() {
               ref={multiInputRef}
               type="file"
               multiple
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg"
               className="hidden"
               onChange={onPickMultiple}
             />
