@@ -13,16 +13,16 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold tracking-tight">
             Compress and convert images locally
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Optimize single images, batch uploads, or full folders right in your
-            browser. Choose WebP, AVIF, JPEG, or PNG output with no server upload
-            required.
+            Optimize a single image directly in your browser with no server
+            upload. Compare the original and processed result, tweak quality,
+            resize, and export.
           </p>
         </div>
 
