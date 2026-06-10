@@ -29,9 +29,9 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { label: "X", href: "https://x.com/filego" },
-  { label: "GitHub", href: "https://github.com/filego" },
-  { label: "LinkedIn", href: "https://linkedin.com/company/filego" },
+  // { label: "X", href: "https://x.com/filego" },
+  { label: "GitHub", href: "https://github.com/devnavinn" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/devnavin/" },
 ];
 
 export function Footer() {
