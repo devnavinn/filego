@@ -277,8 +277,8 @@ export default function TermsPage() {
                             </p>
                             <div className="rounded-2xl border bg-muted/30 p-5">
                                 <p className="font-medium">Filego</p>
-                                <p>Email: legal@filego.in</p>
-                                <p>Support: support@filego.in</p>
+                                <p>Email: hello@filego.in</p>
+                                <p>Support: hello@filego.in</p>
                                 <p>
                                     Website:{" "}
                                     <Link href="/" className="underline underline-offset-4">

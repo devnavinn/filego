@@ -1,4 +1,6 @@
+// app/contact/page.tsx
 import React from "react";
+import { ContactForm } from "@/components/forms/contact-form";
 
 const contactOptions = [
     {
@@ -8,12 +10,12 @@ const contactOptions = [
     },
     {
         title: "Support",
-        value: "support@filego.in",
+        value: "hello@filego.in",
         description: "For account, billing, or tool-related issues that need help from the team.",
     },
     {
         title: "Security",
-        value: "security@filego.in",
+        value: "hello@filego.in",
         description: "For responsible disclosure, trust, or security-related questions.",
     },
 ];
@@ -42,12 +44,8 @@ export default function ContactPage() {
                         className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
                     >
                         <h2 className="text-lg font-semibold text-gray-900">{item.title}</h2>
-                        <p className="mt-3 text-sm font-medium text-emerald-700">
-                            {item.value}
-                        </p>
-                        <p className="mt-3 text-sm leading-6 text-gray-600">
-                            {item.description}
-                        </p>
+                        <p className="mt-3 text-sm font-medium text-emerald-700">{item.value}</p>
+                        <p className="mt-3 text-sm leading-6 text-gray-600">{item.description}</p>
                     </div>
                 ))}
             </section>
@@ -58,63 +56,9 @@ export default function ContactPage() {
                     Share a few details and we’ll get your message to the right team.
                 </p>
 
-                <form className="mt-6 space-y-5">
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-900">
-                            Name
-                        </label>
-                        <input
-                            id="name"
-                            type="text"
-                            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-600"
-                            placeholder="Your name"
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-600"
-                            placeholder="you@example.com"
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="topic" className="block text-sm font-medium text-gray-900">
-                            Topic
-                        </label>
-                        <select
-                            id="topic"
-                            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-600"
-                        >
-                            <option>General inquiry</option>
-                            <option>Support</option>
-                            <option>Billing</option>
-                            <option>Security</option>
-                            <option>Partnership</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-gray-900">
-                            Message
-                        </label>
-                        <textarea
-                            id="message"
-                            rows={6}
-                            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-600"
-                            placeholder="How can we help?"
-                        />
-                    </div>
-
-                    <button className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800">
-                        Send message
-                    </button>
-                </form>
+                <div className="mt-6">
+                    <ContactForm />
+                </div>
             </section>
         </main>
     );

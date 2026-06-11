@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
     ArrowRight,
-    Bell,
     CalendarClock,
     Sparkles,
     Lock,
@@ -12,8 +11,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { NotifyForm } from "@/components/forms/notify-form";
 
 type ComingSoonProps = {
     title?: string;
@@ -30,9 +29,8 @@ export function ComingSoon({
     backHref = "/",
     notifyPlaceholder = "Enter your email for launch updates",
 }: ComingSoonProps) {
-    const [email, setEmail] = useState("");
-    const [submitted, setSubmitted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(getTimeLeft(launchDate));
+    const [currentPage, setCurrentPage] = useState<string | null>(null);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -42,6 +40,10 @@ export function ComingSoon({
         return () => clearInterval(timer);
     }, [launchDate]);
 
+    useEffect(() => {
+        setCurrentPage(window.location.pathname);
+    }, []);
+
     const launchLabel = useMemo(() => {
         const date = new Date(launchDate);
         return date.toLocaleDateString("en-US", {
@@ -50,13 +52,6 @@ export function ComingSoon({
             year: "numeric",
         });
     }, [launchDate]);
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!email.trim()) return;
-        setSubmitted(true);
-        setEmail("");
-    };
 
     return (
         <section className="relative overflow-hidden rounded-[2rem] border bg-background">
@@ -103,11 +98,7 @@ export function ComingSoon({
                             </Link>
                         </Button>
 
-                        <Button
-                            asChild
-                            variant="outline"
-                            className="rounded-xl"
-                        >
+                        <Button asChild variant="outline" className="rounded-xl">
                             <Link href="/pricing">View pricing</Link>
                         </Button>
                     </div>
@@ -123,43 +114,12 @@ export function ComingSoon({
                                 <TimeCard label="Sec" value={timeLeft.seconds} />
                             </div>
 
-                            <div className="mt-6 rounded-2xl border bg-muted/40 p-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-0.5 rounded-xl bg-background p-2 shadow-sm">
-                                        <Bell className="h-4 w-4" />
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-sm font-semibold">Get launch updates</h3>
-                                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                            Join the waitlist to get notified when this tool goes live.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-                                    <Input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder={notifyPlaceholder}
-                                        className="h-11 rounded-xl"
-                                    />
-
-                                    <Button type="submit" className="h-11 w-full rounded-xl">
-                                        Notify me
-                                    </Button>
-                                </form>
-
-                                {submitted ? (
-                                    <p className="mt-3 text-sm text-emerald-600 dark:text-emerald-400">
-                                        You’re on the list. We’ll let you know when it launches.
-                                    </p>
-                                ) : (
-                                    <p className="mt-3 text-xs text-muted-foreground">
-                                        No spam. Just launch updates and major product news.
-                                    </p>
-                                )}
+                            <div className="mt-6">
+                                <NotifyForm
+                                    source="coming-soon"
+                                    page={currentPage}
+                                    placeholder={notifyPlaceholder}
+                                />
                             </div>
 
                             <div className="mt-4 grid gap-3 sm:grid-cols-3">
