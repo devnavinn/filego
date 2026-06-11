@@ -28,7 +28,14 @@ type ExtractionMode = "balanced" | "text-first";
 type SpacingMode = "compact" | "normal" | "loose";
 type PdfStatus = "idle" | "loading" | "ready" | "error";
 
-type ExtractedLine = {
+type GroupedLine = {
+    text: string;
+    y: number;
+    x: number;
+    fontSize: number;
+};
+
+type ExtractedLine = GroupedLine & {
     text: string;
     y: number;
     x: number;
@@ -574,7 +581,7 @@ function SettingGroup({
 function groupItemsIntoLines(
     items: { text: string; x: number; y: number; fontSize: number }[],
     mode: ExtractionMode
-): ExtractedLine[] {
+): GroupedLine[] {
     const sorted = [...items].sort((a, b) => {
         if (Math.abs(b.y - a.y) > 2) return b.y - a.y;
         return a.x - b.x;

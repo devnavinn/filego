@@ -150,7 +150,10 @@ export function PdfToJpgTool() {
             const uint8 = new Uint8Array(buffer);
 
             setProgressText("Loading PDF document...");
-            const loadingTask = pdfjsLib.getDocument({ data: uint8 });
+            const loadingTask = pdfjsLib.getDocument({ data: uint8 }) as {
+                promise: Promise<any>;
+                onProgress?: (progress: { loaded: number; total: number }) => void;
+            };
 
             loadingTask.onProgress = (progress) => {
                 if (progress.total > 0) {
