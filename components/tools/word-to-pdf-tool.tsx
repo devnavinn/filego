@@ -466,7 +466,7 @@ export function WordToPdfTool() {
             </div>
 
             <div className="rounded-[2rem] border bg-background shadow-sm">
-                <div className="sticky top-3 z-20 rounded-t-[2rem] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                <div className="sticky top-16 z-20 rounded-t-[2rem] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                     <div className="flex flex-col gap-3 px-4 py-4 md:px-6">
                         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                             <div>
