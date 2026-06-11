@@ -83,8 +83,9 @@ export function NotifyForm({
             setServerError("error" in data ? data.error : "Something went wrong.");
             return;
         }
-
-        setServerMessage(data.message);
+        if (data.ok) {
+            setServerMessage(data.message);
+        }
         reset({
             email: "",
             source,
