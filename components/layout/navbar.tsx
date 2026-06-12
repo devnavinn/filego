@@ -66,7 +66,6 @@ const mobileLinks = [
   { title: "PDF to JPG", href: "/pdf-to-jpg" },
   { title: "PDF to Word", href: "/pdf-to-word" },
   { title: "Word to PDF", href: "/word-to-pdf" },
-  { title: "Pricing", href: "/pricing" },
   { title: "API", href: "/api-docs" },
   { title: "About", href: "/about" },
 ];
@@ -131,16 +130,6 @@ export function Navbar() {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link href="/pricing">Pricing</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild

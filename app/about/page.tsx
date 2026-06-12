@@ -87,7 +87,7 @@ export default function AboutPage() {
               </Button>
 
               <Button asChild variant="outline" className="rounded-xl">
-                <Link href="/pricing">View pricing</Link>
+                <Link href="/contact">Contact Us</Link>
               </Button>
             </div>
           </div>

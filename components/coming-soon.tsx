@@ -99,7 +99,7 @@ export function ComingSoon({
                         </Button>
 
                         <Button asChild variant="outline" className="rounded-xl">
-                            <Link href="/pricing">View pricing</Link>
+                            <Link href="/contact">Contact Us</Link>
                         </Button>
                     </div>
                 </div>

@@ -44,10 +44,10 @@ export default function NotFoundPage() {
 
                         <div className="mt-10 flex flex-wrap gap-3 text-sm text-stone-500">
                             <Link
-                                href="/pricing"
+                                href="/"
                                 className="rounded-full border border-stone-200 bg-white px-4 py-2 transition hover:border-stone-300 hover:bg-stone-100"
                             >
-                                Pricing
+                                Go to home page
                             </Link>
                             <Link
                                 href="/security"

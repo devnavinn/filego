@@ -120,12 +120,7 @@ export default function HomePage() {
               icon: Sparkles,
               href: "/tools",
             },
-            {
-              title: "Built for teams",
-              desc: "Use one place for everyday document tasks.",
-              icon: CheckCircle2,
-              href: "/pricing",
-            },
+
           ].map((item) => {
             const Icon = item.icon;
 
