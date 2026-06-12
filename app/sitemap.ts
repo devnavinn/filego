@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         "/split-pdf",
         "/word-to-pdf",
         "/bulk-image-compress",
-        "/image-compress"
+        "/image-squoosh"
     ];
 
     return routes.map((route) => ({

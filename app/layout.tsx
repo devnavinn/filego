@@ -5,8 +5,6 @@ import { Analytics } from "@vercel/analytics/next"
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -179,9 +177,8 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
           />
 
-          <Navbar />
+
           {children}
-          <Footer />
         </body>
       </AuthSessionProvider>
       <GoogleAnalytics gaId="G-91BF9G6C4E" />

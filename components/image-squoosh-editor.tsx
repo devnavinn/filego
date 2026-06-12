@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { Download, ImagePlus, Minus, Plus, RotateCcw, X } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 type OutputFormat = "webp" | "avif" | "jpeg" | "png";
 
 type WorkerInput = {
@@ -25,32 +25,39 @@ type WorkerInput = {
 
 type WorkerOutput =
   | {
-      id: string;
-      status: "done";
-      originalName: string;
-      outputName: string;
-      relativePath: string;
-      originalSize: number;
-      outputSize: number;
-      blob: Blob;
-      width: number;
-      height: number;
-    }
+    id: string;
+    status: "done";
+    originalName: string;
+    outputName: string;
+    relativePath: string;
+    originalSize: number;
+    outputSize: number;
+    blob: Blob;
+    width: number;
+    height: number;
+  }
   | {
-      id: string;
-      status: "error";
-      error: string;
-    };
+    id: string;
+    status: "error";
+    error: string;
+  };
 
 export function ImageSquooshEditor() {
+  const router = useRouter()
   const inputRef = useRef<HTMLInputElement | null>(null);
   const compareRef = useRef<HTMLDivElement | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestIdRef = useRef(0);
+  const initialPendingFile =
+    typeof window !== "undefined"
+      ? (window as typeof window & { __imageSquooshFile?: File }).__imageSquooshFile ?? null
+      : null;
 
-  const [file, setFile] = useState<File | null>(null);
-  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(initialPendingFile);
+  const [originalUrl, setOriginalUrl] = useState<string | null>(() =>
+    initialPendingFile ? URL.createObjectURL(initialPendingFile) : null,
+  );
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [outputName, setOutputName] = useState<string>("");
@@ -72,6 +79,9 @@ export function ImageSquooshEditor() {
   const [outputSize, setOutputSize] = useState<number>(0);
   const [outputWidth, setOutputWidth] = useState<number>(0);
   const [outputHeight, setOutputHeight] = useState<number>(0);
+  const [zoomX, setZoomX] = useState<number>(0);
+  const [zoomY, setZoomY] = useState<number>(0);
+  const [isPanning, setIsPanning] = useState<boolean>(false);
 
   const originalSize = file?.size ?? 0;
 
@@ -90,6 +100,69 @@ export function ImageSquooshEditor() {
   const revokeUrl = (url: string | null) => {
     if (url) URL.revokeObjectURL(url);
   };
+
+  const handleFile = useCallback((nextFile: File) => {
+    revokeUrl(originalUrl);
+    revokeUrl(resultUrl);
+
+    const nextOriginalUrl = URL.createObjectURL(nextFile);
+    setFile(nextFile);
+    setOriginalUrl(nextOriginalUrl);
+    setResultUrl(null);
+    setResultBlob(null);
+    setOutputSize(0);
+    setOutputWidth(0);
+    setOutputHeight(0);
+    setOutputName("");
+    setError("");
+    setSplit(50);
+    setZoom(100);
+    setZoomX(0);
+    setZoomY(0);
+    setIsPanning(false);
+  }, [originalUrl, resultUrl]);
+
+  const onImagePointerDown = (e: React.PointerEvent) => {
+    if (zoom <= 100) return; // only pan when zoomed
+    e.preventDefault();
+    setIsPanning(true);
+  };
+
+  const onImagePointerMove = (e: React.PointerEvent) => {
+    if (!isPanning) return;
+    const rect = compareRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const deltaX = e.clientX - (rect.left + rect.width / 2);
+    const deltaY = e.clientY - (rect.top + rect.height / 2);
+
+    const scale = zoom / 100;
+    setZoomX(deltaX / scale);
+    setZoomY(deltaY / scale);
+  };
+
+  const onImagePointerUp = () => {
+    setIsPanning(false);
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      delete (window as typeof window & { __imageSquooshFile?: File }).__imageSquooshFile;
+    }
+  }, []);
+
+  useEffect(() => {
+    const pendingFile = (window as typeof window & {
+      __imageSquooshFile?: File;
+    }).__imageSquooshFile;
+
+    if (pendingFile) {
+      handleFile(pendingFile);
+      delete (window as typeof window & {
+        __imageSquooshFile?: File;
+      }).__imageSquooshFile;
+    }
+  }, [handleFile]);
 
   useEffect(() => {
     const worker = new Worker(
@@ -168,23 +241,6 @@ export function ImageSquooshEditor() {
 
   const openPicker = () => inputRef.current?.click();
 
-  const handleFile = (nextFile: File) => {
-    revokeUrl(originalUrl);
-    revokeUrl(resultUrl);
-
-    const nextOriginalUrl = URL.createObjectURL(nextFile);
-    setFile(nextFile);
-    setOriginalUrl(nextOriginalUrl);
-    setResultUrl(null);
-    setResultBlob(null);
-    setOutputSize(0);
-    setOutputWidth(0);
-    setOutputHeight(0);
-    setOutputName("");
-    setError("");
-    setSplit(50);
-    setZoom(100);
-  };
 
   const resetAll = () => {
     revokeUrl(originalUrl);
@@ -201,6 +257,7 @@ export function ImageSquooshEditor() {
     setZoom(100);
     setSplit(50);
     setLoading(false);
+    router.push('/image-squoosh')
   };
 
   const updateSplitFromClientX = useCallback((clientX: number) => {
@@ -245,7 +302,7 @@ export function ImageSquooshEditor() {
   };
 
   return (
-    <div className="overflow-hidden rounded-3xl border bg-card shadow-sm">
+    <div className="h-dvh w-full overflow-hidden bg-[#2d2d2d] " data-editor-page>
       {!file || !originalUrl ? (
         <section className="relative min-h-[720px] overflow-hidden bg-[#f7f7f7] text-slate-900">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] bg-[size:22px_22px]" />
@@ -291,7 +348,7 @@ export function ImageSquooshEditor() {
           </div>
         </section>
       ) : (
-        <section className="flex min-h-[760px] flex-col bg-[#2d2d2d] text-white xl:flex-row">
+        <section className="flex h-dvh flex-col bg-[#2d2d2d] text-white xl:flex-row">
           <aside className="hidden w-[230px] flex-col justify-between border-r border-white/10 bg-[#262626] p-4 xl:flex">
             <div>
               <button
@@ -344,21 +401,24 @@ export function ImageSquooshEditor() {
               <div className="absolute inset-0 grid place-items-center p-6">
                 <div
                   className="relative h-full w-full"
-                  style={{
-                    overflow: "hidden",
-                  }}
+                  style={{ overflow: "hidden" }}
                 >
+                  {/* Result/Optimized image - zoom only applies here */}
                   <img
                     src={resultUrl || originalUrl}
                     alt="Optimized preview"
                     draggable={false}
                     className="pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full select-none object-contain"
                     style={{
-                      transform: `translate(-50%, -50%) scale(${zoom / 100})`,
+                      transform: `translate(-50%, -50%) translate(${zoomX}px, ${zoomY}px) scale(${zoom / 100})`,
                       transformOrigin: "center center",
                     }}
+                    onPointerDown={zoom > 100 ? onImagePointerDown : undefined}
+                    onPointerMove={zoom > 100 ? onImagePointerMove : undefined}
+                    onPointerUp={zoom > 100 ? onImagePointerUp : undefined}
                   />
 
+                  {/* Original image - zoom only applies here */}
                   <div
                     className="absolute inset-0 overflow-hidden"
                     style={{
@@ -371,14 +431,18 @@ export function ImageSquooshEditor() {
                       draggable={false}
                       className="pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full select-none object-contain"
                       style={{
-                        transform: `translate(-50%, -50%) scale(${zoom / 100})`,
+                        transform: `translate(-50%, -50%) translate(${zoomX}px, ${zoomY}px) scale(${zoom / 100})`,
                         transformOrigin: "center center",
                       }}
+                      onPointerDown={zoom > 100 ? onImagePointerDown : undefined}
+                      onPointerMove={zoom > 100 ? onImagePointerMove : undefined}
+                      onPointerUp={zoom > 100 ? onImagePointerUp : undefined}
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Split slider button - no transform here */}
               <div
                 className="absolute inset-y-0 z-20 w-[2px] bg-black/30 shadow-[0_0_0_1px_rgba(255,255,255,0.2)]"
                 style={{ left: `${split}%`, transform: "translateX(-50%)" }}
@@ -401,6 +465,7 @@ export function ImageSquooshEditor() {
                 </div>
               </button>
 
+              {/* Labels - no transform here */}
               <div className="absolute left-4 top-4 z-20 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white">
                 Original
               </div>
@@ -410,6 +475,7 @@ export function ImageSquooshEditor() {
               </div>
             </div>
 
+            {/* Zoom controls - no transform here */}
             <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-xl bg-[#1f1f1f] p-2 shadow-2xl">
               <button
                 onClick={() => setZoom((z) => Math.max(25, z - 10))}
@@ -434,7 +500,11 @@ export function ImageSquooshEditor() {
               <div className="mx-1 h-6 w-px bg-white/10" />
 
               <button
-                onClick={() => setZoom(100)}
+                onClick={() => {
+                  setZoom(100);
+                  setZoomX(0);
+                  setZoomY(0);
+                }}
                 className="rounded-lg p-2 hover:bg-white/10"
                 aria-label="Reset zoom"
               >
@@ -453,15 +523,13 @@ export function ImageSquooshEditor() {
                   <span className="text-sm text-zinc-200">Resize</span>
                   <button
                     onClick={() => setResizeEnabled((v) => !v)}
-                    className={`relative h-7 w-14 rounded-full transition ${
-                      resizeEnabled ? "bg-sky-400" : "bg-zinc-700"
-                    }`}
+                    className={`relative h-7 w-14 rounded-full transition ${resizeEnabled ? "bg-sky-400" : "bg-zinc-700"
+                      }`}
                     aria-label="Toggle resize"
                   >
                     <span
-                      className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
-                        resizeEnabled ? "left-8" : "left-1"
-                      }`}
+                      className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${resizeEnabled ? "left-8" : "left-1"
+                        }`}
                     />
                   </button>
                 </div>
