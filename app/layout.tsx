@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { AuthSessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/layout/navbar";
@@ -162,20 +163,22 @@ export default function RootLayout({
         inter.variable
       )}
     >
-      <body className="min-h-full flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
+      <AuthSessionProvider>
+        <body className="min-h-full flex flex-col">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+          />
 
-        <Navbar />
-        {children}
-        <Footer />
-      </body>
+          <Navbar />
+          {children}
+          <Footer />
+        </body>
+      </AuthSessionProvider>
       <GoogleAnalytics gaId="G-91BF9G6C4E" />
     </html>
   );
