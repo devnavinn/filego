@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next"
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     images: [
       {
-        url: "/og-image.png",
+        url: "/web-app-manifest-192x192.png",
         width: 1200,
         height: 630,
         alt: "Filego file tools platform preview",
@@ -96,7 +97,7 @@ export const metadata: Metadata = {
     title: "Filego — Fast File Tools for PDF, Image, and Document Workflows",
     description:
       "Compress images, merge PDFs, split files, and convert documents in one clean workspace.",
-    images: ["/og-image.png"],
+    images: ["/web-app-manifest-192x192.png"],
   },
 
   icons: {
@@ -180,6 +181,7 @@ export default function RootLayout({
         </body>
       </AuthSessionProvider>
       <GoogleAnalytics gaId="G-91BF9G6C4E" />
+      <Analytics />
     </html>
   );
 }
