@@ -2,34 +2,35 @@ import type { Metadata } from "next";
 import { WordToPdfTool } from "@/components/tools/word-to-pdf-tool";
 
 export const metadata: Metadata = {
-  title: "Word to PDF Converter – Convert DOCX to PDF Online | Filego",
+  title: "Free Word to PDF Converter Online – Convert DOCX to PDF | Filego",
   description:
-    "Convert Word documents to PDF in your browser with a fast DOCX to PDF tool. Upload a .docx file, adjust preview spacing, edit content, and export a clean PDF.",
+    "Convert Word to PDF free online. Upload DOCX files, edit layout and spacing, and export high-quality PDFs instantly in your browser. No signup required.",
   keywords: [
-    "word to pdf",
-    "docx to pdf",
-    "convert word to pdf",
-    "convert docx to pdf",
-    "word document to pdf",
-    "browser docx to pdf",
-    "filego",
+    "free word to pdf",
+    "free docx to pdf",
+    "convert word to pdf free",
+    "convert docx to pdf online free",
+    "word document to pdf free",
+    "docx to pdf browser",
+    "free pdf converter",
+    "filego word to pdf",
   ],
   alternates: {
     canonical: "/word-to-pdf",
   },
   openGraph: {
-    title: "Word to PDF Converter | Filego",
+    title: "Free Word to PDF Converter Online | Filego",
     description:
-      "Upload a DOCX file, edit preview spacing, and export it as a clean PDF in your browser.",
+      "Convert DOCX to PDF free in your browser. Edit spacing, preview, and download clean PDFs instantly.",
     url: "/word-to-pdf",
     siteName: "Filego",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Word to PDF Converter | Filego",
+    title: "Free Word to PDF Converter | Filego",
     description:
-      "Fast browser-based DOCX to PDF conversion with preview editing and clean export.",
+      "Free online DOCX to PDF converter with preview editing and fast export.",
   },
 };
 

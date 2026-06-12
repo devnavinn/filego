@@ -29,28 +29,32 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
 
   title: {
-    default: "Filego — Fast File Tools for PDF, Image, and Document Workflows",
+    default: "Free PDF, Image & Document Tools Online | Filego",
     template: "%s | Filego",
   },
 
   description:
-    "Filego helps you compress images, merge PDFs, split files, convert documents, and manage file workflows with a fast, clean, privacy-first experience.",
+    "Free online file tools for PDF, image, and document workflows. Compress images, merge PDFs, split files, convert JPG to PDF, PDF to JPG, Word to PDF, and more with a fast, privacy-first experience.",
 
   keywords: [
-    "Filego",
-    "image compressor",
-    "compress image",
-    "PDF tools",
-    "merge PDF",
-    "split PDF",
-    "JPG to PDF",
-    "PDF to JPG",
-    "PDF to Word",
-    "Word to PDF",
-    "file conversion tools",
+    "filego",
+    "free file tools",
+    "online file tools",
+    "pdf tools",
+    "free pdf tools",
+    "image tools",
     "document tools",
-    "online PDF tools",
+    "merge pdf",
+    "split pdf",
+    "compress image",
+    "image compressor",
+    "jpg to pdf",
+    "pdf to jpg",
+    "pdf to word",
+    "word to pdf",
+    "file conversion tools",
     "privacy first file tools",
+    "browser-based file tools",
   ],
 
   applicationName: "Filego",
@@ -77,9 +81,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: siteUrl,
-    title: "Filego — Fast File Tools for PDF, Image, and Document Workflows",
+    title: "Free PDF, Image & Document Tools Online | Filego",
     description:
-      "Compress images, merge PDFs, split files, and convert documents in one clean workspace.",
+      "Compress images, merge PDFs, split files, and convert documents with fast, privacy-first online tools.",
     siteName: "Filego",
     locale: "en_IN",
     images: [
@@ -94,9 +98,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Filego — Fast File Tools for PDF, Image, and Document Workflows",
+    title: "Free PDF, Image & Document Tools Online | Filego",
     description:
-      "Compress images, merge PDFs, split files, and convert documents in one clean workspace.",
+      "Compress images, merge PDFs, split files, and convert documents with fast, privacy-first online tools.",
     images: ["/web-app-manifest-192x192.png"],
   },
 

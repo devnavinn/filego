@@ -2,34 +2,37 @@ import type { Metadata } from "next";
 import { JpgToPdfTool } from "@/components/tools/jpg-to-pdf-tool";
 
 export const metadata: Metadata = {
-  title: "JPG to PDF Converter – Fast, Private Image to PDF Tool | Filego",
+  title: "Free JPG to PDF Converter Online – Convert Images to PDF | Filego",
   description:
-    "Convert JPG images to PDF in seconds with a fast browser-based tool. Reorder images, choose page size, add margins, and download a clean PDF without uploading files.",
+    "Convert JPG to PDF free online. Upload images, reorder pages, choose page size & margins, and download a clean PDF instantly. No signup required, browser-based.",
   keywords: [
-    "jpg to pdf",
-    "image to pdf",
-    "convert jpg to pdf",
-    "jpg pdf converter",
-    "filego",
-    "online jpg to pdf",
-    "private jpg to pdf tool",
+    "free jpg to pdf",
+    "free image to pdf",
+    "convert jpg to pdf free",
+    "convert image to pdf online free",
+    "jpg to pdf free online",
+    "jpeg to pdf free",
+    "free pdf converter",
+    "filego jpg to pdf",
+    "online jpg to pdf free",
+    "private jpg to pdf",
   ],
   alternates: {
     canonical: "/jpg-to-pdf",
   },
   openGraph: {
-    title: "JPG to PDF Converter | Filego",
+    title: "Free JPG to PDF Converter Online | Filego",
     description:
-      "Convert multiple JPG images into one PDF with fast in-browser processing, clean layout controls, and instant download.",
+      "Convert JPG images to PDF free in your browser. Reorder pages, adjust layout & margins, and download clean PDFs instantly.",
     url: "/jpg-to-pdf",
     siteName: "Filego",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "JPG to PDF Converter | Filego",
+    title: "Free JPG to PDF Converter | Filego",
     description:
-      "Fast browser-based JPG to PDF conversion with page ordering, layout controls, and instant download.",
+      "Free online JPG to PDF converter with page ordering, layout controls, and instant browser-based download.",
   },
 };
 

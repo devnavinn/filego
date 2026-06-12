@@ -1,34 +1,36 @@
 import type { Metadata } from "next";
 import { PdfToJpgClient } from "./pdf-to-jpg-client";
 export const metadata: Metadata = {
-  title: "PDF to JPG Converter – Convert PDF Pages to Images | Filego",
+  title: "Free PDF to JPG Converter Online – Convert PDF to Images | Filego",
   description:
-    "Convert PDF pages to high-quality JPG images in your browser. Upload a PDF, choose image quality and scale, preview pages, and download all JPG files instantly.",
+    "Convert PDF to JPG free online. Upload PDF files, choose quality & scale, preview pages, and download high-quality JPG images instantly. No signup required.",
   keywords: [
-    "pdf to jpg",
-    "pdf to image",
-    "convert pdf to jpg",
-    "pdf page to jpg",
-    "pdf to jpeg",
-    "filego",
-    "browser pdf to jpg",
+    "free pdf to jpg",
+    "free pdf to image",
+    "convert pdf to jpg free",
+    "convert pdf to image online free",
+    "pdf page to jpg free",
+    "pdf to jpeg free",
+    "free pdf converter",
+    "filego pdf to jpg",
+    "browser pdf to jpg free",
   ],
   alternates: {
     canonical: "/pdf-to-jpg",
   },
   openGraph: {
-    title: "PDF to JPG Converter | Filego",
+    title: "Free PDF to JPG Converter Online | Filego",
     description:
-      "Turn PDF pages into clean JPG images with fast browser-based conversion, page previews, and instant downloads.",
+      "Convert PDF pages to JPG free in your browser. Choose quality, preview pages, and download high-res images instantly.",
     url: "/pdf-to-jpg",
     siteName: "Filego",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PDF to JPG Converter | Filego",
+    title: "Free PDF to JPG Converter | Filego",
     description:
-      "Convert PDF pages into JPG images with quality controls and fast local processing.",
+      "Free online PDF to JPG converter with quality controls, page previews, and fast local processing.",
   },
 };
 

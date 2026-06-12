@@ -3,26 +3,32 @@ import { ImageCompressor } from "@/components/image-compressor";
 
 const siteUrl = "https://filego.in";
 const pageUrl = `${siteUrl}/bulk-image-compress`;
-const title = "Bulk Image Compressor - Compress JPG, PNG, WebP Online | Filego";
+const title =
+  "Free Bulk Image Compressor Online – Compress Multiple Images | Filego";
+
 const description =
-  "Compress multiple images locally in your browser. Reduce JPG, PNG, WebP, AVIF, GIF, and BMP file size without server uploads, with fast batch conversion and quality controls.";
+  "Compress multiple images free online. Batch compress JPG, PNG, WebP, and AVIF in your browser with local processing, quality controls, and instant downloads.";
 
 export const metadata: Metadata = {
   title,
   description,
   keywords: [
+    "free bulk image compressor",
     "bulk image compressor",
     "compress multiple images",
-    "image compressor online",
+    "batch image compression",
+    "compress images online free",
+    "reduce image file size",
     "compress jpg",
     "compress png",
     "compress webp",
     "compress avif",
-    "batch image compression",
-    "reduce image file size",
     "browser image compressor",
     "local image compression",
-    "image converter online",
+    "private image compressor",
+    "batch photo compressor",
+    "bulk image optimizer",
+    "filego bulk image compressor",
   ],
   alternates: {
     canonical: "/bulk-image-compress",
