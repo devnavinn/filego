@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "browser pdf to jpg free",
   ],
   alternates: {
-    canonical: "/pdf-to-jpg",
+    canonical: "https://www.filego.in/pdf-to-jpg",
   },
   openGraph: {
     title: "Free PDF to JPG Converter Online | Filego",

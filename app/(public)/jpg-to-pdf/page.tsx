@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "private jpg to pdf",
   ],
   alternates: {
-    canonical: "/jpg-to-pdf",
+    canonical: "https://www.filego.in/jpg-to-pdf",
   },
   openGraph: {
     title: "Free JPG to PDF Converter Online | Filego",

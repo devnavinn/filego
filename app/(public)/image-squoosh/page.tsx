@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "local image compression",
   ],
   alternates: {
-    canonical: "/image-squoosh",
+    canonical: "https://www.filego.in/image-squoosh",
   },
   openGraph: {
     title: "Free Image Compressor Without Losing Quality | PDFMatcher",

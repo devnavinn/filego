@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "filego word to pdf",
   ],
   alternates: {
-    canonical: "/word-to-pdf",
+    canonical: "https://www.filego.in/word-to-pdf",
   },
   openGraph: {
     title: "Free Word to PDF Converter Online | Filego",

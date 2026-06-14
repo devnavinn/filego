@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const tools = [
-  { name: "Compress Image", href: "/image-compress" },
+  { name: "Compress Image", href: "/image-squoosh" },
   { name: "Merge PDF", href: "/merge-pdf" },
   { name: "Split PDF", href: "/split-pdf" },
   { name: "JPG to PDF", href: "/jpg-to-pdf" },
@@ -120,7 +120,6 @@ export default function HomePage() {
               icon: Sparkles,
               href: "/tools",
             },
-
           ].map((item) => {
             const Icon = item.icon;
 

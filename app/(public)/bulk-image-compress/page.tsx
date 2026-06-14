@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     "filego bulk image compressor",
   ],
   alternates: {
-    canonical: "/bulk-image-compress",
+    canonical: "https://www.filego.in/bulk-image-compress",
   },
   robots: {
     index: true,
@@ -116,10 +116,10 @@ export default function BulkImageCompressPage() {
           </h1>
 
           <p className="mt-2 max-w-3xl text-sm text-muted-foreground md:text-base">
-            Compress and convert JPG, PNG, WebP, AVIF, GIF, and BMP images locally
-            in your browser. Optimize multiple images without server uploads,
-            compare results, fine-tune quality, resize dimensions, and export in
-            batches.
+            Compress and convert JPG, PNG, WebP, AVIF, GIF, and BMP images
+            locally in your browser. Optimize multiple images without server
+            uploads, compare results, fine-tune quality, resize dimensions, and
+            export in batches.
           </p>
         </header>
 
@@ -129,8 +129,9 @@ export default function BulkImageCompressPage() {
           <div className="rounded-2xl border bg-background p-6">
             <h2 className="text-lg font-semibold">Why use Filego</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Filego processes images locally in your browser, which helps protect
-              privacy while improving speed for compression and conversion tasks.
+              Filego processes images locally in your browser, which helps
+              protect privacy while improving speed for compression and
+              conversion tasks.
             </p>
           </div>
 

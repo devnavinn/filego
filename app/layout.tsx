@@ -59,10 +59,6 @@ export const metadata: Metadata = {
   applicationName: "Filego",
   category: "technology",
 
-  alternates: {
-    canonical: "/",
-  },
-
   robots: {
     index: true,
     follow: true,
