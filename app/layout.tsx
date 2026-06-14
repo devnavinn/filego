@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
@@ -21,97 +20,7 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-const siteUrl = "https://filego.in";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-
-  title: {
-    default: "Free PDF, Image & Document Tools Online | Filego",
-    template: "%s | Filego",
-  },
-
-  description:
-    "Free online file tools for PDF, image, and document workflows. Compress images, merge PDFs, split files, convert JPG to PDF, PDF to JPG, Word to PDF, and more with a fast, privacy-first experience.",
-
-  keywords: [
-    "filego",
-    "free file tools",
-    "online file tools",
-    "pdf tools",
-    "free pdf tools",
-    "image tools",
-    "document tools",
-    "merge pdf",
-    "split pdf",
-    "compress image",
-    "image compressor",
-    "jpg to pdf",
-    "pdf to jpg",
-    "pdf to word",
-    "word to pdf",
-    "file conversion tools",
-    "privacy first file tools",
-    "browser-based file tools",
-  ],
-
-  applicationName: "Filego",
-  category: "technology",
-
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-
-  openGraph: {
-    type: "website",
-    url: siteUrl,
-    title: "Free PDF, Image & Document Tools Online | Filego",
-    description:
-      "Compress images, merge PDFs, split files, and convert documents with fast, privacy-first online tools.",
-    siteName: "Filego",
-    locale: "en_IN",
-    images: [
-      {
-        url: "/web-app-manifest-192x192.png",
-        width: 1200,
-        height: 630,
-        alt: "Filego file tools platform preview",
-      },
-    ],
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Free PDF, Image & Document Tools Online | Filego",
-    description:
-      "Compress images, merge PDFs, split files, and convert documents with fast, privacy-first online tools.",
-    images: ["/web-app-manifest-192x192.png"],
-  },
-
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    shortcut: ["/favicon.ico"],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-  },
-
-  verification: {
-    google: "w3_i8bMsxgPtWnzLjemY6GnNZj9r4EWfU27RSHCnkD8",
-  },
-};
+const siteUrl = "https://www.filego.in";
 
 export default function RootLayout({
   children,
