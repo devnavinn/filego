@@ -4,6 +4,7 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { TooltipProvider } from "@/components/ui/tooltip"
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -104,7 +105,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
 
-        <AuthSessionProvider>{children}</AuthSessionProvider>
+        <AuthSessionProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </AuthSessionProvider>
       </body>
 
       <GoogleTagManager gtmId="GTM-K6ND86RZ" />

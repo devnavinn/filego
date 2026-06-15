@@ -102,6 +102,33 @@ model WaitlistSubscriber {
   @@map("waitlist_subscribers")
 }
 
+model BlogPost {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  excerpt        String
+  content        String     @db.Text
+  coverImage     String?
+  category       String?
+  tags           String[]
+  seoTitle       String?
+  seoDescription String?
+  status         BlogStatus @default(DRAFT)
+  publishedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([createdAt])
+  @@map("blog_posts")
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
 enum ContactStatus {
   NEW
   READ

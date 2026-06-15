@@ -46,6 +46,7 @@ export const mobileLinks = [
     { title: "Word to PDF", href: "/word-to-pdf" },
     { title: "API", href: "/api-docs" },
     { title: "About", href: "/about" },
+    { title: "Blog", href: '/blog' }
 ] as const;
 
 export function getAvatarUrl(seed: string) {
