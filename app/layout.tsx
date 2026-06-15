@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
@@ -21,10 +21,11 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
 const siteUrl = "https://www.filego.in";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://filego.in"),
+  metadataBase: new URL("https://www.filego.in"),
   title: {
     default: "Filego",
     template: "%s | Filego",
@@ -79,25 +80,34 @@ export default function RootLayout({
         geistSans.variable,
         geistMono.variable,
         "font-sans",
-        inter.variable,
+        inter.variable
       )}
     >
-      <AuthSessionProvider>
-        <body className="min-h-full flex flex-col">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(organizationSchema),
-            }}
+      <body className="min-h-full flex flex-col">
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-K6ND86RZ"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
           />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-          />
+        </noscript>
 
-          {children}
-        </body>
-      </AuthSessionProvider>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+
+        <AuthSessionProvider>{children}</AuthSessionProvider>
+      </body>
+
+      <GoogleTagManager gtmId="GTM-K6ND86RZ" />
       <GoogleAnalytics gaId="G-91BF9G6C4E" />
       <Analytics />
       <SpeedInsights />
