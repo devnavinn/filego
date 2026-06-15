@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = "https://filego.in";
+    const baseUrl = "https://www.filego.in";
 
     const routes = [
         "",

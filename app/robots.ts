@@ -14,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
                 ],
             },
         ],
-        sitemap: "https://filego.in/sitemap.xml",
+        sitemap: "https://www.filego.in/sitemap.xml",
     };
 }

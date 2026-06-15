@@ -34,6 +34,7 @@
     "dotenv": "^17.4.2",
     "file-saver": "^2.0.5",
     "html2canvas-pro": "^2.0.4",
+    "idb-keyval": "^6.2.5",
     "input-otp": "^1.4.2",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.1",

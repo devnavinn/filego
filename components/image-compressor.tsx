@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { del, get, set } from "idb-keyval";
 import JSZip from "jszip";
 import {
   Download,
@@ -31,6 +32,11 @@ import {
   pickFolderImagesViaFSAccess,
   pickFolderImagesViaInput,
 } from "@/lib/folder-utils";
+
+type StoredEntry = {
+  file: File;
+  relativePath: string;
+};
 
 type OutputFormat = "webp" | "avif" | "jpeg" | "png";
 
@@ -77,6 +83,7 @@ export function ImageCompressor() {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const showEffortControl = outputFormat === "webp" || outputFormat === "avif";
 
@@ -97,6 +104,48 @@ export function ImageCompressor() {
     };
   }, [items]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadEntries() {
+      try {
+        const storedEntries = await get<StoredEntry[]>("filego-bulk-image-entries");
+
+        if (!mounted) return;
+
+        if (storedEntries?.length) {
+          setItems(
+            storedEntries.map((entry) => ({
+              id: crypto.randomUUID(),
+              file: entry.file,
+              relativePath: entry.relativePath,
+              status: "pending" as const,
+              originalSize: entry.file.size,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    loadEntries();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const persistEntries = async (nextItems: QueueItem[]) => {
+    const entries: StoredEntry[] = nextItems.map((item) => ({
+      file: item.file,
+      relativePath: item.relativePath,
+    }));
+    await set("filego-bulk-image-entries", entries);
+  };
+
   const resetProcessedState = () => {
     setItems((prev) =>
       prev.map((item) => ({
@@ -107,20 +156,20 @@ export function ImageCompressor() {
         outputRelativePath: undefined,
         blob: undefined,
         error: undefined,
-      })),
+      }))
     );
     setProgress(0);
   };
 
-  const addFiles = async (entries: { file: File; relativePath: string }[]) => {
+  const addFiles = async (entries: StoredEntry[]) => {
     setItems((prev) => {
       const existingKeys = new Set(
-        prev.map((item) => `${item.relativePath}::${item.originalSize}`),
+        prev.map((item) => `${item.relativePath}::${item.originalSize}`)
       );
 
       const next: QueueItem[] = entries
         .filter(
-          (entry) => !existingKeys.has(`${entry.relativePath}::${entry.file.size}`),
+          (entry) => !existingKeys.has(`${entry.relativePath}::${entry.file.size}`)
         )
         .map((entry) => ({
           id: crypto.randomUUID(),
@@ -130,7 +179,9 @@ export function ImageCompressor() {
           originalSize: entry.file.size,
         }));
 
-      return [...prev, ...next];
+      const merged = [...prev, ...next];
+      void persistEntries(merged);
+      return merged;
     });
   };
 
@@ -167,17 +218,14 @@ export function ImageCompressor() {
       if (!entries.length) return;
       await addFiles(entries);
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        return;
-      }
-
+      if (error instanceof DOMException && error.name === "AbortError") return;
       console.error("Folder picker failed:", error);
     }
   };
 
   const compressAll = async () => {
     const pending = items.filter(
-      (item) => item.status === "pending" || item.status === "error",
+      (item) => item.status === "pending" || item.status === "error"
     );
 
     if (!pending.length) return;
@@ -192,13 +240,13 @@ export function ImageCompressor() {
         prev.map((row) =>
           row.id === item.id
             ? { ...row, status: "processing", error: undefined }
-            : row,
-        ),
+            : row
+        )
       );
 
       const worker = new Worker(
         new URL("../workers/compress.worker.ts", import.meta.url),
-        { type: "module" },
+        { type: "module" }
       );
 
       const result = await new Promise<WorkerResponse>((resolve) => {
@@ -229,8 +277,8 @@ export function ImageCompressor() {
                 outputRelativePath: result.relativePath,
                 blob: result.blob,
               }
-              : row,
-          ),
+              : row
+          )
         );
       } else {
         setItems((prev) =>
@@ -241,8 +289,8 @@ export function ImageCompressor() {
                 status: "error",
                 error: result.error,
               }
-              : row,
-          ),
+              : row
+          )
         );
       }
 
@@ -282,11 +330,16 @@ export function ImageCompressor() {
     URL.revokeObjectURL(url);
   };
 
-  const resetAll = () => {
+  const resetAll = async () => {
     setItems([]);
     setRunning(false);
     setProgress(0);
+    await del("filego-bulk-image-entries");
   };
+
+  if (loading) {
+    return <div className="text-sm text-muted-foreground">Loading editor...</div>;
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
@@ -294,8 +347,7 @@ export function ImageCompressor() {
         <CardHeader>
           <CardTitle>Controls</CardTitle>
           <CardDescription>
-            Compress and convert single images, batches, or folders locally with ZIP
-            export.
+            Add more images or folders, tune compression, and export results as ZIP.
           </CardDescription>
         </CardHeader>
 
@@ -332,7 +384,7 @@ export function ImageCompressor() {
             <p className="text-xs text-muted-foreground">
               {showEffortControl
                 ? "Higher effort can improve compression but takes more time."
-                : "Effort is only used for modern codec outputs like WebP or AVIF."}
+                : "Effort is only used for WebP or AVIF outputs."}
             </p>
           </div>
 
@@ -345,7 +397,7 @@ export function ImageCompressor() {
                 setOutputFormat(e.target.value as OutputFormat);
                 resetProcessedState();
               }}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="webp">WebP</option>
               <option value="avif">AVIF</option>
@@ -410,7 +462,7 @@ export function ImageCompressor() {
               className="justify-start"
             >
               <FolderOpen className="mr-2 size-4" />
-              Pick folder (Chromium)
+              Pick folder
             </Button>
 
             <Button
@@ -434,7 +486,6 @@ export function ImageCompressor() {
             <Button
               onClick={downloadZip}
               disabled={!items.some((item) => item.status === "done")}
-              variant="default"
             >
               <Download className="mr-2 size-4" />
               Download ZIP
@@ -486,13 +537,12 @@ export function ImageCompressor() {
         <CardHeader>
           <CardTitle>Queue</CardTitle>
           <CardDescription>
-            Files stay on the user device. Output format is selected by the user and
-            ZIP is generated in-browser.
+            Selected images and folders appear here before compression.
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <ScrollArea className="h-[650px] pr-4">
+          <ScrollArea className="h-[850px] pr-4">
             <div className="space-y-3">
               {items.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-8 text-sm text-muted-foreground">
