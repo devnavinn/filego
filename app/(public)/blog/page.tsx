@@ -1,22 +1,20 @@
 // app/blog/page.tsx
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, ArrowUpRight } from "lucide-react";
+import { getPublishedBlogPosts } from "@/lib/blog";
 
-export default async function BlogPage() {
-    const posts = await prisma.blogPost.findMany({
-        where: { status: "PUBLISHED" },
-        orderBy: { publishedAt: "desc" },
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            category: true,
-            publishedAt: true,
-        },
-    });
+export const revalidate = 3600;
+
+type Props = {
+    searchParams: Promise<{ page?: string }>;
+};
+
+export default async function BlogPage({ searchParams }: Props) {
+    const sp = await searchParams;
+    const page = Math.max(1, Number(sp.page) || 1);
+
+    const { items: posts, totalPages } = await getPublishedBlogPosts(page);
 
     return (
         <main className="bg-background">
@@ -85,6 +83,28 @@ export default async function BlogPage() {
                             </div>
                         )}
                     </div>
+
+                    {totalPages > 1 ? (
+                        <div className="mt-10 flex items-center justify-between border-t border-border/60 pt-6">
+                            <Link
+                                href={page > 1 ? `/blog?page=${page - 1}` : "#"}
+                                className={`text-sm ${page > 1 ? "text-foreground" : "pointer-events-none text-muted-foreground/50"}`}
+                            >
+                                Previous
+                            </Link>
+
+                            <p className="text-sm text-muted-foreground">
+                                Page {page} of {totalPages}
+                            </p>
+
+                            <Link
+                                href={page < totalPages ? `/blog?page=${page + 1}` : "#"}
+                                className={`text-sm ${page < totalPages ? "text-foreground" : "pointer-events-none text-muted-foreground/50"}`}
+                            >
+                                Next
+                            </Link>
+                        </div>
+                    ) : null}
                 </div>
             </section>
         </main>

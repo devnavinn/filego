@@ -1,5 +1,6 @@
 // app/api/admin/blog/route.ts
 import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { blogPostSchema } from "@/lib/validations/blog";
@@ -94,6 +95,13 @@ export async function POST(req: Request) {
                 publishedAt: data.status === "PUBLISHED" ? new Date() : null,
             },
         });
+
+        if (post.status === "PUBLISHED") {
+            revalidatePath("/blog");
+            revalidatePath(`/blog/${post.slug}`);
+            revalidateTag("blog-list", "max");
+            revalidateTag(`blog-post-${post.slug}`, "max");
+        }
 
         return NextResponse.json(
             {

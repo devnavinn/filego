@@ -8,33 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDays, ChevronLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
+import { getPublishedBlogPostBySlug } from "@/lib/blog";
 type Props = {
     params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
-
-    const post = await prisma.blogPost.findFirst({
-        where: {
-            slug,
-            status: "PUBLISHED",
-        },
-        select: {
-            title: true,
-            excerpt: true,
-            seoTitle: true,
-            seoDescription: true,
-            coverImage: true,
-        },
-    });
-
-    if (!post) {
-        return {
-            title: "Post not found",
-        };
-    }
+    const post = await getPublishedBlogPostBySlug(slug);
+    if (!post) notFound();
 
     return {
         title: post.seoTitle || post.title,
@@ -49,23 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
     const { slug } = await params;
-
-    const post = await prisma.blogPost.findFirst({
-        where: {
-            slug,
-            status: "PUBLISHED",
-        },
-        select: {
-            title: true,
-            excerpt: true,
-            content: true,
-            coverImage: true,
-            category: true,
-            publishedAt: true,
-            slug: true,
-        },
-    });
-
+    const post = await getPublishedBlogPostBySlug(slug);
     if (!post) notFound();
 
     return (
