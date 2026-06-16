@@ -87,6 +87,7 @@ export async function POST(req: Request) {
                 excerpt: data.excerpt,
                 content: data.content,
                 coverImage: data.coverImage,
+                coverImageId: data.coverImageId,
                 category: data.category,
                 tags: data.tags,
                 seoTitle: data.seoTitle,
@@ -111,7 +112,9 @@ export async function POST(req: Request) {
             },
             { status: 201 }
         );
-    } catch {
+    } catch (error) {
+        console.error("CREATE_BLOG_POST_ERROR", error);
+
         return NextResponse.json(
             {
                 ok: false,

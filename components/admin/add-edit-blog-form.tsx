@@ -44,6 +44,48 @@ function slugify(value: string) {
         .replace(/-+/g, "-");
 }
 
+async function generateCoverImage(input: {
+    title: string;
+    excerpt?: string;
+    category?: string;
+}) {
+    const res = await fetch("/api/admin/blog/generate-image", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            title: input.title,
+            excerpt: input.excerpt ?? "",
+            category: input.category ?? "Blog",
+            style: "clean modern editorial",
+            aspectRatio: "16:9",
+        }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.ok) {
+        if (res.status === 429) {
+            throw new Error(
+                data?.error || "Image generation quota exceeded. Try again later."
+            );
+        }
+
+        throw new Error(data?.error || "Failed to generate image.");
+    }
+
+    return data.item as {
+        publicId: string;
+        url: string;
+        width: number;
+        height: number;
+        format: string;
+        bytes: number;
+        assetId: string;
+    };
+}
+
 export function AddEditBlogForm({
     mode,
     initialValues,
@@ -94,25 +136,42 @@ export function AddEditBlogForm({
         setIsSubmitting(true);
         setServerError(null);
 
-        const payload = {
-            ...values,
-            coverImage: values.coverImage || undefined,
-            category: values.category || undefined,
-            seoTitle: values.seoTitle || undefined,
-            seoDescription: values.seoDescription || undefined,
-            tags: values.tags ?? [],
-        };
-
-        const endpoint =
-            mode === "create" ? "/api/admin/blog" : `/api/admin/blog/${postId}`;
-        const method = mode === "create" ? "POST" : "PUT";
-
         try {
+            let coverImage = values.coverImage ?? null;
+            let coverImageId = values.coverImageId ?? null;
+
+            if (mode === "create" && !coverImage) {
+                try {
+                    const generated = await generateCoverImage({
+                        title: values.title,
+                        excerpt: values.excerpt,
+                        category: values.category,
+                    });
+
+                    coverImage = generated.url;
+                    coverImageId = generated.publicId;
+                } catch (error) {
+                    console.error("COVER_IMAGE_GENERATION_ERROR", error);
+                }
+            }
+
+            const payload = {
+                ...values,
+                coverImage,
+                coverImageId,
+                category: values.category || undefined,
+                seoTitle: values.seoTitle || undefined,
+                seoDescription: values.seoDescription || undefined,
+                tags: values.tags ?? [],
+            };
+
+            const endpoint =
+                mode === "create" ? "/api/admin/blog" : `/api/admin/blog/${postId}`;
+            const method = mode === "create" ? "POST" : "PUT";
+
             const res = await fetch(endpoint, {
                 method,
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
@@ -122,7 +181,6 @@ export function AddEditBlogForm({
                 if (data?.fieldErrors) {
                     Object.entries(data.fieldErrors).forEach(([key, messages]) => {
                         const message = Array.isArray(messages) ? messages[0] : undefined;
-
                         if (message) {
                             setError(key as FieldPath<BlogPostFormInput>, {
                                 type: "server",
@@ -136,9 +194,10 @@ export function AddEditBlogForm({
                 return;
             }
 
-            router.push("/admin/blog");
             router.refresh();
-        } catch {
+            router.push("/admin/blog");
+        } catch (error) {
+            console.error("BLOG_SUBMIT_ERROR", error);
             setServerError("Something went wrong. Please try again.");
         } finally {
             setIsSubmitting(false);

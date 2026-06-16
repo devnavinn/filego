@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { blogPostSchema } from "@/lib/validations/blog";
+import { destroyCloudinaryImage } from "@/lib/cloudinary";
 
 export async function GET(
     _req: Request,
@@ -72,6 +73,8 @@ export async function PUT(
                 slug: true,
                 status: true,
                 publishedAt: true,
+                coverImage: true,
+                coverImageId: true,
             },
         });
 
@@ -82,6 +85,13 @@ export async function PUT(
             );
         }
 
+        const nextCoverImage = data.coverImage ?? null;
+        const nextCoverImageId = data.coverImageId ?? null;
+
+        const coverImageChanged =
+            current.coverImage !== nextCoverImage ||
+            current.coverImageId !== nextCoverImageId;
+
         const post = await prisma.blogPost.update({
             where: { id },
             data: {
@@ -89,7 +99,8 @@ export async function PUT(
                 slug: data.slug,
                 excerpt: data.excerpt,
                 content: data.content,
-                coverImage: data.coverImage,
+                coverImage: nextCoverImage,
+                coverImageId: nextCoverImageId,
                 category: data.category,
                 tags: data.tags,
                 seoTitle: data.seoTitle,
@@ -103,6 +114,18 @@ export async function PUT(
                             : current.publishedAt,
             },
         });
+
+        if (
+            coverImageChanged &&
+            current.coverImageId &&
+            current.coverImageId !== nextCoverImageId
+        ) {
+            try {
+                await destroyCloudinaryImage(current.coverImageId);
+            } catch (error) {
+                console.error("DELETE_OLD_CLOUDINARY_IMAGE_ERROR", error);
+            }
+        }
 
         const wasPublished = current.status === "PUBLISHED";
         const isPublished = post.status === "PUBLISHED";
@@ -135,7 +158,9 @@ export async function PUT(
             item: post,
             message: "Blog post updated successfully.",
         });
-    } catch {
+    } catch (error) {
+        console.error("UPDATE_BLOG_POST_ERROR", error);
+
         return NextResponse.json(
             { ok: false, error: "Something went wrong. Please try again." },
             { status: 500 }
@@ -156,6 +181,7 @@ export async function DELETE(
             id: true,
             slug: true,
             status: true,
+            coverImageId: true,
         },
     });
 
@@ -169,6 +195,14 @@ export async function DELETE(
     await prisma.blogPost.delete({
         where: { id },
     });
+
+    if (existing.coverImageId) {
+        try {
+            await destroyCloudinaryImage(existing.coverImageId);
+        } catch (error) {
+            console.error("DELETE_CLOUDINARY_IMAGE_ON_POST_DELETE_ERROR", error);
+        }
+    }
 
     if (existing.status === "PUBLISHED") {
         revalidatePath("/blog");

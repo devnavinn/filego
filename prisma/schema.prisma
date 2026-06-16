@@ -108,7 +108,8 @@ model BlogPost {
   slug           String     @unique
   excerpt        String
   content        String     @db.Text
-  coverImage     String?
+  coverImage      String?
+  coverImageId    String?
   category       String?
   tags           String[]
   seoTitle       String?

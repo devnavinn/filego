@@ -1,22 +1,30 @@
-// lib/validations/blog.ts
 import { z } from "zod";
 
-export const blogStatusEnum = z.enum(["DRAFT", "PUBLISHED"]);
-
 export const blogPostSchema = z.object({
-    title: z.string().min(5, "Title must be at least 5 characters."),
-    slug: z
+    title: z.string().trim().min(3).max(160),
+    slug: z.string().trim().min(3).max(180),
+    excerpt: z.string().trim().min(10).max(300),
+    content: z.string().trim().min(50),
+    coverImage: z.preprocess(
+        (value) => {
+            if (typeof value === "string" && value.trim() === "") {
+                return null;
+            }
+            return value;
+        },
+        z.string().trim().url("Cover image must be a valid URL.").nullable().optional()
+    ),
+    coverImageId: z
         .string()
-        .min(3, "Slug is required.")
-        .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens."),
-    excerpt: z.string().min(20, "Excerpt must be at least 20 characters.").max(220),
-    content: z.string().min(50, "Content must be at least 50 characters."),
-    coverImage: z.string().url().optional().or(z.literal("")).transform((v) => v || undefined),
-    category: z.string().optional(),
-    tags: z.array(z.string()).default([]),
-    seoTitle: z.string().max(70).optional(),
-    seoDescription: z.string().max(160).optional(),
-    status: blogStatusEnum,
+        .trim()
+        .min(1)
+        .max(255)
+        .nullable()
+        .optional()
+        .transform((v) => v || null),
+    category: z.string().trim().min(2).max(60),
+    tags: z.array(z.string().trim().min(1).max(40)).default([]),
+    seoTitle: z.string().trim().max(160).nullable().optional().transform((v) => v || null),
+    seoDescription: z.string().trim().max(200).nullable().optional().transform((v) => v || null),
+    status: z.enum(["DRAFT", "PUBLISHED"]),
 });
-
-export type BlogPostInput = z.infer<typeof blogPostSchema>;

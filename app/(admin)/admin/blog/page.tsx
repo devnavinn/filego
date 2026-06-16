@@ -117,9 +117,9 @@ export default async function AdminBlogPage({
                                                 /blog/{post.slug}
                                             </span>
 
-                                            {post.tags?.map((tag) => (
+                                            {post.tags?.map((tag, i) => (
                                                 <span
-                                                    key={tag}
+                                                    key={tag + i + 1}
                                                     className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1"
                                                 >
                                                     <Tag className="size-3.5" />
