@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         destination: "/image-squoosh",
         permanent: true,
       },
+      {
+        source: "/bulk-image-compress",
+        destination: "/bulk-image-compressor",
+        permanent: true,
+      },
     ];
   },
 

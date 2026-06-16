@@ -30,7 +30,7 @@ export function BulkImageUploadEntry() {
         try {
             setIsSaving(true);
             await set("filego-bulk-image-entries", entries);
-            router.push("/bulk-image-compress/editor");
+            router.push("/bulk-image-compressor/editor");
         } catch (error) {
             console.error(error);
             alert("Could not open the editor. Please try again.");
