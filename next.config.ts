@@ -13,12 +13,34 @@ const nextConfig: NextConfig = {
         destination: "/bulk-image-compressor",
         permanent: true,
       },
-      {
-        source: '/admin/:path*',
-        destination: 'https://admin.filego.in/admin/:path*',
-        permanent: true,
-      },
     ];
+  },
+
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/",
+          has: [
+            {
+              type: "host",
+              value: "admin.filego.in",
+            },
+          ],
+          destination: "/admin",
+        },
+        {
+          source: "/:path*",
+          has: [
+            {
+              type: "host",
+              value: "admin.filego.in",
+            },
+          ],
+          destination: "/admin/:path*",
+        },
+      ],
+    };
   },
 
   // images: {
