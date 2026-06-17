@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -28,10 +28,21 @@ const loginSchema = z.object({
 
 type LoginInput = z.infer<typeof loginSchema>;
 
+function getRoleRedirect(role?: string) {
+    switch (role) {
+        case "ADMIN":
+            return "/admin/dashboard";
+        case "USER":
+            return "/";
+        default:
+            return "/dashboard";
+    }
+}
+
 export function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+    const callbackUrl = searchParams.get("callbackUrl");
 
     const [serverError, setServerError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +64,6 @@ export function LoginForm() {
                 email: values.email,
                 password: values.password,
                 redirect: false,
-                callbackUrl,
             });
 
             if (!result) {
@@ -66,7 +76,12 @@ export function LoginForm() {
                 return;
             }
 
-            router.push(result.url || callbackUrl);
+            const session = await getSession();
+            const role = (session?.user as any)?.role;
+
+            const redirectTo = callbackUrl || getRoleRedirect(role);
+
+            router.push(redirectTo);
             router.refresh();
         } catch {
             setServerError("Something went wrong. Please try again.");
