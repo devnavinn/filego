@@ -5,6 +5,7 @@ import { DesktopNav } from "./desktop-nav";
 import { MobileNav } from "./mobile-nav";
 import { NavbarBrand } from "./navbar-brand";
 import { UserMenu } from "./user-menu";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -13,8 +14,16 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
         <NavbarBrand />
-        <DesktopNav />
-        <UserMenu status={status} user={session?.user} />
+
+        <div className="hidden md:flex items-center gap-4">
+          <DesktopNav />
+        </div>
+
+        <div className="hidden md:flex items-center gap-2">
+          <ModeToggle />
+          <UserMenu status={status} user={session?.user} />
+        </div>
+
         <MobileNav status={status} user={session?.user} />
       </div>
     </header>

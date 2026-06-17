@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +84,7 @@ export default function RootLayout({
         "font-sans",
         inter.variable
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <noscript>
@@ -106,9 +108,16 @@ export default function RootLayout({
         />
 
         <AuthSessionProvider>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </ThemeProvider>
         </AuthSessionProvider>
       </body>
 

@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
@@ -14,6 +16,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { getAvatarUrl, mobileLinks } from "./navbar-data";
+import { ModeToggle } from "@/components/mode-toggle";
 
 type MobileNavProps = {
     status: "loading" | "authenticated" | "unauthenticated";
@@ -38,7 +41,10 @@ export function MobileNav({ user }: MobileNavProps) {
                     </Button>
                 </SheetTrigger>
 
-                <SheetContent side="right" className="w-[320px] p-0">
+                <SheetContent
+                    side="right"
+                    className="w-[320px] p-0 [&>button:first-of-type]:hidden"
+                >
                     <SheetHeader className="sr-only">
                         <SheetTitle>Navigation menu</SheetTitle>
                         <SheetDescription>
@@ -47,6 +53,16 @@ export function MobileNav({ user }: MobileNavProps) {
                     </SheetHeader>
 
                     <div className="flex h-full flex-col">
+                        <div className="border-b px-5 py-4">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-foreground">Appearance</p>
+                                    <p className="text-xs text-muted-foreground">Choose your theme</p>
+                                </div>
+                                <ModeToggle />
+                            </div>
+                        </div>
+
                         {user ? (
                             <div className="border-b px-5 py-4">
                                 <div className="flex items-center gap-3">
@@ -121,14 +137,14 @@ export function MobileNav({ user }: MobileNavProps) {
                             <div className="border-t p-3">
                                 <button
                                     onClick={() => signOut({ callbackUrl: "/" })}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
                                 >
                                     <LogOut className="h-4 w-4" />
                                     Sign out
                                 </button>
                             </div>
                         ) : (
-                            <div className="border-t p-3 space-y-2">
+                            <div className="space-y-2 border-t p-3">
                                 <SheetClose asChild>
                                     <Button asChild variant="outline" className="w-full rounded-xl">
                                         <Link href="/login">Sign in</Link>
