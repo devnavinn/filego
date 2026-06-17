@@ -9,12 +9,19 @@ export async function proxy(req: NextRequest) {
     });
 
     const host = req.headers.get("host") || "";
+    const pathname = req.nextUrl.pathname;
     const url = req.nextUrl.clone();
 
-    if (host === "admin.filego.in") {
-        const pathname = url.pathname;
+    const isAuthPath =
+        pathname.startsWith("/login") ||
+        pathname.startsWith("/api/auth") ||
+        pathname.startsWith("/register") ||
+        pathname.startsWith("/forgot-password");
 
-        url.pathname = pathname === "/" ? "/admin" : `/admin${pathname}`;
+    if (host === "admin.filego.in") {
+        if (isAuthPath) {
+            return NextResponse.next();
+        }
 
         if (!token) {
             return NextResponse.redirect(new URL("/login", req.url));
@@ -24,10 +31,13 @@ export async function proxy(req: NextRequest) {
             return NextResponse.redirect(new URL("/dashboard", req.url));
         }
 
-        return NextResponse.rewrite(url);
-    }
+        if (!pathname.startsWith("/admin")) {
+            url.pathname = pathname === "/" ? "/admin" : `/admin${pathname}`;
+            return NextResponse.rewrite(url);
+        }
 
-    const pathname = req.nextUrl.pathname;
+        return NextResponse.next();
+    }
 
     if (!token && pathname.startsWith("/dashboard")) {
         return NextResponse.redirect(new URL("/login", req.url));
@@ -48,9 +58,13 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
     matcher: [
+        "/",
+        "/login",
+        "/register",
+        "/forgot-password",
         "/dashboard/:path*",
         "/admin/:path*",
-        "/",
-        "/((?!api|_next/static|_next/image|favicon.ico).*)",
+        "/blog/:path*",
+        "/((?!_next/static|_next/image|favicon.ico).*)",
     ],
 };
