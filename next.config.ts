@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/admin/:path*',
-        destination: 'https://admin.filego.in/:path*',
+        destination: 'https://admin.filego.in/admin/:path*',
         permanent: true,
       },
     ];
