@@ -16,43 +16,37 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: "/",
-          has: [
-            {
-              type: "host",
-              value: "admin.filego.in",
-            },
-          ],
-          destination: "/admin",
-        },
-        {
-          source: "/:path*",
-          has: [
-            {
-              type: "host",
-              value: "admin.filego.in",
-            },
-          ],
-          destination: "/admin/:path*",
-        },
-      ],
-    };
+  async headers() {
+    return [
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/icons/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
-
-  // images: {
-  //   remotePatterns: [
-  //     {
-  //       protocol: "https",
-  //       hostname: "assets.example.com",
-  //       port: "",
-  //       pathname: "/**",
-  //     },
-  //   ],
-  // },
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
