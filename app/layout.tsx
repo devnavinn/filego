@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import Script from "next/script";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,7 @@ const geistMono = Geist_Mono({
 const siteUrl = "https://www.filego.in";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.filego.in"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Filego",
     template: "%s | Filego",
@@ -86,15 +87,14 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-K6ND86RZ"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
+      <head>
+        <Script
+          id="adsense-script"
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4796389804860566"
+          crossOrigin="anonymous"
+        />
 
         <script
           type="application/ld+json"
@@ -106,6 +106,17 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+      </head>
+
+      <body className="min-h-full flex flex-col">
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-K6ND86RZ"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
 
         <AuthSessionProvider>
           <ThemeProvider
@@ -114,17 +125,15 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TooltipProvider>
-              {children}
-            </TooltipProvider>
+            <TooltipProvider>{children}</TooltipProvider>
           </ThemeProvider>
         </AuthSessionProvider>
-      </body>
 
-      <GoogleTagManager gtmId="GTM-K6ND86RZ" />
-      <GoogleAnalytics gaId="G-91BF9G6C4E" />
-      <Analytics />
-      <SpeedInsights />
+        <GoogleTagManager gtmId="GTM-K6ND86RZ" />
+        <GoogleAnalytics gaId="G-91BF9G6C4E" />
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
