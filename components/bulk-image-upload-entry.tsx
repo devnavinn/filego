@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { set } from "idb-keyval";
 import { FolderOpen, ImageUp, Loader2, Upload } from "lucide-react";
-
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
     pickFolderImagesViaFSAccess,
@@ -33,7 +33,7 @@ export function BulkImageUploadEntry() {
             router.push("/bulk-image-compressor/editor");
         } catch (error) {
             console.error(error);
-            alert("Could not open the editor. Please try again.");
+            toast.error("Could not open the editor. Please try again.");
         } finally {
             setIsSaving(false);
         }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
+import { toast } from "sonner";
 declare global {
     interface Window {
         Razorpay: new (options: Record<string, unknown>) => {
@@ -37,13 +37,13 @@ export function UpgradeButton() {
             const orderData = await orderRes.json().catch(() => null);
 
             if (!orderRes.ok) {
-                alert(orderData?.error || "Failed to create order");
+                toast.error(orderData?.error || "Failed to create order");
                 setLoading(false);
                 return;
             }
 
             if (!window.Razorpay) {
-                alert("Razorpay SDK failed to load. Please refresh and try again.");
+                toast.error("Razorpay SDK failed to load. Please refresh and try again.");
                 setLoading(false);
                 return;
             }
@@ -80,15 +80,15 @@ export function UpgradeButton() {
                         const verifyData = await verifyRes.json().catch(() => null);
 
                         if (!verifyRes.ok) {
-                            alert(verifyData?.error || "Payment verification failed");
-                            setLoading(false);
+                            toast.error(verifyData?.error || "Payment verification failed");
                             return;
                         }
-
+                        toast.success("Premium activated successfully");
                         router.refresh();
                     } catch (error) {
                         console.error("verify payment error", error);
-                        alert("Payment completed, but verification failed. Please contact support.");
+                        toast.error("Payment completed, but verification failed. Please contact support.");
+                    } finally {
                         setLoading(false);
                     }
                 },
@@ -97,14 +97,14 @@ export function UpgradeButton() {
             const razorpay = new window.Razorpay(options);
 
             razorpay.on("payment.failed", function () {
-                alert("Payment failed. Please try again.");
+                toast.error("Payment failed. Please try again.");
                 setLoading(false);
             });
 
             razorpay.open();
         } catch (error) {
             console.error("upgrade error", error);
-            alert("Something went wrong");
+            toast.error("Something went wrong");
             setLoading(false);
         }
     };

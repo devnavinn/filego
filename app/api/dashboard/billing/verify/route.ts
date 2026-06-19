@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { BillingStatus } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-provider";
 import { prisma } from "@/lib/prisma";
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
             null;
 
         if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await req.json();
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
 
         if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
             return NextResponse.json(
-                { error: "Missing payment fields" },
+                { ok: false, error: "Missing payment fields" },
                 { status: 400 }
             );
         }
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
 
         if (!valid) {
             return NextResponse.json(
-                { error: "Invalid payment signature" },
+                { ok: false, error: "Invalid payment signature" },
                 { status: 400 }
             );
         }
@@ -53,26 +54,34 @@ export async function POST(req: Request) {
 
         if (!subscription) {
             return NextResponse.json(
-                { error: "Subscription not found" },
+                { ok: false, error: "Subscription not found" },
                 { status: 404 }
             );
+        }
+
+        if (
+            subscription.billingStatus === BillingStatus.ACTIVE &&
+            subscription.providerPaymentId === razorpayPaymentId
+        ) {
+            return NextResponse.json({ ok: true, alreadyVerified: true });
         }
 
         await prisma.subscription.update({
             where: { id: subscription.id },
             data: {
-                billingStatus: "ACTIVE",
+                billingStatus: BillingStatus.ACTIVE,
                 providerPaymentId: razorpayPaymentId,
-                purchasedAt: new Date(),
-                startsAt: new Date(),
+                purchasedAt: subscription.purchasedAt ?? new Date(),
+                startsAt: subscription.startsAt ?? new Date(),
             },
         });
 
         return NextResponse.json({ ok: true });
     } catch (error) {
         console.error("[BILLING_VERIFY_ERROR]", error);
+
         return NextResponse.json(
-            { error: "Failed to verify payment" },
+            { ok: false, error: "Failed to verify payment" },
             { status: 500 }
         );
     }

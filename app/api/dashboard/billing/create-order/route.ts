@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { BillingStatus } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { razorpay } from "@/lib/razorpay";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const LIFETIME_PRICE_INR_PAISE = 49000;
+const LIFETIME_PRICE_INR_PAISE = 99900;
 
 export async function POST() {
     try {
@@ -30,14 +32,59 @@ export async function POST() {
             },
         });
 
+        const amount = Number(order.amount);
+
+        const existingSubscription = await prisma.subscription.findFirst({
+            where: {
+                userId: user.id,
+                planType: "LIFETIME",
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        if (existingSubscription) {
+            await prisma.subscription.update({
+                where: { id: existingSubscription.id },
+                data: {
+                    billingStatus: BillingStatus.INACTIVE,
+                    provider: "RAZORPAY",
+                    providerOrderId: order.id,
+                    providerPaymentId: null,
+                    amount,
+                    currency: order.currency,
+                    purchasedAt: null,
+                    startsAt: null,
+                },
+            });
+        } else {
+            await prisma.subscription.create({
+                data: {
+                    userId: user.id,
+                    planType: "LIFETIME",
+                    billingStatus: BillingStatus.INACTIVE,
+                    provider: "RAZORPAY",
+                    providerOrderId: order.id,
+                    providerPaymentId: null,
+                    amount,
+                    currency: order.currency,
+                },
+            });
+        }
+
         return NextResponse.json({
             ok: true,
             data: {
                 orderId: order.id,
-                amount: order.amount,
+                amount,
                 currency: order.currency,
                 key: process.env.RAZORPAY_KEY_ID,
                 planType: "LIFETIME",
+                prefill: {
+                    name: user.name ?? "",
+                    email: user.email ?? "",
+                },
             },
         });
     } catch (error) {

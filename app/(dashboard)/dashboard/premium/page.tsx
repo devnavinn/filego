@@ -33,7 +33,7 @@ export default async function PremiumPage() {
                     <CardContent className="space-y-5">
                         <div>
                             <p className="text-4xl font-semibold tracking-tight text-foreground">
-                                ₹490
+                                ₹999
                             </p>
                             <p className="mt-2 text-sm text-muted-foreground">
                                 One-time payment for premium Filego access.

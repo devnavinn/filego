@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
@@ -122,7 +123,7 @@ export default function RootLayout({
           >
             <TooltipProvider>
               {children}
-
+              <Toaster richColors position="top-right" />
             </TooltipProvider>
           </ThemeProvider>
         </AuthSessionProvider>
