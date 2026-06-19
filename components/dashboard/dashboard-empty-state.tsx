@@ -19,7 +19,7 @@ export function DashboardEmptyState() {
             </p>
 
             <Button asChild className="mt-5 rounded-xl">
-                <Link href="/tools">Open tools</Link>
+                <Link href="/dashboard/tools">Open tools</Link>
             </Button>
         </div>
     );
