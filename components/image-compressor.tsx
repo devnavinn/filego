@@ -373,6 +373,7 @@ export function ImageCompressor() {
             <Label>Quality: {quality}</Label>
             <Slider
               value={[quality]}
+              disabled={!showEffortControl || !items.length || running}
               min={1}
               max={100}
               step={1}
@@ -392,7 +393,7 @@ export function ImageCompressor() {
               min={0}
               max={6}
               step={1}
-              disabled={!showEffortControl}
+              disabled={!showEffortControl || !items.length || running}
               onValueChange={(value) => {
                 setEffort(value[0] ?? 4);
                 resetProcessedState();
@@ -410,6 +411,7 @@ export function ImageCompressor() {
             <select
               id="output-format"
               value={outputFormat}
+              disabled={!items.length || running}
               onChange={(e) => {
                 setOutputFormat(e.target.value as OutputFormat);
                 resetProcessedState();
@@ -457,6 +459,7 @@ export function ImageCompressor() {
 
             <Button
               onClick={() => singleInputRef.current?.click()}
+              disabled={!items.length || running}
               variant="secondary"
               className="justify-start"
             >
@@ -466,6 +469,7 @@ export function ImageCompressor() {
 
             <Button
               onClick={() => multiInputRef.current?.click()}
+              disabled={!items.length || running}
               variant="secondary"
               className="justify-start"
             >
@@ -474,6 +478,7 @@ export function ImageCompressor() {
             </Button>
 
             <Button
+              disabled={!items.length || running}
               onClick={onPickFolderFS}
               variant="secondary"
               className="justify-start"
