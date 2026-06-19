@@ -23,7 +23,7 @@ import {
     Zap,
     Settings2,
 } from "lucide-react";
-
+import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
 type ExtractionMode = "balanced" | "text-first";
 type SpacingMode = "compact" | "normal" | "loose";
 type PdfStatus = "idle" | "loading" | "ready" | "error";
@@ -228,6 +228,7 @@ export function PdfToWordTool() {
 
             const blob = await Packer.toBlob(doc);
             const baseName = file.name.replace(/\.pdf$/i, "");
+            const outputName = `${baseName}.docx`;
 
             if (looksLikeScannedPdf(extractedPages)) {
                 setWarning(
@@ -239,7 +240,59 @@ export function PdfToWordTool() {
                 );
             }
 
-            saveAs(blob, `${baseName}.docx`);
+            saveAs(blob, outputName);
+
+            try {
+                const totalExtractedLines = extractedPages.reduce(
+                    (sum, page) => sum + page.lines.length,
+                    0
+                );
+                const totalExtractedChars = extractedPages.reduce(
+                    (sum, page) =>
+                        sum + page.lines.reduce((lineSum, line) => lineSum + line.text.length, 0),
+                    0
+                );
+
+                const started = await startUsageJob({
+                    toolType: "PDF_TO_WORD",
+                    filesCount: 1,
+                    originalBytes: file.size,
+                    source: "web",
+                    metadata: {
+                        inputName: file.name,
+                        outputName,
+                        pageCount: pdf.numPages,
+                        mode,
+                        spacingMode,
+                        extractedLineCount: totalExtractedLines,
+                        extractedCharCount: totalExtractedChars,
+                        scannedLikely: looksLikeScannedPdf(extractedPages),
+                    },
+                });
+
+                if (started?.jobId) {
+                    await completeUsageJob({
+                        jobId: started.jobId,
+                        outputBytes: blob.size,
+                        savedBytes: 0,
+                        compressionRate: 0,
+                        status: "COMPLETED",
+                        metadata: {
+                            downloaded: true,
+                            inputName: file.name,
+                            outputName,
+                            pageCount: pdf.numPages,
+                            mode,
+                            spacingMode,
+                            extractedLineCount: totalExtractedLines,
+                            extractedCharCount: totalExtractedChars,
+                            scannedLikely: looksLikeScannedPdf(extractedPages),
+                        },
+                    });
+                }
+            } catch (usageError) {
+                console.error("Failed to record PDF to Word usage", usageError);
+            }
         } catch (err) {
             console.error(err);
             setError(

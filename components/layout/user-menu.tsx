@@ -84,14 +84,7 @@ export function UserMenu({ status, user }: UserMenuProps) {
                         </DropdownMenuItem>
 
                         <DropdownMenuItem asChild>
-                            <Link href="/profile" className="flex cursor-pointer items-center">
-                                <User className="mr-2 h-4 w-4" />
-                                Profile
-                            </Link>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem asChild>
-                            <Link href="/settings" className="flex cursor-pointer items-center">
+                            <Link href="/dashboard/settings" className="flex cursor-pointer items-center">
                                 <Settings className="mr-2 h-4 w-4" />
                                 Settings
                             </Link>

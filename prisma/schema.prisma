@@ -11,20 +11,71 @@ enum Role {
   ADMIN
 }
 
+enum ToolType {
+  IMAGE_COMPRESS
+  BULK_IMAGE_COMPRESS
+  PDF_COMPRESS
+  MERGE_PDF
+  SPLIT_PDF
+  JPG_TO_PDF
+  PDF_TO_JPG
+  PDF_TO_WORD
+  WORD_TO_PDF
+  UNLOCK_PDF
+  OTHER
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum PlanType {
+  FREE
+  LIFETIME
+  PRO
+}
+
+enum BillingStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  REFUNDED
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String?
-  role          Role      @default(USER)
-  emailVerified DateTime?
-  passwordResetToken    String?
-  passwordResetExpires  DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                   String               @id @default(cuid())
+  name                 String?
+  email                String               @unique
+  password             String?
+  role                 Role                 @default(USER)
+  emailVerified        DateTime?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  image                String?
+  accounts             Account[]
+  sessions             Session[]
+  usageSummary         UserUsageSummary?
+  toolJobs             ToolJob[]
+  subscriptions        Subscription[]
+  entitlements         FeatureEntitlement[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 }
 
 model Account {
@@ -124,14 +175,110 @@ model BlogPost {
   @@map("blog_posts")
 }
 
-enum BlogStatus {
-  DRAFT
-  PUBLISHED
+model UserUsageSummary {
+  id                     String    @id @default(cuid())
+  userId                 String    @unique
+  totalJobs              Int       @default(0)
+  totalFiles             Int       @default(0)
+  totalOriginalBytes     BigInt    @default(0)
+  totalOutputBytes       BigInt    @default(0)
+  totalSavedBytes        BigInt    @default(0)
+  totalImageCompressions Int       @default(0)
+  totalPdfOperations     Int       @default(0)
+  lastActivityAt         DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum ContactStatus {
-  NEW
-  READ
-  REPLIED
-  ARCHIVED
+model ToolJob {
+  id              String    @id @default(cuid())
+  userId          String?
+  toolType        ToolType
+  status          JobStatus @default(PENDING)
+  filesCount      Int       @default(1)
+  originalBytes   BigInt    @default(0)
+  outputBytes     BigInt    @default(0)
+  savedBytes      BigInt    @default(0)
+  compressionRate Float?
+  mimeTypes       String[]
+  source          String?
+  isGuest         Boolean   @default(false)
+  guestSessionId  String?
+  metadata        Json?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user  User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files ToolJobFile[]
+
+  @@index([userId, createdAt])
+  @@index([toolType, createdAt])
+  @@index([guestSessionId])
+  @@index([status, createdAt])
+}
+
+model ToolJobFile {
+  id            String    @id @default(cuid())
+  jobId         String
+  fileName      String
+  inputFormat   String?
+  outputFormat  String?
+  originalBytes BigInt
+  outputBytes   BigInt
+  savedBytes    BigInt    @default(0)
+  width         Int?
+  height        Int?
+  pages         Int?
+  durationMs    Int?
+  status        JobStatus @default(COMPLETED)
+  createdAt     DateTime  @default(now())
+
+  job ToolJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+}
+
+model Subscription {
+  id                 String        @id @default(cuid())
+  userId             String
+  planType           PlanType      @default(FREE)
+  billingStatus      BillingStatus @default(INACTIVE)
+  provider           String?
+  providerCustomerId String?
+  providerOrderId    String?
+  providerPaymentId  String?
+  providerSignature  String?
+  amount             Int?
+  currency           String?       @default("INR")
+  startsAt           DateTime?
+  expiresAt          DateTime?
+  purchasedAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, planType])
+  @@index([providerOrderId])
+  @@index([providerPaymentId])
+}
+
+model FeatureEntitlement {
+  id            String    @id @default(cuid())
+  userId        String
+  key           String // bulk_image_compress, high_limit, no_ads, priority_queue
+  enabled       Boolean   @default(false)
+  usageLimit    Int?
+  usageConsumed Int       @default(0)
+  resetAt       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
 }

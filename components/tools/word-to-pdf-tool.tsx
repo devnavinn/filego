@@ -6,6 +6,7 @@ import mammoth from "mammoth";
 import DOMPurify from "dompurify";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
+import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
 import {
     ArrowLeft,
     Download,
@@ -329,7 +330,58 @@ export function WordToPdfTool() {
             }
 
             const name = (file?.name || "document").replace(/\.docx$/i, "");
-            pdf.save(`${name}.pdf`);
+            const outputName = `${name}.pdf`;
+            const pdfBlob = pdf.output("blob");
+
+            pdf.save(outputName);
+
+            try {
+                const started = await startUsageJob({
+                    toolType: "WORD_TO_PDF",
+                    filesCount: 1,
+                    originalBytes: file?.size ?? 0,
+                    source: "web",
+                    metadata: {
+                        inputName: file?.name ?? null,
+                        outputName,
+                        pageFormat,
+                        margin,
+                        lineHeight,
+                        paragraphSpacing,
+                        pagePadding,
+                        fontSize,
+                        isEditMode,
+                        previewHtmlLength: liveHtml.length,
+                        generatedPageCount: pages.length,
+                    },
+                });
+
+                if (started?.jobId) {
+                    await completeUsageJob({
+                        jobId: started.jobId,
+                        outputBytes: pdfBlob.size,
+                        savedBytes: 0,
+                        compressionRate: 0,
+                        status: "COMPLETED",
+                        metadata: {
+                            downloaded: true,
+                            inputName: file?.name ?? null,
+                            outputName,
+                            pageFormat,
+                            margin,
+                            lineHeight,
+                            paragraphSpacing,
+                            pagePadding,
+                            fontSize,
+                            isEditMode,
+                            previewHtmlLength: liveHtml.length,
+                            generatedPageCount: pages.length,
+                        },
+                    });
+                }
+            } catch (usageError) {
+                console.error("Failed to record Word to PDF usage", usageError);
+            }
         } catch (err) {
             console.error(err);
             setError("Could not export the PDF. Please try again.");

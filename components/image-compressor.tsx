@@ -28,6 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { formatBytes, sanitizeZipPath } from "@/lib/image-utils";
+import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
 import {
   pickFolderImagesViaFSAccess,
   pickFolderImagesViaInput,
@@ -76,6 +77,7 @@ export function ImageCompressor() {
   const singleInputRef = useRef<HTMLInputElement | null>(null);
   const multiInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
+  const itemsRef = useRef<QueueItem[]>([]);
 
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("webp");
   const [quality, setQuality] = useState(75);
@@ -102,6 +104,10 @@ export function ImageCompressor() {
       compressed,
       saved: Math.max(0, original - compressed),
     };
+  }, [items]);
+
+  useEffect(() => {
+    itemsRef.current = items;
   }, [items]);
 
   useEffect(() => {
@@ -235,6 +241,20 @@ export function ImageCompressor() {
 
     if (!pending.length) return;
 
+    const originalBytes = pending.reduce((sum, item) => sum + item.originalSize, 0);
+
+    const usageJob = await startUsageJob({
+      toolType: "BULK_IMAGE_COMPRESS",
+      filesCount: pending.length,
+      originalBytes,
+      source: "web",
+      metadata: {
+        outputFormat,
+        quality,
+        effort,
+      },
+    });
+
     setRunning(true);
     setProgress(0);
 
@@ -311,10 +331,40 @@ export function ImageCompressor() {
         processNext();
       });
 
-    await Promise.all(workers.map(runWorker));
-    workers.forEach((worker) => worker.terminate());
+    try {
+      await Promise.all(workers.map(runWorker));
+    } finally {
+      workers.forEach((worker) => worker.terminate());
+      setRunning(false);
+    }
 
-    setRunning(false);
+    const finishedItems = itemsRef.current.filter((item) =>
+      pending.some((p) => p.id === item.id)
+    );
+
+    const doneItems = finishedItems.filter((item) => item.status === "done");
+
+    const outputBytes = doneItems.reduce((sum, item) => sum + (item.outputSize ?? 0), 0);
+    const savedBytes = Math.max(0, originalBytes - outputBytes);
+    const compressionRate =
+      originalBytes > 0 ? Number(((savedBytes / originalBytes) * 100).toFixed(2)) : 0;
+
+    if (usageJob?.jobId) {
+      await completeUsageJob({
+        jobId: usageJob.jobId,
+        outputBytes,
+        savedBytes,
+        compressionRate,
+        status: doneItems.length ? "COMPLETED" : "FAILED",
+        metadata: {
+          completedFiles: doneItems.length,
+          failedFiles: pending.length - doneItems.length,
+          outputFormat,
+          quality,
+          effort,
+        },
+      });
+    }
   };
 
 
@@ -411,7 +461,7 @@ export function ImageCompressor() {
             <select
               id="output-format"
               value={outputFormat}
-              disabled={!items.length || running}
+              disabled={running}
               onChange={(e) => {
                 setOutputFormat(e.target.value as OutputFormat);
                 resetProcessedState();
@@ -459,7 +509,7 @@ export function ImageCompressor() {
 
             <Button
               onClick={() => singleInputRef.current?.click()}
-              disabled={!items.length || running}
+              disabled={running}
               variant="secondary"
               className="justify-start"
             >
@@ -469,7 +519,7 @@ export function ImageCompressor() {
 
             <Button
               onClick={() => multiInputRef.current?.click()}
-              disabled={!items.length || running}
+              disabled={running}
               variant="secondary"
               className="justify-start"
             >
@@ -478,7 +528,7 @@ export function ImageCompressor() {
             </Button>
 
             <Button
-              disabled={!items.length || running}
+              disabled={running}
               onClick={onPickFolderFS}
               variant="secondary"
               className="justify-start"

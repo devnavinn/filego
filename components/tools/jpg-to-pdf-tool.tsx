@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { PDFDocument } from "pdf-lib";
+import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
 import {
     ArrowDown,
     ArrowLeft,
@@ -195,19 +196,65 @@ export function JpgToPdfTool() {
             }
 
             const pdfBytes = await pdfDoc.save();
-            const arrayBuffer = pdfBytes.buffer.slice(
-                pdfBytes.byteOffset,
-                pdfBytes.byteOffset + pdfBytes.byteLength
-            );
             const blob = new Blob([toSafeArrayBuffer(pdfBytes)], {
                 type: "application/pdf",
             });
             const url = URL.createObjectURL(blob);
+            const downloadName = `filego-jpg-to-pdf-${Date.now()}.pdf`;
 
             const a = document.createElement("a");
             a.href = url;
-            a.download = `filego-jpg-to-pdf-${Date.now()}.pdf`;
+            a.download = downloadName;
             a.click();
+
+            try {
+                const totalOriginalBytes = images.reduce(
+                    (sum, item) => sum + item.file.size,
+                    0
+                );
+
+                const started = await startUsageJob({
+                    toolType: "JPG_TO_PDF",
+                    filesCount: images.length,
+                    originalBytes: totalOriginalBytes,
+                    source: "web",
+                    metadata: {
+                        inputFormats: [...new Set(images.map((item) => item.file.type))],
+                        inputNames: images.map((item) => item.file.name),
+                        outputName: downloadName,
+                        pageSize,
+                        orientation,
+                        margin,
+                    },
+                });
+
+                if (started?.jobId) {
+                    const savedBytes = Math.max(0, totalOriginalBytes - blob.size);
+                    const compressionRate =
+                        totalOriginalBytes > 0
+                            ? Number(((savedBytes / totalOriginalBytes) * 100).toFixed(2))
+                            : 0;
+
+                    await completeUsageJob({
+                        jobId: started.jobId,
+                        outputBytes: blob.size,
+                        savedBytes,
+                        compressionRate,
+                        status: "COMPLETED",
+                        metadata: {
+                            downloaded: true,
+                            inputCount: images.length,
+                            inputNames: images.map((item) => item.file.name),
+                            outputName: downloadName,
+                            pageSize,
+                            orientation,
+                            margin,
+                        },
+                    });
+                }
+            } catch (usageError) {
+                console.error("Failed to record JPG to PDF usage", usageError);
+            }
 
             URL.revokeObjectURL(url);
         } catch (err) {

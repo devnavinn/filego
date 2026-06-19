@@ -16,7 +16,7 @@ import {
     Upload,
     Zap,
 } from "lucide-react";
-
+import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
 type OutputImage = {
     name: string;
     url: string;
@@ -221,11 +221,55 @@ export function PdfToJpgTool() {
         }
     };
 
-    const downloadSingle = (item: OutputImage) => {
+    const downloadSingle = async (item: OutputImage) => {
         const a = document.createElement("a");
         a.href = item.url;
         a.download = item.name;
         a.click();
+
+        try {
+            const started = await startUsageJob({
+                toolType: "PDF_TO_JPG",
+                filesCount: 1,
+                originalBytes: file?.size ?? 0,
+                source: "web",
+                metadata: {
+                    inputName: file?.name ?? null,
+                    outputName: item.name,
+                    pageNumber: item.pageNumber,
+                    quality,
+                    scale,
+                    mode: "single-download",
+                },
+            });
+
+            if (started?.jobId) {
+                const savedBytes = Math.max(0, (file?.size ?? 0) - item.blob.size);
+                const compressionRate =
+                    (file?.size ?? 0) > 0
+                        ? Number(((savedBytes / (file?.size ?? 0)) * 100).toFixed(2))
+                        : 0;
+
+                await completeUsageJob({
+                    jobId: started.jobId,
+                    outputBytes: item.blob.size,
+                    savedBytes,
+                    compressionRate,
+                    status: "COMPLETED",
+                    metadata: {
+                        downloaded: true,
+                        inputName: file?.name ?? null,
+                        outputName: item.name,
+                        pageNumber: item.pageNumber,
+                        quality,
+                        scale,
+                        mode: "single-download",
+                    },
+                });
+            }
+        } catch (usageError) {
+            console.error("Failed to record PDF to JPG single download usage", usageError);
+        }
     };
 
     const downloadAll = async () => {
@@ -239,11 +283,60 @@ export function PdfToJpgTool() {
         const blob = await zip.generateAsync({ type: "blob" });
         const url = URL.createObjectURL(blob);
         const baseName = (file?.name || "converted-file").replace(/\.pdf$/i, "");
+        const zipName = `${baseName}-jpg-images.zip`;
 
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${baseName}-jpg-images.zip`;
+        a.download = zipName;
         a.click();
+
+        try {
+            const totalOutputBytes = pages.reduce((sum, page) => sum + page.blob.size, 0);
+
+            const started = await startUsageJob({
+                toolType: "PDF_TO_JPG",
+                filesCount: pages.length,
+                originalBytes: file?.size ?? 0,
+                source: "web",
+                metadata: {
+                    inputName: file?.name ?? null,
+                    outputName: zipName,
+                    pageCount: pages.length,
+                    quality,
+                    scale,
+                    mode: "zip-download",
+                    pageNames: pages.map((page) => page.name),
+                },
+            });
+
+            if (started?.jobId) {
+                const savedBytes = Math.max(0, (file?.size ?? 0) - totalOutputBytes);
+                const compressionRate =
+                    (file?.size ?? 0) > 0
+                        ? Number(((savedBytes / (file?.size ?? 0)) * 100).toFixed(2))
+                        : 0;
+
+                await completeUsageJob({
+                    jobId: started.jobId,
+                    outputBytes: totalOutputBytes,
+                    savedBytes,
+                    compressionRate,
+                    status: "COMPLETED",
+                    metadata: {
+                        downloaded: true,
+                        inputName: file?.name ?? null,
+                        outputName: zipName,
+                        pageCount: pages.length,
+                        quality,
+                        scale,
+                        mode: "zip-download",
+                        pageNames: pages.map((page) => page.name),
+                    },
+                });
+            }
+        } catch (usageError) {
+            console.error("Failed to record PDF to JPG ZIP download usage", usageError);
+        }
 
         URL.revokeObjectURL(url);
     };

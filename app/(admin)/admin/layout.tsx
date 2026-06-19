@@ -22,8 +22,8 @@ export default async function AdminLayout({
                 <AdminHeader
                     title="Control center"
                     subtitle="Manage content, contacts, subscribers, and users."
-                    adminName={session.user.name}
-                    adminEmail={session.user.email}
+                    adminName={session.name ?? ""}
+                    adminEmail={session.email ?? ""}
                 />
 
                 <div className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-6 md:px-6">

@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-
+import Script from "next/script";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -109,7 +109,10 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
-
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="afterInteractive"
+        />
         <AuthSessionProvider>
           <ThemeProvider
             attribute="class"
@@ -119,11 +122,11 @@ export default function RootLayout({
           >
             <TooltipProvider>
               {children}
+
             </TooltipProvider>
           </ThemeProvider>
         </AuthSessionProvider>
       </body>
-
       <GoogleTagManager gtmId="GTM-K6ND86RZ" />
       <GoogleAnalytics gaId="G-91BF9G6C4E" />
       <Analytics />

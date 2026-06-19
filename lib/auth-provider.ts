@@ -27,19 +27,24 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 const parsed = loginSchema.safeParse(credentials);
-
                 if (!parsed.success) return null;
 
                 const { email, password } = parsed.data;
 
                 const user = await prisma.user.findUnique({
                     where: { email },
+                    select: {
+                        id: true,
+                        email: true,
+                        name: true,
+                        password: true,
+                        role: true,
+                    },
                 });
 
                 if (!user || !user.password) return null;
 
                 const isValid = await bcrypt.compare(password, user.password);
-
                 if (!isValid) return null;
 
                 return {
@@ -54,31 +59,26 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
+                token.id = user.id;
                 token.role = (user as any).role;
+                token.name = user.name;
+                token.email = user.email;
             }
-
-            if (token.email) {
-                const dbUser = await prisma.user.findUnique({
-                    where: { email: token.email },
-                });
-
-                if (dbUser) {
-                    token.role = dbUser.role;
-                    token.name = dbUser.name;
-                }
-            }
-
             return token;
         },
-        async session({ session, token }) {
-            if (session.user) {
-                (session.user as any).id = token.sub;
-                (session.user as any).role = token.role;
-                session.user.name = token.name;
-                session.user.email = token.email;
-            }
 
-            return session;
+        async session({ session, token }) {
+            const newSession = {
+                ...session,
+                user: {
+                    ...session.user,
+                    id: (token.id || token.sub) as string,
+                    role: token.role as "USER" | "ADMIN",
+                    name: token.name,
+                    email: token.email,
+                },
+            };
+            return newSession;
         },
     },
     secret: process.env.NEXTAUTH_SECRET,

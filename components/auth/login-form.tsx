@@ -31,9 +31,9 @@ type LoginInput = z.infer<typeof loginSchema>;
 function getRoleRedirect(role?: string) {
     switch (role) {
         case "ADMIN":
-            return "/admin/dashboard";
+            return "/admin";
         case "USER":
-            return "/";
+            return "/dashboard";
         default:
             return "/dashboard";
     }

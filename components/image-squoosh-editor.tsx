@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { Download, ImagePlus, Minus, Plus, RotateCcw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
 type OutputFormat = "webp" | "avif" | "jpeg" | "png";
 
 type WorkerInput = {
@@ -293,12 +294,61 @@ export function ImageSquooshEditor() {
     };
   }, [originalUrl, resultUrl]);
 
-  const downloadResult = () => {
-    if (!resultBlob || !resultUrl) return;
+  const downloadResult = async () => {
+    if (!file || !resultBlob || !resultUrl) return;
+
     const a = document.createElement("a");
     a.href = resultUrl;
     a.download = outputName || "optimized-image";
     a.click();
+
+    try {
+      const started = await startUsageJob({
+        toolType: "IMAGE_COMPRESS",
+        filesCount: 1,
+        originalBytes: file.size,
+        source: "web",
+        metadata: {
+          inputName: file.name,
+          outputName: outputName || "optimized-image",
+          outputFormat: format,
+          quality,
+          effort,
+          resizeEnabled,
+          width: outputWidth || (width ? Number(width) : null),
+          height: outputHeight || (height ? Number(height) : null),
+        },
+      });
+
+      if (started?.jobId) {
+        const savedBytes = Math.max(0, file.size - resultBlob.size);
+        const compressionRate =
+          file.size > 0
+            ? Number(((savedBytes / file.size) * 100).toFixed(2))
+            : 0;
+
+        await completeUsageJob({
+          jobId: started.jobId,
+          outputBytes: resultBlob.size,
+          savedBytes,
+          compressionRate,
+          status: "COMPLETED",
+          metadata: {
+            downloaded: true,
+            inputName: file.name,
+            outputName: outputName || "optimized-image",
+            outputFormat: format,
+            quality,
+            effort,
+            resizeEnabled,
+            width: outputWidth || (width ? Number(width) : null),
+            height: outputHeight || (height ? Number(height) : null),
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to record download usage", err);
+    }
   };
 
   return (

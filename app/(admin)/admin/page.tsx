@@ -59,7 +59,7 @@ export default async function AdminPage() {
             <section className="rounded-3xl border bg-background p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Overview</p>
                 <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                    Welcome back, {session.user.name || session.user.email}
+                    Welcome back, {session.name || session.email}
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
                     Track submissions, monitor growth, and manage blog publishing from a single workspace.
