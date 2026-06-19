@@ -223,6 +223,11 @@ export function ImageCompressor() {
     }
   };
 
+  const createWorker = () =>
+    new Worker(new URL("../workers/compress.worker.ts", import.meta.url), {
+      type: "module",
+    });
+
   const compressAll = async () => {
     const pending = items.filter(
       (item) => item.status === "pending" || item.status === "error"
@@ -233,73 +238,85 @@ export function ImageCompressor() {
     setRunning(true);
     setProgress(0);
 
-    let processed = 0;
+    const concurrency = Math.min(navigator.hardwareConcurrency || 4, 4);
+    const workers = Array.from({ length: concurrency }, createWorker);
 
-    for (const item of pending) {
-      setItems((prev) =>
-        prev.map((row) =>
-          row.id === item.id
-            ? { ...row, status: "processing", error: undefined }
-            : row
-        )
-      );
+    let completed = 0;
+    let nextIndex = 0;
 
-      const worker = new Worker(
-        new URL("../workers/compress.worker.ts", import.meta.url),
-        { type: "module" }
-      );
+    const runWorker = (worker: Worker) =>
+      new Promise<void>((resolve) => {
+        const processNext = () => {
+          const item = pending[nextIndex++];
+          if (!item) {
+            resolve();
+            return;
+          }
 
-      const result = await new Promise<WorkerResponse>((resolve) => {
-        worker.onmessage = (event: MessageEvent<WorkerResponse>) =>
-          resolve(event.data);
+          setItems((prev) =>
+            prev.map((row) =>
+              row.id === item.id
+                ? { ...row, status: "processing", error: undefined }
+                : row
+            )
+          );
 
-        worker.postMessage({
-          id: item.id,
-          file: item.file,
-          relativePath: item.relativePath,
-          quality,
-          effort,
-          outputFormat,
-        });
+          worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+            const result = event.data;
+
+            if (result.status === "done") {
+              setItems((prev) =>
+                prev.map((row) =>
+                  row.id === result.id
+                    ? {
+                      ...row,
+                      status: "done",
+                      outputSize: result.outputSize,
+                      outputName: result.outputName,
+                      outputRelativePath: result.relativePath,
+                      blob: result.blob,
+                    }
+                    : row
+                )
+              );
+            } else {
+              setItems((prev) =>
+                prev.map((row) =>
+                  row.id === result.id
+                    ? {
+                      ...row,
+                      status: "error",
+                      error: result.error,
+                    }
+                    : row
+                )
+              );
+            }
+
+            completed += 1;
+            setProgress(Math.round((completed / pending.length) * 100));
+            processNext();
+          };
+
+          worker.postMessage({
+            id: item.id,
+            file: item.file,
+            relativePath: item.relativePath,
+            quality,
+            effort,
+            outputFormat,
+          });
+        };
+
+        processNext();
       });
 
-      worker.terminate();
-
-      if (result.status === "done") {
-        setItems((prev) =>
-          prev.map((row) =>
-            row.id === result.id
-              ? {
-                ...row,
-                status: "done",
-                outputSize: result.outputSize,
-                outputName: result.outputName,
-                outputRelativePath: result.relativePath,
-                blob: result.blob,
-              }
-              : row
-          )
-        );
-      } else {
-        setItems((prev) =>
-          prev.map((row) =>
-            row.id === result.id
-              ? {
-                ...row,
-                status: "error",
-                error: result.error,
-              }
-              : row
-          )
-        );
-      }
-
-      processed += 1;
-      setProgress(Math.round((processed / pending.length) * 100));
-    }
+    await Promise.all(workers.map(runWorker));
+    workers.forEach((worker) => worker.terminate());
 
     setRunning(false);
   };
+
 
   const downloadOne = (item: QueueItem) => {
     if (!item.blob || !item.outputName) return;
@@ -401,8 +418,8 @@ export function ImageCompressor() {
             >
               <option value="webp">WebP</option>
               <option value="avif">AVIF</option>
-              <option value="jpeg">JPEG</option>
-              <option value="png">PNG</option>
+              {/* <option value="jpeg">JPEG</option>
+              <option value="png">PNG</option> */}
             </select>
           </div>
 
@@ -485,7 +502,7 @@ export function ImageCompressor() {
 
             <Button
               onClick={downloadZip}
-              disabled={!items.some((item) => item.status === "done")}
+              disabled={!items.some((item) => item.status === "done") || !items.length || running}
             >
               <Download className="mr-2 size-4" />
               Download ZIP
@@ -551,28 +568,92 @@ export function ImageCompressor() {
               ) : null}
 
               {items.map((item) => (
-                <div key={item.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                <div
+                  key={item.id}
+                  className={[
+                    "group relative overflow-hidden rounded-2xl border bg-card/90 p-4 shadow-sm transition-all duration-300",
+                    "hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/20",
+                    "supports-[backdrop-filter]:bg-card/80 supports-[backdrop-filter]:backdrop-blur-sm",
+                    item.status === "done" && "border-emerald-500/20",
+                    item.status === "error" && "border-red-500/20",
+                    item.status === "processing" && "border-primary/30 shadow-primary/5",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <div
+                    className={[
+                      "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent",
+                      item.status === "processing" ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+                      "transition-opacity duration-300",
+                    ].join(" ")}
+                  />
+
+                  <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/[0.04] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-white/[0.03]" />
+
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{item.relativePath}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {formatBytes(item.originalSize)}
-                        {item.outputSize ? ` → ${formatBytes(item.outputSize)}` : ""}
-                      </p>
-                      {item.error ? (
-                        <p className="mt-1 text-xs text-red-500">{item.error}</p>
-                      ) : null}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border bg-muted/60 text-xs font-semibold shadow-sm">
+                          {item.status === "done" ? "✓" : item.status === "error" ? "!" : item.status === "processing" ? "…" : "IMG"}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={[
+                                "inline-block h-2.5 w-2.5 rounded-full",
+                                item.status === "done" && "bg-emerald-500",
+                                item.status === "error" && "bg-red-500",
+                                item.status === "pending" && "bg-zinc-400",
+                                item.status === "processing" && "bg-primary animate-pulse",
+                              ]
+                                .filter(Boolean)
+                                .join(" ")}
+                            />
+                            <p className="truncate text-sm font-semibold tracking-tight">
+                              {item.relativePath}
+                            </p>
+                          </div>
+
+                          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                            <span>{formatBytes(item.originalSize)}</span>
+                            {item.outputSize ? (
+                              <>
+                                <span>→</span>
+                                <span className="font-medium text-foreground/80">
+                                  {formatBytes(item.outputSize)}
+                                </span>
+                              </>
+                            ) : null}
+
+                            {item.outputSize && item.outputSize < item.originalSize ? (
+                              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
+                                Saved {formatBytes(item.originalSize - item.outputSize)}
+                              </span>
+                            ) : null}
+                          </div>
+
+                          {item.error ? (
+                            <p className="mt-2 text-xs font-medium text-red-500">
+                              {item.error}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <Badge
-                        variant={
-                          item.status === "done"
-                            ? "default"
-                            : item.status === "error"
-                              ? "destructive"
-                              : "secondary"
-                        }
+                        className={[
+                          "capitalize transition-colors",
+                          item.status === "done" && "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400",
+                          item.status === "error" && "bg-red-500/10 text-red-600 hover:bg-red-500/10 dark:text-red-400",
+                          item.status === "processing" && "bg-primary/10 text-primary hover:bg-primary/10",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        variant="secondary"
                       >
                         {item.status}
                       </Badge>
@@ -582,6 +663,7 @@ export function ImageCompressor() {
                         variant="outline"
                         disabled={!item.blob}
                         onClick={() => downloadOne(item)}
+                        className="min-w-[96px] rounded-xl transition-all duration-300 group-hover:border-primary/30 group-hover:bg-primary/5"
                       >
                         Download
                       </Button>
@@ -593,6 +675,6 @@ export function ImageCompressor() {
           </ScrollArea>
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 }
