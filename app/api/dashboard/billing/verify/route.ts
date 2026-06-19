@@ -1,105 +1,78 @@
-import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth-provider";
 import { prisma } from "@/lib/prisma";
-
-export const dynamic = "force-dynamic";
+import { verifyRazorpayPayment } from "@/lib/razorpay";
 
 export async function POST(req: Request) {
     try {
-        const user = await requireUser();
+        const session = await getServerSession(authOptions);
+
+        const userId =
+            (session as { id?: string; user?: { id?: string } } | null)?.id ??
+            (session as { user?: { id?: string } } | null)?.user?.id ??
+            null;
+
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await req.json();
 
-        const {
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature,
-            planType = "LIFETIME",
-        } = body;
+        const razorpayOrderId = body?.razorpay_order_id;
+        const razorpayPaymentId = body?.razorpay_payment_id;
+        const razorpaySignature = body?.razorpay_signature;
 
-        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
             return NextResponse.json(
-                { ok: false, message: "Missing payment details" },
+                { error: "Missing payment fields" },
                 { status: 400 }
             );
         }
 
-        const secret = process.env.RAZORPAY_KEY_SECRET;
+        const valid = verifyRazorpayPayment({
+            orderId: razorpayOrderId,
+            paymentId: razorpayPaymentId,
+            signature: razorpaySignature,
+        });
 
-        if (!secret) {
+        if (!valid) {
             return NextResponse.json(
-                { ok: false, message: "Billing secret not configured" },
-                { status: 500 }
-            );
-        }
-
-        const expectedSignature = crypto
-            .createHmac("sha256", secret)
-            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-            .digest("hex");
-
-        if (expectedSignature !== razorpay_signature) {
-            return NextResponse.json(
-                { ok: false, message: "Invalid payment signature" },
+                { error: "Invalid payment signature" },
                 { status: 400 }
             );
         }
 
-        await prisma.$transaction(async (tx) => {
-            await tx.subscription.upsert({
-                where: {
-                    userId_planType: {
-                        userId: user.id,
-                        planType: "LIFETIME",
-                    },
-                },
-                create: {
-                    userId: user.id,
-                    planType: "LIFETIME",
-                    billingStatus: "ACTIVE",
-                    provider: "razorpay",
-                    providerOrderId: razorpay_order_id,
-                    providerPaymentId: razorpay_payment_id,
-                    purchasedAt: new Date(),
-                    startsAt: new Date(),
-                },
-                update: {
-                    billingStatus: "ACTIVE",
-                    provider: "razorpay",
-                    providerOrderId: razorpay_order_id,
-                    providerPaymentId: razorpay_payment_id,
-                    purchasedAt: new Date(),
-                    startsAt: new Date(),
-                },
-            });
-
-            await tx.featureEntitlement.upsert({
-                where: {
-                    userId_key: {
-                        userId: user.id,
-                        key: "bulk_image_compress",
-                    },
-                },
-                create: {
-                    userId: user.id,
-                    key: "bulk_image_compress",
-                    enabled: true,
-                },
-                update: {
-                    enabled: true,
-                },
-            });
+        const subscription = await prisma.subscription.findFirst({
+            where: {
+                userId,
+                planType: "LIFETIME",
+                providerOrderId: razorpayOrderId,
+            },
         });
 
-        return NextResponse.json({
-            ok: true,
-            message: "Payment verified successfully",
+        if (!subscription) {
+            return NextResponse.json(
+                { error: "Subscription not found" },
+                { status: 404 }
+            );
+        }
+
+        await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: {
+                billingStatus: "ACTIVE",
+                providerPaymentId: razorpayPaymentId,
+                purchasedAt: new Date(),
+                startsAt: new Date(),
+            },
         });
+
+        return NextResponse.json({ ok: true });
     } catch (error) {
-        console.error("[VERIFY_BILLING_ERROR]", error);
-
+        console.error("[BILLING_VERIFY_ERROR]", error);
         return NextResponse.json(
-            { ok: false, message: "Payment verification failed" },
+            { error: "Failed to verify payment" },
             { status: 500 }
         );
     }

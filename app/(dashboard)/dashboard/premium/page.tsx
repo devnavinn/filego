@@ -3,7 +3,7 @@ import { getDashboardOverview } from "@/lib/dashboard";
 import { Crown, ShieldCheck, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PremiumStatusCard } from "@/components/dashboard/premium-status-card";
-import { Button } from "@/components/ui/button";
+import { UpgradeButton } from "@/components/dashboard/upgrade-button";
 
 export default async function PremiumPage() {
     const user = await requireUser();
@@ -78,12 +78,7 @@ export default async function PremiumPage() {
                             </div>
                         </div>
 
-                        <Button
-                            id="upgrade-button"
-                            className="rounded-xl bg-primary text-primary-foreground hover:opacity-90"
-                        >
-                            Upgrade now
-                        </Button>
+                        <UpgradeButton />
                     </CardContent>
                 </Card>
 
