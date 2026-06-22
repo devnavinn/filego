@@ -36,14 +36,6 @@ export const menuGroups = [
 ] as const;
 
 export const mobileLinks = [
-    { title: "Home", href: "/" },
-    { title: "Compress Image", href: "/bulk-image-compress" },
-    { title: "Merge PDF", href: "/merge-pdf" },
-    { title: "Split PDF", href: "/split-pdf" },
-    { title: "JPG to PDF", href: "/jpg-to-pdf" },
-    { title: "PDF to JPG", href: "/pdf-to-jpg" },
-    { title: "PDF to Word", href: "/pdf-to-word" },
-    { title: "Word to PDF", href: "/word-to-pdf" },
     { title: "API", href: "/api-docs" },
     { title: "About", href: "/about" },
     { title: "Blog", href: '/blog' }
