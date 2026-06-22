@@ -1,11 +1,19 @@
 // app/sitemap.ts
-import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/prisma";
+import type { MetadataRoute } from "next"
 
-export const dynamic = "force-dynamic";
+import { prisma } from "@/lib/prisma"
+import { toolCategories } from "@/lib/tools-data"
+
+export const dynamic = "force-dynamic"
+
+const BASE_URL = "https://www.filego.in"
+
+function toAbsoluteUrl(path: string) {
+    return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = "https://www.filego.in";
+    const now = new Date()
 
     const staticRoutes = [
         "",
@@ -22,14 +30,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         "/word-to-pdf",
         "/bulk-image-compress",
         "/image-squoosh",
-    ];
+        "/tools",
+    ]
 
     const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: route === "" ? "daily" : route === "/blog" ? "daily" : "weekly",
-        priority: route === "" ? 1 : route === "/blog" ? 0.9 : 0.8,
-    }));
+        url: toAbsoluteUrl(route),
+        lastModified: now,
+        changeFrequency:
+            route === ""
+                ? "daily"
+                : route === "/blog"
+                    ? "daily"
+                    : route === "/tools"
+                        ? "weekly"
+                        : "weekly",
+        priority:
+            route === ""
+                ? 1
+                : route === "/blog"
+                    ? 0.9
+                    : route === "/tools"
+                        ? 0.95
+                        : 0.8,
+    }))
+
+    const categoryEntries: MetadataRoute.Sitemap = toolCategories.map((category) => ({
+        url: toAbsoluteUrl(`/tools/${category.slug}`),
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.85,
+    }))
+
+    const singleToolEntries: MetadataRoute.Sitemap = toolCategories.flatMap((category) =>
+        category.tools.map((tool) => ({
+            url: toAbsoluteUrl(`/tools/${category.slug}/${tool.slug}`),
+            lastModified: now,
+            changeFrequency: "weekly",
+            priority: 0.75,
+        }))
+    )
 
     const posts = await prisma.blogPost.findMany({
         where: {
@@ -43,14 +82,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         orderBy: {
             publishedAt: "desc",
         },
-    });
+    })
 
     const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: post.updatedAt ?? post.publishedAt ?? new Date(),
+        url: toAbsoluteUrl(`/blog/${post.slug}`),
+        lastModified: post.updatedAt ?? post.publishedAt ?? now,
         changeFrequency: "weekly",
         priority: 0.7,
-    }));
+    }))
 
-    return [...staticEntries, ...blogEntries];
+    return [
+        ...staticEntries,
+        ...categoryEntries,
+        ...singleToolEntries,
+        ...blogEntries,
+    ]
 }

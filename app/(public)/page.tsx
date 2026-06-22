@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { toolCategories } from "@/lib/tools-data";
+import { cn } from "@/lib/utils";
+import { MagicCard } from "@/components/ui/magic-card";
 import {
   ArrowRight,
   CheckCircle2,
@@ -12,16 +16,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-const tools = [
-  { name: "Compress Image", href: "/image-squoosh" },
-  { name: "Merge PDF", href: "/merge-pdf" },
-  { name: "Split PDF", href: "/split-pdf" },
-  { name: "JPG to PDF", href: "/jpg-to-pdf" },
-  { name: "PDF to JPG", href: "/pdf-to-jpg" },
-  { name: "PDF to Word", href: "/pdf-to-word" },
-  { name: "Word to PDF", href: "/word-to-pdf" },
-  { name: "Unlock PDF", href: "/unlock-pdf" },
-];
+const featuredTools = toolCategories.flatMap((category) =>
+  category.tools.slice(0, 2).map((tool) => ({
+    name: tool.name,
+    shortDescription: tool.shortDescription,
+    href: `/tools/${category.slug}/${tool.slug}`,
+    categoryTitle: category.title,
+    accent: category.accent,
+  }))
+).slice(0, 8);
 
 const siteUrl = "https://www.filego.in";
 export const metadata: Metadata = {
@@ -171,66 +174,160 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {tools.map((tool) => (
-              <Link key={tool.name} href={tool.href} className="block">
-                <Card className="rounded-2xl border-border/60 bg-card/70 shadow-none transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted">
-                      <FileImage className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{tool.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Fast and simple
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+          <div className="mt-14">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Featured tools</p>
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Start with popular workflows
+                </h2>
+              </div>
+
+              <Button asChild variant="ghost" className="rounded-full">
+                <Link href="/tools">
+                  View all tools
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {featuredTools.map((tool) => (
+                <Link key={tool.href} href={tool.href} className="group block">
+                  <MagicCard
+                    className="rounded-3xl border border-border/60 bg-background/90 p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    gradientColor="rgba(1, 105, 111, 0.12)"
+                  >
+                    <Card className="rounded-3xl border-0 bg-transparent shadow-none">
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <div
+                            className={cn(
+                              "flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-sm",
+                              tool.accent
+                            )}
+                          >
+                            <FileImage className="h-5 w-5" />
+                          </div>
+
+                          <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
+                        </div>
+
+                        <div className="mt-4 space-y-2">
+                          <h3 className="text-lg font-semibold tracking-tight">
+                            {tool.name}
+                          </h3>
+                          <p className="text-sm leading-6 text-muted-foreground">
+                            {tool.shortDescription}
+                          </p>
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full border border-border/60 bg-muted/60 px-3 py-1 text-xs font-medium text-foreground/90"
+                          >
+                            {tool.categoryTitle}
+                          </Badge>
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full border border-border/60 bg-muted/60 px-3 py-1 text-xs font-medium text-foreground/90"
+                          >
+                            Open tool
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </MagicCard>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       <section className="border-y bg-muted/30">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 md:grid-cols-4 md:px-6">
-          {[
-            {
-              title: "Privacy first",
-              desc: "Keep workflows simple with secure file handling.",
-              icon: ShieldCheck,
-              href: "/security",
-            },
-            {
-              title: "Fast processing",
-              desc: "Run conversions and compression without friction.",
-              icon: Zap,
-              href: "/tools",
-            },
-            {
-              title: "Smart tools",
-              desc: "Organize and optimize files in fewer steps.",
-              icon: Sparkles,
-              href: "/tools",
-            },
-          ].map((item) => {
-            const Icon = item.icon;
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Why teams use Filego
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Built for fast, focused file workflows
+              </h2>
+            </div>
 
-            return (
-              <Link key={item.title} href={item.href} className="block">
-                <div className="rounded-2xl border bg-background p-5 transition-colors hover:bg-muted/40">
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-medium">{item.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {item.desc}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              Clean utilities, quick processing, and dedicated tool pages designed for
+              real conversion workflows.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                title: "Privacy first",
+                desc: "Keep workflows simple with secure file handling and clear user trust messaging.",
+                icon: ShieldCheck,
+                href: "/security",
+              },
+              {
+                title: "Fast processing",
+                desc: "Run conversions, compression, and exports with less friction across common tasks.",
+                icon: Zap,
+                href: "/tools",
+              },
+              {
+                title: "Smart tools",
+                desc: "Organize, convert, and optimize files in fewer steps with cleaner UX patterns.",
+                icon: Sparkles,
+                href: "/tools",
+              },
+              {
+                title: "Dedicated pages",
+                desc: "Each tool gets a focused landing page for SEO, clarity, and stronger conversion intent.",
+                icon: ArrowRight,
+                href: "/tools",
+              },
+            ].map((item) => {
+              const Icon = item.icon
+
+              return (
+                <Link key={item.title} href={item.href} className="group block">
+                  <Card className="h-full rounded-3xl border-border/60 bg-background/90 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                    <CardContent className="p-5">
+                      <div className="flex h-full flex-col justify-between">
+                        <div>
+                          <div className="mb-4 flex items-start justify-between gap-4">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted">
+                              <Icon className="h-5 w-5 text-foreground" />
+                            </div>
+
+                            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
+                          </div>
+
+                          <h3 className="text-base font-semibold tracking-tight">
+                            {item.title}
+                          </h3>
+
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            {item.desc}
+                          </p>
+                        </div>
+
+                        <div className="mt-5">
+                          <span className="inline-flex rounded-full border border-border/60 bg-muted/60 px-3 py-1 text-xs font-medium text-foreground/90">
+                            Learn more
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </section>
 
