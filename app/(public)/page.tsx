@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { toolCategories } from "@/lib/tools-data";
 import { cn } from "@/lib/utils";
 import { MagicCard } from "@/components/ui/magic-card";
+import { Meteors } from "@/components/ui/meteors";
 import {
   ArrowRight,
   CheckCircle2,
@@ -123,6 +124,8 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="relative overflow-hidden">
+        <Meteors number={24} className="opacity-40" />
+
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.10),transparent_40%)]" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">

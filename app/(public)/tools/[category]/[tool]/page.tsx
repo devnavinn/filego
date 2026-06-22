@@ -135,7 +135,7 @@ export default async function SingleToolPage({ params }: Props) {
                 </div>
             </section>
 
-            <section className="container mx-auto grid gap-8 px-4 py-16 md:px-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <section className="container mx-auto grid gap-8 px-4 py-16 md:px-6 lg:lg:grid-cols-[1.5fr_0.5fr]">
                 <ToolRenderer
                     toolSlug={toolItem.slug}
                     toolName={toolItem.name}

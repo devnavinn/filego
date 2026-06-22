@@ -55,81 +55,81 @@ export function ComingSoon({
         });
     }, [launchDate]);
 
-    if (isMobile) {
-        return (
-            <section className="relative overflow-hidden rounded-[2rem] border bg-background">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.06),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(0,0,0,0.05),transparent_28%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_24%)]" />
-                <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:36px_36px]" />
+    // if (isMobile) {
+    //     return (
+    //         <section className="relative overflow-hidden rounded-[2rem] border bg-background">
+    //             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.06),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(0,0,0,0.05),transparent_28%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_24%)]" />
+    //             <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:36px_36px]" />
 
-                <div className="relative p-5">
-                    <div className="mx-auto w-full rounded-[2rem] border border-border/70 bg-background/95 shadow-sm backdrop-blur">
-                        <div className="space-y-5 p-5">
-                            <Badge
-                                variant="secondary"
-                                className="w-fit rounded-full px-3 py-1 text-xs font-medium"
-                            >
-                                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                                Coming soon
-                            </Badge>
+    //             <div className="relative p-5">
+    //                 <div className="mx-auto w-full rounded-[2rem] border border-border/70 bg-background/95 shadow-sm backdrop-blur">
+    //                     <div className="space-y-5 p-5">
+    //                         <Badge
+    //                             variant="secondary"
+    //                             className="w-fit rounded-full px-3 py-1 text-xs font-medium"
+    //                         >
+    //                             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+    //                             Coming soon
+    //                         </Badge>
 
-                            <div>
-                                <h2 className="text-2xl font-semibold tracking-tight">
-                                    {title}
-                                </h2>
-                                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                                    {description}
-                                </p>
-                            </div>
+    //                         <div>
+    //                             <h2 className="text-2xl font-semibold tracking-tight">
+    //                                 {title}
+    //                             </h2>
+    //                             <p className="mt-3 text-sm leading-6 text-muted-foreground">
+    //                                 {description}
+    //                             </p>
+    //                         </div>
 
-                            <div className="space-y-2 text-sm text-muted-foreground">
-                                <div className="inline-flex w-full items-center gap-2 rounded-xl border bg-background/80 px-3 py-2">
-                                    <CalendarClock className="h-4 w-4 shrink-0" />
-                                    <span>Planned launch: {launchLabel}</span>
-                                </div>
+    //                         <div className="space-y-2 text-sm text-muted-foreground">
+    //                             <div className="inline-flex w-full items-center gap-2 rounded-xl border bg-background/80 px-3 py-2">
+    //                                 <CalendarClock className="h-4 w-4 shrink-0" />
+    //                                 <span>Planned launch: {launchLabel}</span>
+    //                             </div>
 
-                                <div className="inline-flex w-full items-center gap-2 rounded-xl border bg-background/80 px-3 py-2">
-                                    <Lock className="h-4 w-4 shrink-0" />
-                                    <span>Early access will open first</span>
-                                </div>
-                            </div>
+    //                             <div className="inline-flex w-full items-center gap-2 rounded-xl border bg-background/80 px-3 py-2">
+    //                                 <Lock className="h-4 w-4 shrink-0" />
+    //                                 <span>Early access will open first</span>
+    //                             </div>
+    //                         </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <TimeCard label="Days" value={timeLeft.days} />
-                                <TimeCard label="Hours" value={timeLeft.hours} />
-                                <TimeCard label="Min" value={timeLeft.minutes} />
-                                <TimeCard label="Sec" value={timeLeft.seconds} />
-                            </div>
+    //                         <div className="grid grid-cols-2 gap-3">
+    //                             <TimeCard label="Days" value={timeLeft.days} />
+    //                             <TimeCard label="Hours" value={timeLeft.hours} />
+    //                             <TimeCard label="Min" value={timeLeft.minutes} />
+    //                             <TimeCard label="Sec" value={timeLeft.seconds} />
+    //                         </div>
 
-                            <NotifyForm
-                                source="coming-soon"
-                                page={currentPage}
-                                placeholder={notifyPlaceholder}
-                            />
+    //                         <NotifyForm
+    //                             source="coming-soon"
+    //                             page={currentPage}
+    //                             placeholder={notifyPlaceholder}
+    //                         />
 
-                            <div className="grid gap-3">
-                                <MiniStat title="Fast workflow" value="Built for speed" />
-                                <MiniStat title="Private by design" value="Minimal friction" />
-                                <MiniStat title="Modern tools" value="Focused features" />
-                            </div>
+    //                         <div className="grid gap-3">
+    //                             <MiniStat title="Fast workflow" value="Built for speed" />
+    //                             <MiniStat title="Private by design" value="Minimal friction" />
+    //                             <MiniStat title="Modern tools" value="Focused features" />
+    //                         </div>
 
-                            <div className="grid gap-3">
-                                <Button asChild className="rounded-xl">
-                                    <Link href={backHref}>
-                                        Back to home
-                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Link>
-                                </Button>
+    //                         <div className="grid gap-3">
+    //                             <Button asChild className="rounded-xl">
+    //                                 <Link href={backHref}>
+    //                                     Back to home
+    //                                     <ArrowRight className="ml-2 h-4 w-4" />
+    //                                 </Link>
+    //                             </Button>
 
-                                <Button asChild variant="outline" className="rounded-xl">
-                                    <Link href="/contact">Contact Us</Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-    }
+    //                             <Button asChild variant="outline" className="rounded-xl">
+    //                                 <Link href="/contact">Contact Us</Link>
+    //                             </Button>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         </section>
+    //     );
+    // }
 
     return (
         <section className="relative overflow-hidden rounded-[2rem] border bg-background">
