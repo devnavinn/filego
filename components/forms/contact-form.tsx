@@ -25,7 +25,6 @@ import {
     FieldContent,
     FieldDescription,
     FieldError,
-    FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
 
@@ -105,6 +104,7 @@ export function ContactForm() {
         if (data.ok) {
             setServerMessage(data.message ?? "Your message has been sent.");
         }
+
         reset({
             name: "",
             email: "",
@@ -125,9 +125,10 @@ export function ContactForm() {
                             id="name"
                             placeholder="Your name"
                             aria-invalid={!!errors.name}
+                            aria-describedby={errors.name ? "name-error" : undefined}
                             {...register("name")}
                         />
-                        <FieldError errors={[errors.name]} />
+                        <FieldError id="name-error" errors={[errors.name]} />
                     </FieldContent>
                 </Field>
 
@@ -139,9 +140,10 @@ export function ContactForm() {
                             type="email"
                             placeholder="you@example.com"
                             aria-invalid={!!errors.email}
+                            aria-describedby={errors.email ? "email-error" : undefined}
                             {...register("email")}
                         />
-                        <FieldError errors={[errors.email]} />
+                        <FieldError id="email-error" errors={[errors.email]} />
                     </FieldContent>
                 </Field>
             </div>
@@ -154,10 +156,13 @@ export function ContactForm() {
                             id="company"
                             placeholder="Your company"
                             aria-invalid={!!errors.company}
+                            aria-describedby={
+                                errors.company ? "company-error company-help" : "company-help"
+                            }
                             {...register("company")}
                         />
-                        <FieldDescription>Optional</FieldDescription>
-                        <FieldError errors={[errors.company]} />
+                        <FieldDescription id="company-help">Optional</FieldDescription>
+                        <FieldError id="company-error" errors={[errors.company]} />
                     </FieldContent>
                 </Field>
 
@@ -169,10 +174,13 @@ export function ContactForm() {
                             type="tel"
                             placeholder="+91 98765 43210"
                             aria-invalid={!!errors.phone}
+                            aria-describedby={
+                                errors.phone ? "phone-error phone-help" : "phone-help"
+                            }
                             {...register("phone")}
                         />
-                        <FieldDescription>Optional</FieldDescription>
-                        <FieldError errors={[errors.phone]} />
+                        <FieldDescription id="phone-help">Optional</FieldDescription>
+                        <FieldError id="phone-error" errors={[errors.phone]} />
                     </FieldContent>
                 </Field>
             </div>
@@ -185,7 +193,14 @@ export function ContactForm() {
                         name="subject"
                         render={({ field }) => (
                             <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger id="subject" aria-invalid={!!errors.subject}>
+                                <SelectTrigger
+                                    id="subject"
+                                    aria-invalid={!!errors.subject}
+                                    aria-describedby={
+                                        errors.subject ? "subject-error subject-help" : "subject-help"
+                                    }
+                                    className="w-full"
+                                >
                                     <SelectValue placeholder="Select a subject" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -198,10 +213,10 @@ export function ContactForm() {
                             </Select>
                         )}
                     />
-                    <FieldDescription>
+                    <FieldDescription id="subject-help">
                         Choose the category that best matches your message.
                     </FieldDescription>
-                    <FieldError errors={[errors.subject]} />
+                    <FieldError id="subject-error" errors={[errors.subject]} />
                 </FieldContent>
             </Field>
 
@@ -214,20 +229,27 @@ export function ContactForm() {
                         placeholder="How can we help?"
                         className="resize-none"
                         aria-invalid={!!errors.message}
+                        aria-describedby={errors.message ? "message-error" : undefined}
                         {...register("message")}
                     />
-                    <FieldError errors={[errors.message]} />
+                    <FieldError id="message-error" errors={[errors.message]} />
                 </FieldContent>
             </Field>
 
             {serverError ? (
-                <p className="text-sm text-red-600" role="alert">
+                <p
+                    className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
+                    role="alert"
+                >
                     {serverError}
                 </p>
             ) : null}
 
             {serverMessage ? (
-                <p className="text-sm text-emerald-600" role="status">
+                <p
+                    className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    role="status"
+                >
                     {serverMessage}
                 </p>
             ) : null}
