@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, memo } from "react";
-import { AutoSizer } from "react-virtualized-auto-sizer";
-import { List, type RowComponentProps } from "react-window";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { del, get, set } from "idb-keyval";
 import JSZip from "jszip";
 import {
@@ -17,6 +23,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Images,
+  Settings2
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -262,6 +269,9 @@ const PRESET_CONFIG: Record<
 
 const ACCEPTED_IMAGE_TYPES =
   "image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg";
+
+
+
 
 function getTargetKB(mode: CompressionMode, customTargetKB: number) {
   switch (mode) {
@@ -815,537 +825,757 @@ export function ImageCompressor() {
     return <div className="text-sm text-muted-foreground">Loading editor...</div>;
   }
 
-  return (
+  const settingsContent = (
     <div className="space-y-6">
-      <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-background via-background to-muted/30">
-        <CardContent className="p-0">
-          <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="p-6 md:p-8">
-              <div className="mb-6 space-y-3">
-                <Badge variant="secondary" className="w-fit">
-                  Bulk image compressor
-                </Badge>
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    Compress images faster with presets and target-size modes
-                  </h2>
-                  <p className="max-w-2xl text-sm text-muted-foreground">
-                    Drop images or folders, compress them in bulk, convert formats,
-                    and export everything as a ZIP.
-                  </p>
-                </div>
-              </div>
+      <div className="space-y-2">
+        <Label>Compression preset</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              ["maximum", "Maximum Compression"],
+              ["recommended", "Recommended"],
+              ["best-quality", "Best Quality"],
+              ["custom", "Custom"],
+            ] as const
+          ).map(([value, label]) => (
+            <Button
+              key={value}
+              type="button"
+              variant={preset === value ? "default" : "outline"}
+              className="justify-start rounded-xl"
+              disabled={running}
+              onClick={() => applyPreset(value)}
+            >
+              {preset === value ? <Sparkles className="mr-2 size-4" /> : null}
+              {label}
+            </Button>
+          ))}
+        </div>
+      </div>
 
-              <div
-                ref={dropzoneRef}
-                role="button"
-                tabIndex={0}
-                aria-label="Upload images by dragging and dropping, or press Enter to select files"
-                onClick={() => multiInputRef.current?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    multiInputRef.current?.click();
-                  }
-                }}
-                onDragEnter={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDragActive(true);
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDragActive(true);
-                }}
-                onDragLeave={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (e.currentTarget === e.target) {
-                    setDragActive(false);
-                  }
-                }}
-                onDrop={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDragActive(false);
-                  await onDropFiles(e.dataTransfer.files);
-                }}
-                className={[
-                  "rounded-3xl border border-dashed p-8 transition-all duration-300 outline-none",
-                  dragActive
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-border bg-card hover:border-primary/30 hover:bg-muted/30",
-                  "focus-visible:ring-2 focus-visible:ring-primary/30",
-                ].join(" ")}
-              >
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Upload className="size-6" />
-                  </div>
-                  <h3 className="text-lg font-semibold">
-                    Drag and drop images here
-                  </h3>
-                  <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-                    Upload single images, multiple files, or entire folders. You can
-                    also click this area to choose files.
-                  </p>
+      <div className="space-y-2">
+        <Label>Compression mode</Label>
+        <div className="grid gap-2">
+          {(
+            [
+              ["best-compression", "Best Compression"],
+              ["target-20", "Compress to 20KB"],
+              ["target-50", "Compress to 50KB"],
+              ["target-100", "Compress to 100KB"],
+              ["custom-size", "Custom Size"],
+            ] as const
+          ).map(([value, label]) => (
+            <Button
+              key={value}
+              type="button"
+              variant={compressionMode === value ? "default" : "outline"}
+              className="justify-start rounded-xl"
+              disabled={running}
+              onClick={() => {
+                setCompressionMode(value);
+                if (outputFormat === "keep" && value !== "best-compression") {
+                  setOutputFormat("webp");
+                }
+                resetProcessedState();
+              }}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
 
-                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        singleInputRef.current?.click();
-                      }}
-                      disabled={running}
-                      variant="secondary"
-                    >
-                      <ImagePlus className="mr-2 size-4" />
-                      Select single image
-                    </Button>
+        {compressionMode === "custom-size" ? (
+          <div className="rounded-xl border bg-background p-3">
+            <Label htmlFor="custom-target">Target size (KB)</Label>
+            <Input
+              id="custom-target"
+              type="number"
+              min={1}
+              value={customTargetKB}
+              disabled={running}
+              onChange={(e) => {
+                setCustomTargetKB(Number(e.target.value || 1));
+                resetProcessedState();
+              }}
+              className="mt-2"
+            />
+          </div>
+        ) : null}
+      </div>
 
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        multiInputRef.current?.click();
-                      }}
-                      disabled={running}
-                    >
-                      <Upload className="mr-2 size-4" />
-                      Select multiple images
-                    </Button>
+      <div className="space-y-2">
+        <Label htmlFor="output-format">Convert to</Label>
+        <select
+          id="output-format"
+          value={outputFormat}
+          disabled={running}
+          onChange={(e) => {
+            const nextValue = e.target.value as OutputFormat;
+            setOutputFormat(nextValue);
+            setPreset("custom");
+            resetProcessedState();
+          }}
+          className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+        >
+          <option value="keep" disabled={compressionMode !== "best-compression"}>
+            Keep Original
+          </option>
+          <option value="webp">WebP (Recommended)</option>
+          <option value="avif">AVIF (Smallest)</option>
+          <option value="jpeg">JPG</option>
+        </select>
+      </div>
 
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onPickFolderFS();
-                      }}
-                      disabled={running}
-                      variant="secondary"
-                    >
-                      <FolderOpen className="mr-2 size-4" />
-                      Pick folder
-                    </Button>
-                  </div>
-                </div>
-              </div>
+      <div className="space-y-3">
+        <Label>Quality: {quality}</Label>
+        <Slider
+          value={[quality]}
+          disabled={!items.length || running || preset !== "custom"}
+          min={1}
+          max={100}
+          step={1}
+          onValueChange={(value) => {
+            setQuality(value[0] ?? 75);
+            setPreset("custom");
+            resetProcessedState();
+          }}
+        />
+      </div>
 
-              <div className="mt-4 rounded-2xl border bg-muted/30 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 text-emerald-600 dark:text-emerald-400">
-                    <ShieldCheck className="size-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Private by default</p>
-                    <p className="text-xs text-muted-foreground">
-                      Your images stay on your device during compression. Use drag
-                      and drop, buttons, or folder import based on your browser
-                      support.
+      <div className="space-y-3">
+        <Label className={!showEffortControl ? "text-muted-foreground" : ""}>
+          Effort: {effort}
+        </Label>
+        <Slider
+          value={[effort]}
+          min={0}
+          max={6}
+          step={1}
+          disabled={!showEffortControl || !items.length || running || preset !== "custom"}
+          onValueChange={(value) => {
+            setEffort(value[0] ?? 4);
+            setPreset("custom");
+            resetProcessedState();
+          }}
+        />
+        <p className="text-xs text-muted-foreground">
+          {getCompressionHint(preset, compressionMode, outputFormat)}
+        </p>
+      </div>
+
+      <Separator />
+
+      <div className="grid gap-3">
+        <Button
+          onClick={() => folderInputRef.current?.click()}
+          variant="outline"
+          className="justify-start rounded-xl"
+        >
+          <FolderOpen className="mr-2 size-4" />
+          Folder fallback input
+        </Button>
+
+        <Button onClick={resetAll} variant="destructive" className="rounded-xl">
+          <Trash2 className="mr-2 size-4" />
+          Clear queue
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <div className="space-y-6">
+        <Card className="overflow-visible border-primary/10 bg-gradient-to-br from-background via-background to-muted/30">
+          <CardContent className="p-0">
+            <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="p-6 md:p-8">
+                <div className="mb-6 space-y-3">
+                  <Badge variant="secondary" className="w-fit">
+                    Bulk image compressor
+                  </Badge>
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-semibold tracking-tight">
+                      Compress images faster with presets and target-size modes
+                    </h2>
+                    <p className="max-w-2xl text-sm text-muted-foreground">
+                      Drop images or folders, compress them in bulk, convert formats, and export
+                      everything as a ZIP.
                     </p>
                   </div>
                 </div>
+
+                {items.length === 0 ? (
+                  <>
+                    <div
+                      ref={dropzoneRef}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Upload images by dragging and dropping, or press Enter to select files"
+                      onClick={() => multiInputRef.current?.click()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          multiInputRef.current?.click();
+                        }
+                      }}
+                      onDragEnter={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDragActive(true);
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDragActive(true);
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (e.currentTarget === e.target) {
+                          setDragActive(false);
+                        }
+                      }}
+                      onDrop={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDragActive(false);
+                        await onDropFiles(e.dataTransfer.files);
+                      }}
+                      className={[
+                        "rounded-3xl border border-dashed p-8 transition-all duration-300 outline-none",
+                        dragActive
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border bg-card hover:border-primary/30 hover:bg-muted/30",
+                        "focus-visible:ring-2 focus-visible:ring-primary/30",
+                      ].join(" ")}
+                    >
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                          <Upload className="size-6" />
+                        </div>
+                        <h3 className="text-lg font-semibold">Drag and drop images here</h3>
+                        <p className="mt-2 max-w-lg text-sm text-muted-foreground">
+                          Upload single images, multiple files, or entire folders. You can also
+                          click this area to choose files.
+                        </p>
+
+                        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              singleInputRef.current?.click();
+                            }}
+                            disabled={running}
+                            variant="secondary"
+                          >
+                            <ImagePlus className="mr-2 size-4" />
+                            Select single image
+                          </Button>
+
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              multiInputRef.current?.click();
+                            }}
+                            disabled={running}
+                          >
+                            <Upload className="mr-2 size-4" />
+                            Select multiple images
+                          </Button>
+
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onPickFolderFS();
+                            }}
+                            disabled={running}
+                            variant="secondary"
+                          >
+                            <FolderOpen className="mr-2 size-4" />
+                            Pick folder
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border bg-muted/30 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 text-emerald-600 dark:text-emerald-400">
+                          <ShieldCheck className="size-5" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Private by default</p>
+                          <p className="text-xs text-muted-foreground">
+                            Your images stay on your device during compression. Use drag and
+                            drop, buttons, or folder import based on your browser support.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-4 pb-24 md:pb-0">
+                    <div className="flex flex-col gap-3 rounded-2xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm font-medium">
+                          {items.length} {items.length === 1 ? "image" : "images"} added
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Manage your queue below or add more files.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => singleInputRef.current?.click()}
+                          disabled={running}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          <ImagePlus className="mr-2 size-4" />
+                          Add image
+                        </Button>
+
+                        <Button
+                          onClick={() => multiInputRef.current?.click()}
+                          disabled={running}
+                          size="sm"
+                        >
+                          <Upload className="mr-2 size-4" />
+                          Add more
+                        </Button>
+
+                        <Button
+                          onClick={onPickFolderFS}
+                          disabled={running}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <FolderOpen className="mr-2 size-4" />
+                          Add folder
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-2xl border bg-background p-3 lg:hidden">
+                      <div>
+                        <p className="text-sm font-medium">Compression settings</p>
+                        <p className="text-xs text-muted-foreground">
+                          Preset, format, quality, target size
+                        </p>
+                      </div>
+
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button variant="outline" size="sm" className="rounded-xl">
+                            <Settings2 className="mr-2 size-4" />
+                            Settings
+                          </Button>
+                        </SheetTrigger>
+
+                        <SheetContent side="bottom" className="max-h-[85vh] rounded-t-3xl">
+                          <SheetHeader className="text-left">
+                            <SheetTitle>Compression settings</SheetTitle>
+                            <SheetDescription>
+                              Adjust compression options for mobile.
+                            </SheetDescription>
+                          </SheetHeader>
+
+                          <div className="mt-6 overflow-y-auto px-4 pb-6">
+                            {settingsContent}
+                          </div>
+                        </SheetContent>
+                      </Sheet>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-2">
+                      {items.map((item) => (
+                        <QueueCard
+                          key={item.id}
+                          item={item}
+                          running={running}
+                          onDownload={downloadOne}
+                          onRemove={removeOne}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Input
+                  ref={singleInputRef}
+                  type="file"
+                  accept={ACCEPTED_IMAGE_TYPES}
+                  className="hidden"
+                  onChange={onPickSingle}
+                />
+
+                <Input
+                  ref={multiInputRef}
+                  type="file"
+                  multiple
+                  accept={ACCEPTED_IMAGE_TYPES}
+                  className="hidden"
+                  onChange={onPickMultiple}
+                />
+
+                <Input
+                  ref={folderInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={onPickFolderFallback}
+                  {...({
+                    webkitdirectory: "true",
+                    directory: "true",
+                  } as React.InputHTMLAttributes<HTMLInputElement>)}
+                />
               </div>
 
-              <Input
-                ref={singleInputRef}
-                type="file"
-                accept={ACCEPTED_IMAGE_TYPES}
-                className="hidden"
-                onChange={onPickSingle}
-              />
+              <div className="hidden border-t lg:block lg:border-l lg:border-t-0">
+                <div className="lg:sticky lg:top-12 lg:self-start">
+                  <div className="bg-muted/20 p-6 md:p-8 lg:h-fit">
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label>Compression preset</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {(
+                            [
+                              ["maximum", "Maximum Compression"],
+                              ["recommended", "Recommended"],
+                              ["best-quality", "Best Quality"],
+                              ["custom", "Custom"],
+                            ] as const
+                          ).map(([value, label]) => (
+                            <Button
+                              key={value}
+                              type="button"
+                              variant={preset === value ? "default" : "outline"}
+                              className="justify-start"
+                              disabled={running}
+                              onClick={() => applyPreset(value)}
+                            >
+                              {preset === value ? (
+                                <Sparkles className="mr-2 size-4" />
+                              ) : null}
+                              {label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
 
-              <Input
-                ref={multiInputRef}
-                type="file"
-                multiple
-                accept={ACCEPTED_IMAGE_TYPES}
-                className="hidden"
-                onChange={onPickMultiple}
-              />
+                      <div className="space-y-2">
+                        <Label>Compression mode</Label>
+                        <div className="grid gap-2">
+                          {(
+                            [
+                              ["best-compression", "Best Compression"],
+                              ["target-20", "Compress to 20KB"],
+                              ["target-50", "Compress to 50KB"],
+                              ["target-100", "Compress to 100KB"],
+                              ["custom-size", "Custom Size"],
+                            ] as const
+                          ).map(([value, label]) => (
+                            <Button
+                              key={value}
+                              type="button"
+                              variant={compressionMode === value ? "default" : "outline"}
+                              className="justify-start"
+                              disabled={running}
+                              onClick={() => {
+                                setCompressionMode(value);
+                                if (outputFormat === "keep" && value !== "best-compression") {
+                                  setOutputFormat("webp");
+                                }
+                                resetProcessedState();
+                              }}
+                            >
+                              {label}
+                            </Button>
+                          ))}
+                        </div>
 
-              <Input
-                ref={folderInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={onPickFolderFallback}
-                {...({
-                  webkitdirectory: "true",
-                  directory: "true",
-                } as React.InputHTMLAttributes<HTMLInputElement>)}
-              />
-            </div>
-
-            <div className="border-t bg-muted/20 p-6 md:p-8 lg:border-l lg:border-t-0">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Compression preset</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(
-                      [
-                        ["maximum", "Maximum Compression"],
-                        ["recommended", "Recommended"],
-                        ["best-quality", "Best Quality"],
-                        ["custom", "Custom"],
-                      ] as const
-                    ).map(([value, label]) => (
-                      <Button
-                        key={value}
-                        type="button"
-                        variant={preset === value ? "default" : "outline"}
-                        className="justify-start"
-                        disabled={running}
-                        onClick={() => applyPreset(value)}
-                      >
-                        {preset === value ? (
-                          <Sparkles className="mr-2 size-4" />
+                        {compressionMode === "custom-size" ? (
+                          <div className="rounded-xl border bg-background p-3">
+                            <Label htmlFor="custom-target">Target size (KB)</Label>
+                            <Input
+                              id="custom-target"
+                              type="number"
+                              min={1}
+                              value={customTargetKB}
+                              disabled={running}
+                              onChange={(e) => {
+                                setCustomTargetKB(Number(e.target.value || 1));
+                                resetProcessedState();
+                              }}
+                              className="mt-2"
+                            />
+                          </div>
                         ) : null}
-                        {label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label>Compression mode</Label>
-                  <div className="grid gap-2">
-                    {(
-                      [
-                        ["best-compression", "Best Compression"],
-                        ["target-20", "Compress to 20KB"],
-                        ["target-50", "Compress to 50KB"],
-                        ["target-100", "Compress to 100KB"],
-                        ["custom-size", "Custom Size"],
-                      ] as const
-                    ).map(([value, label]) => (
-                      <Button
-                        key={value}
-                        type="button"
-                        variant={compressionMode === value ? "default" : "outline"}
-                        className="justify-start"
-                        disabled={running}
-                        onClick={() => {
-                          setCompressionMode(value);
-                          if (outputFormat === "keep" && value !== "best-compression") {
-                            setOutputFormat("webp");
+                      <div className="space-y-2">
+                        <Label htmlFor="output-format">Convert to</Label>
+                        <select
+                          id="output-format"
+                          value={outputFormat}
+                          disabled={running}
+                          onChange={(e) => {
+                            const nextValue = e.target.value as OutputFormat;
+                            setOutputFormat(nextValue);
+                            setPreset("custom");
+                            resetProcessedState();
+                          }}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                          <option value="keep" disabled={compressionMode !== "best-compression"}>
+                            Keep Original
+                          </option>
+                          <option value="webp">WebP (Recommended)</option>
+                          <option value="avif">AVIF (Smallest)</option>
+                          <option value="jpeg">JPG</option>
+                          {/* <option value="png">PNG</option> */}
+                        </select>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label>Quality: {quality}</Label>
+                        <Slider
+                          value={[quality]}
+                          disabled={!items.length || running || preset !== "custom"}
+                          min={1}
+                          max={100}
+                          step={1}
+                          onValueChange={(value) => {
+                            setQuality(value[0] ?? 75);
+                            setPreset("custom");
+                            resetProcessedState();
+                          }}
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label
+                          className={!showEffortControl ? "text-muted-foreground" : ""}
+                        >
+                          Effort: {effort}
+                        </Label>
+                        <Slider
+                          value={[effort]}
+                          min={0}
+                          max={6}
+                          step={1}
+                          disabled={
+                            !showEffortControl ||
+                            !items.length ||
+                            running ||
+                            preset !== "custom"
                           }
-                          resetProcessedState();
-                        }}
-                      >
-                        {label}
-                      </Button>
-                    ))}
-                  </div>
+                          onValueChange={(value) => {
+                            setEffort(value[0] ?? 4);
+                            setPreset("custom");
+                            resetProcessedState();
+                          }}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {getCompressionHint(preset, compressionMode, outputFormat)}
+                        </p>
+                      </div>
 
-                  {compressionMode === "custom-size" ? (
-                    <div className="rounded-xl border bg-background p-3">
-                      <Label htmlFor="custom-target">Target size (KB)</Label>
-                      <Input
-                        id="custom-target"
-                        type="number"
-                        min={1}
-                        value={customTargetKB}
-                        disabled={running}
-                        onChange={(e) => {
-                          setCustomTargetKB(Number(e.target.value || 1));
-                          resetProcessedState();
-                        }}
-                        className="mt-2"
-                      />
+                      <Separator />
+
+                      <div className="grid gap-3">
+                        <Button onClick={compressAll} disabled={!items.length || running}>
+                          {running ? (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                          ) : null}
+                          Compress all
+                        </Button>
+
+                        <Button
+                          onClick={downloadZip}
+                          disabled={
+                            !items.some((item) => item.status === "done") ||
+                            !items.length ||
+                            running
+                          }
+                          variant="secondary"
+                        >
+                          <Download className="mr-2 size-4" />
+                          Download ZIP
+                        </Button>
+
+                        <Button
+                          onClick={() => folderInputRef.current?.click()}
+                          variant="outline"
+                          className="justify-start"
+                        >
+                          <FolderOpen className="mr-2 size-4" />
+                          Folder fallback input
+                        </Button>
+
+                        <Button onClick={resetAll} variant="destructive">
+                          <Trash2 className="mr-2 size-4" />
+                          Clear queue
+                        </Button>
+                      </div>
                     </div>
-                  ) : null}
+                  </div>
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                <div className="space-y-2">
-                  <Label htmlFor="output-format">Convert to</Label>
-                  <select
-                    id="output-format"
-                    value={outputFormat}
-                    disabled={running}
-                    onChange={(e) => {
-                      const nextValue = e.target.value as OutputFormat;
-                      setOutputFormat(nextValue);
-                      setPreset("custom");
-                      resetProcessedState();
-                    }}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="keep" disabled={compressionMode !== "best-compression"}>
-                      Keep Original
-                    </option>
-                    <option value="webp">WebP (Recommended)</option>
-                    <option value="avif">AVIF (Smallest)</option>
-                    <option value="jpeg">JPG</option>
-                    {/* <option value="png">PNG</option> */}
-                  </select>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Card>
+            <CardContent className="p-5">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Total files
+                </p>
+                <div className="flex items-center gap-2">
+                  <Images className="size-4 text-primary" />
+                  <p className="text-2xl font-semibold">{stats.total}</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                <div className="space-y-3">
-                  <Label>Quality: {quality}</Label>
-                  <Slider
-                    value={[quality]}
-                    disabled={!items.length || running || preset !== "custom"}
-                    min={1}
-                    max={100}
-                    step={1}
-                    onValueChange={(value) => {
-                      setQuality(value[0] ?? 75);
-                      setPreset("custom");
-                      resetProcessedState();
-                    }}
-                  />
-                </div>
+          <Card>
+            <CardContent className="p-5">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Original size
+                </p>
+                <p className="text-2xl font-semibold">{formatBytes(stats.original)}</p>
+              </div>
+            </CardContent>
+          </Card>
 
-                <div className="space-y-3">
-                  <Label
-                    className={!showEffortControl ? "text-muted-foreground" : ""}
-                  >
-                    Effort: {effort}
-                  </Label>
-                  <Slider
-                    value={[effort]}
-                    min={0}
-                    max={6}
-                    step={1}
-                    disabled={
-                      !showEffortControl ||
-                      !items.length ||
-                      running ||
-                      preset !== "custom"
-                    }
-                    onValueChange={(value) => {
-                      setEffort(value[0] ?? 4);
-                      setPreset("custom");
-                      resetProcessedState();
-                    }}
-                  />
+          <Card>
+            <CardContent className="p-5">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Compressed size
+                </p>
+                <p className="text-2xl font-semibold">{formatBytes(stats.compressed)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-emerald-500/20">
+            <CardContent className="p-5">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  You saved
+                </p>
+                <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+                  {formatBytes(stats.saved)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {stats.savingsPercent}% reduction
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <CardTitle>Compression progress</CardTitle>
+                <CardDescription>
+                  Track processed files, live status, and final savings.
+                </CardDescription>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">{stats.done} done</Badge>
+                <Badge variant="secondary">{stats.processing} processing</Badge>
+                <Badge variant="secondary">{stats.errors} errors</Badge>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="rounded-2xl border bg-muted/20 p-4">
+              <div className="mb-3 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium">{progress}% complete</p>
                   <p className="text-xs text-muted-foreground">
-                    {getCompressionHint(preset, compressionMode, outputFormat)}
+                    {stats.done + stats.errors} of {stats.total} files finished
                   </p>
                 </div>
-
-                <Separator />
-
-                <div className="grid gap-3">
-                  <Button onClick={compressAll} disabled={!items.length || running}>
-                    {running ? (
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                    ) : null}
-                    Compress all
-                  </Button>
-
-                  <Button
-                    onClick={downloadZip}
-                    disabled={
-                      !items.some((item) => item.status === "done") ||
-                      !items.length ||
-                      running
-                    }
-                    variant="secondary"
-                  >
-                    <Download className="mr-2 size-4" />
-                    Download ZIP
-                  </Button>
-
-                  <Button
-                    onClick={() => folderInputRef.current?.click()}
-                    variant="outline"
-                    className="justify-start"
-                  >
-                    <FolderOpen className="mr-2 size-4" />
-                    Folder fallback input
-                  </Button>
-
-                  <Button onClick={resetAll} variant="destructive">
-                    <Trash2 className="mr-2 size-4" />
-                    Clear queue
-                  </Button>
-                </div>
+                {running ? (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin" />
+                    Processing
+                  </div>
+                ) : null}
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardContent className="p-5">
-            <div className="space-y-1">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Total files
-              </p>
-              <div className="flex items-center gap-2">
-                <Images className="size-4 text-primary" />
-                <p className="text-2xl font-semibold">{stats.total}</p>
+              <Progress value={progress} className="h-3" />
+
+              <div className="mt-3 flex flex-col gap-2 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
+                <span>
+                  Current file:{" "}
+                  <span className="font-medium text-foreground">
+                    {currentFileName ?? "—"}
+                  </span>
+                </span>
+                <span>
+                  Saved so far:{" "}
+                  <span className="font-medium text-foreground">
+                    {formatBytes(stats.saved)}
+                  </span>
+                </span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5">
-            <div className="space-y-1">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Original size
-              </p>
-              <p className="text-2xl font-semibold">{formatBytes(stats.original)}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5">
-            <div className="space-y-1">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Compressed size
-              </p>
-              <p className="text-2xl font-semibold">{formatBytes(stats.compressed)}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-emerald-500/20">
-          <CardContent className="p-5">
-            <div className="space-y-1">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                You saved
-              </p>
-              <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
-                {formatBytes(stats.saved)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {stats.savingsPercent}% reduction
-              </p>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <CardTitle>Compression progress</CardTitle>
-              <CardDescription>
-                Track processed files, live status, and final savings.
-              </CardDescription>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{stats.done} done</Badge>
-              <Badge variant="secondary">{stats.processing} processing</Badge>
-              <Badge variant="secondary">{stats.errors} errors</Badge>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <div className="rounded-2xl border bg-muted/20 p-4">
-            <div className="mb-3 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium">{progress}% complete</p>
-                <p className="text-xs text-muted-foreground">
-                  {stats.done + stats.errors} of {stats.total} files finished
-                </p>
+      {items.length > 0 ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+          <div className="mx-auto max-w-md px-3 pb-2">
+            <div className="rounded-2xl border bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80">
+              <div className="flex items-center justify-between border-b px-3 py-2 text-[11px] text-muted-foreground">
+                <span>{items.length} files</span>
+                <span>{stats.done} ready</span>
               </div>
-              {running ? (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" />
-                  Processing
-                </div>
-              ) : null}
-            </div>
 
-            <Progress value={progress} className="h-3" />
+              <div className="grid grid-cols-2 gap-2 p-2">
+                <Button
+                  onClick={compressAll}
+                  disabled={!items.length || running}
+                  className="h-11 rounded-xl"
+                  size="sm"
+                >
+                  {running ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                  {running ? "Processing" : "Compress"}
+                </Button>
 
-            <div className="mt-3 flex flex-col gap-2 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-              <span>
-                Current file:{" "}
-                <span className="font-medium text-foreground">
-                  {currentFileName ?? "—"}
-                </span>
-              </span>
-              <span>
-                Saved so far:{" "}
-                <span className="font-medium text-foreground">
-                  {formatBytes(stats.saved)}
-                </span>
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex w-full flex-col gap-4 border-b pb-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 flex-1 space-y-1">
-            <CardTitle>Queue</CardTitle>
-            <CardDescription className="max-w-2xl">
-              Preview selected images, monitor status, and download outputs one by one.
-            </CardDescription>
-          </div>
-
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-            <Button
-              onClick={resetAll}
-              variant="destructive"
-              disabled={!items.length || running}
-              className="w-full sm:w-auto"
-            >
-              <Trash2 className="mr-2 size-4" />
-              Clear queue
-            </Button>
-
-            <Button
-              onClick={compressAll}
-              disabled={!items.length || running}
-              className="w-full sm:w-auto"
-            >
-              {running ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-              {running ? "Compressing..." : "Compress all"}
-            </Button>
-
-            <Button
-              onClick={downloadZip}
-              disabled={
-                !items.some((item) => item.status === "done") ||
-                !items.length ||
-                running
-              }
-              variant="secondary"
-              className="w-full sm:w-auto"
-            >
-              <Download className="mr-2 size-4" />
-              Download ZIP
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed p-10 text-center">
-              <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                <Images className="size-5" />
+                <Button
+                  onClick={downloadZip}
+                  disabled={
+                    !items.some((item) => item.status === "done") ||
+                    !items.length ||
+                    running
+                  }
+                  variant="secondary"
+                  className="h-11 rounded-xl"
+                  size="sm"
+                >
+                  <Download className="mr-2 size-4" />
+                  ZIP
+                </Button>
               </div>
-              <p className="text-sm font-medium">No files added yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Drag images into the upload area or use the buttons above to start.
-              </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {items.map((item) => (
-                <QueueCard
-                  key={item.id}
-                  item={item}
-                  running={running}
-                  onDownload={downloadOne}
-                  onRemove={removeOne}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div >
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
