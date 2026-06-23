@@ -145,7 +145,7 @@ export default function HomePage() {
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-12 rounded-xl px-6">
-                <Link href="/bulk-image-compress/editoror/editor">
+                <Link href="/bulk-image-compressor/editor">
                   Try Bulk Compress Image
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -356,7 +356,7 @@ export default function HomePage() {
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="rounded-xl">
-                <Link href="/bulk-image-compress/editor">Open Bulk compressor</Link>
+                <Link href="/bulk-image-compressor/editor">Open Bulk compressor</Link>
               </Button>
 
               <Button
@@ -370,7 +370,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Link href="/bulk-image-compress/editor" className="block">
+          <Link href="/bulk-image-compressor/editor" className="block">
             <div className="rounded-3xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
               <div className="rounded-2xl border bg-background p-4">
                 <div className="mb-4 flex items-center justify-between">

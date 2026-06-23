@@ -71,7 +71,7 @@ export function Footer() {
                 Browse tools
               </Link>
               <Link
-                href="/bulk-image-compress"
+                href="/bulk-image-compressor/editor"
                 className="inline-flex rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
               >
                 Start free
