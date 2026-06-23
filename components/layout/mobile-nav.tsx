@@ -179,7 +179,7 @@ export function MobileNav({ status, user }: MobileNavProps) {
 
                                         <SheetClose asChild>
                                             <Button asChild className="w-full rounded-xl">
-                                                <Link href="/bulk-image-compress">Start free</Link>
+                                                <Link href="/bulk-image-compressor/editor">Start free</Link>
                                             </Button>
                                         </SheetClose>
                                     </div>

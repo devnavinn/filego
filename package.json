@@ -52,6 +52,8 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.79.0",
     "react-markdown": "^10.1.0",
+    "react-virtualized-auto-sizer": "^2.0.3",
+    "react-window": "^2.2.7",
     "remark-gfm": "^4.0.1",
     "resend": "^6.12.4",
     "shadcn": "^4.11.0",

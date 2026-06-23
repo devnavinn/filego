@@ -11,7 +11,7 @@ export const menuGroups = [
         items: [
             { title: "Merge PDF", href: "/merge-pdf", icon: FileText },
             { title: "Split PDF", href: "/split-pdf", icon: FileText },
-            { title: "Compress Image", href: "/bulk-image-compress", icon: FileImage },
+            { title: "Compress Image", href: "/bulk-image-compressor/editor", icon: FileImage },
             { title: "Scan to PDF", href: "/scan-to-pdf", icon: ScanText },
         ],
     },

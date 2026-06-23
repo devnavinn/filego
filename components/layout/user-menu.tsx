@@ -108,7 +108,7 @@ export function UserMenu({ status, user }: UserMenuProps) {
                     </Button>
 
                     <Button asChild className="rounded-xl">
-                        <Link href="/bulk-image-compress">
+                        <Link href="/bulk-image-compressor/editor">
                             Start free
                             <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>

@@ -80,7 +80,7 @@ export default function AboutPage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="rounded-xl">
-                <Link href="/bulk-image-compress">
+                <Link href="/bulk-image-compressor/editor">
                   Try Filego
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -235,7 +235,7 @@ export default function AboutPage() {
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild className="rounded-xl">
-              <Link href="/bulk-image-compress">
+              <Link href="/bulk-image-compressor/editor">
                 Start free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
