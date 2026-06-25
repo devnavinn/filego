@@ -167,7 +167,6 @@ async function compressToTargetSize({
     initialQuality: number;
 }) {
     const targetBytes = targetKB * 1024;
-    const tolerance = Math.max(1024, targetBytes * 0.05);
 
     if (!canUseQualitySearch(format)) {
         const blob = await encodeImage({
@@ -177,16 +176,16 @@ async function compressToTargetSize({
             effort,
         });
 
-        return blob;
+        return blob.size <= targetBytes ? blob : null;
     }
 
-    let low = 5;
-    let high = 100;
-    let bestBlob: Blob | null = null;
-    let bestDistance = Number.POSITIVE_INFINITY;
+    let low = 1;
+    let high = Math.max(1, Math.min(100, initialQuality || 100));
+    let bestUnderTarget: Blob | null = null;
+    let bestUnderTargetQuality = -1;
 
-    for (let i = 0; i < 8; i += 1) {
-        const mid = Math.max(1, Math.min(100, Math.round((low + high) / 2)));
+    for (let i = 0; i < 10 && low <= high; i += 1) {
+        const mid = Math.round((low + high) / 2);
 
         const blob = await encodeImage({
             imageData,
@@ -195,32 +194,28 @@ async function compressToTargetSize({
             effort,
         });
 
-        const distance = Math.abs(blob.size - targetBytes);
-
-        if (distance < bestDistance) {
-            bestBlob = blob;
-            bestDistance = distance;
-        }
-
-        if (blob.size >= targetBytes - tolerance && blob.size <= targetBytes + tolerance) {
-            return blob;
-        }
-
-        if (blob.size > targetBytes) {
-            high = mid - 1;
-        } else {
+        if (blob.size <= targetBytes) {
+            if (mid > bestUnderTargetQuality) {
+                bestUnderTarget = blob;
+                bestUnderTargetQuality = mid;
+            }
             low = mid + 1;
+        } else {
+            high = mid - 1;
         }
     }
 
-    if (bestBlob) return bestBlob;
+    return bestUnderTarget;
+}
 
-    return encodeImage({
-        imageData,
-        format,
-        quality: initialQuality,
-        effort,
-    });
+function hasAlpha(imageData: ImageData): boolean {
+    const data = imageData.data;
+
+    for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 255) return true;
+    }
+
+    return false;
 }
 
 self.onmessage = async (event: MessageEvent<WorkerInput>) => {
@@ -242,13 +237,67 @@ self.onmessage = async (event: MessageEvent<WorkerInput>) => {
         let blob: Blob;
 
         if (shouldUseTargetSearch(compressionMode, targetKB)) {
-            blob = await compressToTargetSize({
+            if (normalizedFormat === "png") {
+                const encodedPng = await encodeImage({
+                    imageData,
+                    format: "png",
+                    quality,
+                    effort,
+                });
+
+                if (encodedPng.size <= targetKB! * 1024) {
+                    return { blob: encodedPng };
+                }
+
+                if (!hasAlpha(imageData) && outputFormat === "keep") {
+                    const webpBlob = await compressToTargetSize({
+                        imageData,
+                        format: "webp",
+                        effort,
+                        targetKB: targetKB!,
+                        initialQuality: quality,
+                    });
+
+                    if (webpBlob) {
+                        return {
+                            blob: webpBlob,
+                            note: "Converted PNG to WebP to stay under target size.",
+                        };
+                    }
+                }
+
+                return {
+                    blob: file,
+                    usedOriginal: true,
+                    note: "Could not reach target size for PNG without exceeding it.",
+                };
+            }
+
+            const blob = await compressToTargetSize({
                 imageData,
                 format: normalizedFormat,
                 effort,
                 targetKB: targetKB!,
                 initialQuality: quality,
             });
+
+            if (!blob) {
+                return {
+                    blob: file,
+                    usedOriginal: true,
+                    note: "Could not reach target size without exceeding it.",
+                };
+            }
+
+            if (outputFormat === "keep" && blob.size >= file.size) {
+                return {
+                    blob: file,
+                    usedOriginal: true,
+                    note: "Original file kept because compressed result was not smaller.",
+                };
+            }
+
+            return { blob };
         } else {
             blob = await encodeImage({
                 imageData,

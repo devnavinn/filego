@@ -924,6 +924,7 @@ export function ImageCompressor() {
           <option value="webp">WebP (Recommended)</option>
           <option value="avif">AVIF (Smallest)</option>
           <option value="jpeg">JPG</option>
+          <option value="png">Png</option>
         </select>
       </div>
 
@@ -1336,7 +1337,7 @@ export function ImageCompressor() {
                           <option value="webp">WebP (Recommended)</option>
                           <option value="avif">AVIF (Smallest)</option>
                           <option value="jpeg">JPG</option>
-                          {/* <option value="png">PNG</option> */}
+                          <option value="png">PNG</option>
                         </select>
                       </div>
 
