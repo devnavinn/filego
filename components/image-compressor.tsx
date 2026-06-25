@@ -793,6 +793,7 @@ export function ImageCompressor() {
     a.download = "compressed-images.zip";
     a.click();
     URL.revokeObjectURL(url);
+    await del("filego-bulk-image-entries");
   };
 
   const removeOne = async (id: string) => {
