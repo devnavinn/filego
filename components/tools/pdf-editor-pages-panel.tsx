@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, RotateCw, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { PdfJsLib } from "@/lib/use-pdfjs"
+import { sizeCanvasForViewport, type PdfJsLib } from "@/lib/use-pdfjs"
 import type { EditorPage } from "@/lib/pdf-editor-types"
 
 type PdfEditorPagesPanelProps = {
@@ -45,12 +45,11 @@ export function PdfEditorPagesPanel({
                 const viewport = page.getViewport({ scale: 120 / page.getViewport({ scale: 1 }).width })
 
                 const canvas = document.createElement("canvas")
-                canvas.width = viewport.width
-                canvas.height = viewport.height
+                const transform = sizeCanvasForViewport(canvas, viewport)
                 const ctx = canvas.getContext("2d")
                 if (!ctx) continue
 
-                await page.render({ canvasContext: ctx, viewport }).promise
+                await page.render({ canvasContext: ctx, viewport, transform }).promise
                 if (cancelled) return
 
                 const url = canvas.toDataURL("image/jpeg", 0.7)

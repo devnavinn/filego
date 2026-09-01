@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { CheckCircle2, Circle, Loader2, RotateCw } from "lucide-react"
 
-import { usePdfJs } from "@/lib/use-pdfjs"
+import { sizeCanvasForViewport, usePdfJs } from "@/lib/use-pdfjs"
 import { cn } from "@/lib/utils"
 
 type PageThumb = { pageIndex: number; url: string }
@@ -56,12 +56,11 @@ export function PdfPageThumbnails({
                     const scaledViewport = page.getViewport({ scale })
 
                     const canvas = document.createElement("canvas")
-                    canvas.width = scaledViewport.width
-                    canvas.height = scaledViewport.height
+                    const transform = sizeCanvasForViewport(canvas, scaledViewport)
                     const ctx = canvas.getContext("2d")
                     if (!ctx) continue
 
-                    await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise
+                    await page.render({ canvasContext: ctx, viewport: scaledViewport, transform }).promise
                     if (cancelled) return
 
                     const url = canvas.toDataURL("image/jpeg", 0.7)

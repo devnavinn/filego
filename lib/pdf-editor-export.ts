@@ -116,8 +116,20 @@ export async function exportEditedPdf(
         bold: await output.embedFont(StandardFonts.HelveticaBold),
     }
 
-    for (const page of pages) {
-        const [copiedPage] = await output.copyPages(source, [page.originalIndex])
+    // Copy all pages in a single call: copyPages() builds one PDFObjectCopier per
+    // call, which de-duplicates shared resources (a logo, a common font, etc.)
+    // only *within* that call. Copying pages one at a time in a loop — as this
+    // used to do — gave every page its own copier, so anything shared across
+    // pages got re-embedded once per page instead of once total, bloating the
+    // output file well beyond what the content actually needs.
+    const copiedPages = await output.copyPages(
+        source,
+        pages.map((p) => p.originalIndex)
+    )
+
+    for (let i = 0; i < pages.length; i++) {
+        const page = pages[i]
+        const copiedPage = copiedPages[i]
         output.addPage(copiedPage)
 
         if (page.rotationDelta !== 0) {

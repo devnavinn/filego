@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react"
 import { Move, X } from "lucide-react"
 
-import type { PdfJsLib, PdfJsViewport } from "@/lib/use-pdfjs"
+import { sizeCanvasForViewport, type PdfJsLib, type PdfJsViewport } from "@/lib/use-pdfjs"
 import type { EditorElement, EditorPage, EditorTool } from "@/lib/pdf-editor-types"
 import { DEFAULT_FONT_SIZE, DEFAULT_SHAPE_COLOR, DEFAULT_STROKE_WIDTH, DEFAULT_TEXT_COLOR } from "@/lib/pdf-editor-types"
+import { buildTextRuns, type TextRun } from "@/lib/pdf-editor-textlayer"
 import { cn } from "@/lib/utils"
 
 type PendingImage = { dataUrl: string; mimeType: "image/png" | "image/jpeg"; width: number; height: number }
@@ -26,9 +27,6 @@ type PdfEditorCanvasProps = {
 }
 
 type Point = [number, number]
-
-/** A detected existing text run, in the same native bottom-left-origin box convention as EditorElement. */
-type TextRun = { str: string; x: number; y: number; width: number; height: number; fontSize: number }
 
 type DragState =
     | { mode: "move"; elementId: string; startScreen: Point; original: EditorElement }
@@ -96,12 +94,11 @@ export function PdfEditorCanvas({
 
                 const canvas = canvasRef.current
                 if (!canvas) return
-                canvas.width = finalViewport.width
-                canvas.height = finalViewport.height
+                const transform = sizeCanvasForViewport(canvas, finalViewport)
                 const ctx = canvas.getContext("2d")
                 if (!ctx) return
 
-                await pdfPage.render({ canvasContext: ctx, viewport: finalViewport }).promise
+                await pdfPage.render({ canvasContext: ctx, viewport: finalViewport, transform }).promise
                 if (cancelled) return
 
                 setViewport(finalViewport)
@@ -132,22 +129,7 @@ export function PdfEditorCanvas({
                 const { items } = await pdfPage.getTextContent()
                 if (cancelled) return
 
-                const runs: TextRun[] = items
-                    .filter((item) => item.str.trim().length > 0)
-                    .map((item) => {
-                        const fontSize = Math.hypot(item.transform[0], item.transform[1]) || item.height || 12
-                        const height = item.height || fontSize
-                        return {
-                            str: item.str,
-                            x: item.transform[4],
-                            y: item.transform[5],
-                            width: item.width,
-                            height,
-                            fontSize,
-                        }
-                    })
-
-                setTextRuns(runs)
+                setTextRuns(buildTextRuns(items))
             } catch {
                 if (!cancelled) setTextRuns([])
             }

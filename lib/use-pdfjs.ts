@@ -26,7 +26,12 @@ export type PdfJsPage = {
     /** The page's own embedded rotation (0/90/180/270), before any additional rotation. */
     rotate: number
     getViewport: (params: { scale: number; rotation?: number }) => PdfJsViewport
-    render: (params: { canvasContext: CanvasRenderingContext2D; viewport: PdfJsViewport }) => {
+    render: (params: {
+        canvasContext: CanvasRenderingContext2D
+        viewport: PdfJsViewport
+        /** 2D transform matrix [a,b,c,d,e,f] applied before drawing — used to render at devicePixelRatio. */
+        transform?: [number, number, number, number, number, number]
+    }) => {
         promise: Promise<void>
     }
     getTextContent: () => Promise<{ items: PdfJsTextItem[] }>
@@ -75,6 +80,28 @@ function loadPdfJsScript(): Promise<void> {
     }
 
     return loadPromise
+}
+
+/**
+ * Sizes a canvas for crisp rendering on HiDPI/Retina displays: the canvas's
+ * internal pixel buffer is set to `viewport` size * devicePixelRatio (more
+ * actual pixels), while its CSS size stays at the `viewport` size, so it
+ * still occupies the same visual space. Returns the `transform` matrix to
+ * pass to `page.render()` so pdf.js draws at that higher resolution instead
+ * of rendering at 1x and letting the browser blur-upscale it.
+ */
+export function sizeCanvasForViewport(
+    canvas: HTMLCanvasElement,
+    viewport: PdfJsViewport
+): [number, number, number, number, number, number] | undefined {
+    const ratio = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1
+
+    canvas.width = Math.floor(viewport.width * ratio)
+    canvas.height = Math.floor(viewport.height * ratio)
+    canvas.style.width = `${Math.floor(viewport.width)}px`
+    canvas.style.height = `${Math.floor(viewport.height)}px`
+
+    return ratio !== 1 ? [ratio, 0, 0, ratio, 0, 0] : undefined
 }
 
 /** Loads pdf.js from a CDN and returns the ready `window.pdfjsLib` instance. */
