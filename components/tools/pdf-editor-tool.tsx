@@ -82,7 +82,7 @@ export function PdfEditorTool() {
     const [pages, setPages] = useState<EditorPage[]>([])
     const [elements, setElements] = useState<EditorElement[]>([])
     const [activePageId, setActivePageId] = useState<string | null>(null)
-    const [tool, setTool] = useState<EditorTool>("select")
+    const [tool, setTool] = useState<EditorTool>("edit-text")
     const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
     const [pendingImage, setPendingImage] = useState<PendingImage | null>(null)
     const [isLoadingFile, setIsLoadingFile] = useState(false)
@@ -203,7 +203,7 @@ export function PdfEditorTool() {
             const target = index + direction
             if (target < 0 || target >= prev.length) return prev
             const next = [...prev]
-            ;[next[index], next[target]] = [next[target], next[index]]
+                ;[next[index], next[target]] = [next[target], next[index]]
             return next
         })
     }
