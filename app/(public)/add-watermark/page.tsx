@@ -1,14 +1,16 @@
-import { ComingSoon } from "@/components/coming-soon";
+import type { Metadata } from "next";
+import { PdfWatermarkTool } from "@/components/tools/pdf-watermark-tool";
 
-export default function Page() {
+export const metadata: Metadata = {
+  title: "Add Watermark to PDF Online | Filego",
+  description:
+    "Stamp a text watermark across every page of a PDF in your browser. Control size, opacity, rotation, and color, then download instantly.",
+};
+
+export default function AddWatermarkPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-      <ComingSoon
-        title="Add Watermark is coming soon."
-        description="We’re building a simple way to add text and image watermarks to PDFs with better placement control, opacity settings, and batch-friendly workflows."
-        launchDate="2026-07-25T00:00:00"
-        backHref="/"
-      />
+    <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
+      <PdfWatermarkTool />
     </main>
   );
 }

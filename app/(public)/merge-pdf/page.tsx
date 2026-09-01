@@ -1,14 +1,16 @@
-import { ComingSoon } from "@/components/coming-soon";
+import type { Metadata } from "next";
+import { PdfMergeTool } from "@/components/tools/pdf-merge-tool";
+
+export const metadata: Metadata = {
+  title: "Merge PDF – Combine PDF Files Online | Filego",
+  description:
+    "Combine multiple PDF files into one document in your browser. Reorder files, merge instantly, and download — no upload to a server required.",
+};
 
 export default function MergePdfPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-      <ComingSoon
-        title="Merge PDF is coming soon."
-        description="We’re building a faster way to combine multiple PDF files, reorder them easily, and export one clean merged document."
-        launchDate="2026-08-06T00:00:00"
-        backHref="/"
-      />
+    <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6 md:py-10">
+      <PdfMergeTool />
     </main>
   );
 }

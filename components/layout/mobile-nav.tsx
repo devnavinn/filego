@@ -10,18 +10,8 @@ import {
     Menu,
     Settings,
     User,
-    Wrench,
-    ShieldCheck,
-    Sparkles,
-    FileText,
-    ImageIcon,
-    Code2,
-    FileSpreadsheet,
-    Video,
-    Music4,
-    Archive
 } from "lucide-react";
-import { toolCategories } from "@/lib/tools-data";
+import { getCategoryIcon, toolCategories } from "@/lib/tools-data";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -43,24 +33,10 @@ type MobileNavProps = {
     };
 };
 
-const categoryIconMap = {
-    "pdf-tools": FileText,
-    "image-tools": ImageIcon,
-    "document-office-tools": FileSpreadsheet,
-    "video-tools": Video,
-    "audio-tools": Music4,
-    "security-tools": ShieldCheck,
-    "archive-tools": Archive,
-    "developer-tools": Code2,
-    "ai-tools": Sparkles,
-} as const;
-
 const quickLinks = toolCategories.slice(0, 4).map((category) => ({
     title: category.title,
     href: `/tools/${category.slug}`,
-    icon: categoryIconMap[
-        category.slug as keyof typeof categoryIconMap
-    ] ?? Sparkles,
+    icon: getCategoryIcon(category.slug),
 }));
 
 export function MobileNav({ status, user }: MobileNavProps) {

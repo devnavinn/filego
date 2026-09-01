@@ -1,13 +1,15 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Sparkles } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MagicCard } from "@/components/ui/magic-card"
 import { cn } from "@/lib/utils"
-import type { ToolCategory } from "@/lib/tools-data"
+import { categoryIconMap, type ToolCategory } from "@/lib/tools-data"
 
 export function ToolCategoryCard({ category }: { category: ToolCategory }) {
+    const Icon = categoryIconMap[category.slug] ?? Sparkles
+
     return (
         <Link href={`/tools/${category.slug}`} className="group block">
             <MagicCard
@@ -17,7 +19,14 @@ export function ToolCategoryCard({ category }: { category: ToolCategory }) {
                 <Card className="rounded-3xl border-0 bg-transparent shadow-none">
                     <CardHeader className="space-y-4 p-6">
                         <div className="flex items-start justify-between gap-4">
-                            <div className={cn("h-12 w-12 rounded-2xl bg-gradient-to-br", category.accent)} />
+                            <div
+                                className={cn(
+                                    "flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br",
+                                    category.accent
+                                )}
+                            >
+                                <Icon className="h-5 w-5" aria-hidden="true" />
+                            </div>
                             <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
                         </div>
 

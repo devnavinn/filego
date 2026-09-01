@@ -56,6 +56,10 @@ const nextConfig: NextConfig = {
         canvas: false,
         fs: false,
         path: false,
+        // Dead code behind Node-environment checks in 7z-wasm's emscripten glue.
+        module: false,
+        crypto: false,
+        url: false,
       };
     }
 

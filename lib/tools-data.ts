@@ -1,3 +1,16 @@
+import {
+    Archive,
+    Code2,
+    FileSpreadsheet,
+    FileText,
+    ImageIcon,
+    Music4,
+    ShieldCheck,
+    Sparkles,
+    Video,
+    type LucideIcon,
+} from "lucide-react"
+
 export type ToolItem = {
     name: string
     slug: string
@@ -245,4 +258,20 @@ export function getToolBySlugs(categorySlug: string, toolSlug: string) {
     if (!tool) return null
 
     return { category, tool }
+}
+
+export const categoryIconMap: Record<string, LucideIcon> = {
+    "pdf-tools": FileText,
+    "image-tools": ImageIcon,
+    "document-office-tools": FileSpreadsheet,
+    "video-tools": Video,
+    "audio-tools": Music4,
+    "security-tools": ShieldCheck,
+    "archive-tools": Archive,
+    "developer-tools": Code2,
+    "ai-tools": Sparkles,
+}
+
+export function getCategoryIcon(categorySlug: string): LucideIcon {
+    return categoryIconMap[categorySlug] ?? Sparkles
 }

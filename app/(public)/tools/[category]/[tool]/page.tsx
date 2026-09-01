@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, CheckCircle2, Shield, Zap } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { ToolRenderer } from "@/components/tools/tool-renderer"
 import { getToolBySlugs, toolCategories } from "@/lib/tools-data"
 
@@ -78,101 +77,64 @@ export default async function SingleToolPage({ params }: Props) {
     if (!data) notFound()
 
     const { category: toolCategory, tool: toolItem } = data
+    const relatedTools = toolCategory.tools.filter((item) => item.slug !== toolItem.slug).slice(0, 6)
 
     return (
         <main className="min-h-screen bg-background text-foreground">
-            <section className="border-b border-border/50">
-                <div className="container mx-auto px-4 py-16 md:px-6 lg:py-20">
-                    <div className="space-y-6">
-                        <Button asChild variant="ghost" className="w-fit rounded-full">
-                            <Link href={`/tools/${toolCategory.slug}`}>
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to {toolCategory.title}
-                            </Link>
-                        </Button>
+            <div className="border-b border-border/50 bg-muted/20">
+                <div className="container mx-auto flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 md:px-6">
+                    <Link
+                        href={`/tools/${toolCategory.slug}`}
+                        className="inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        {toolCategory.title}
+                    </Link>
 
-                        <div className="space-y-4">
-                            <Badge variant="outline" className="rounded-full px-4 py-1.5">
+                    <div className="hidden h-4 w-px bg-border sm:block" />
+
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h1 className="text-base font-semibold tracking-tight sm:text-lg">{toolItem.name}</h1>
+                            <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px]">
                                 {toolCategory.title}
                             </Badge>
-
-                            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                                {toolItem.name}
-                            </h1>
-
-                            <p className="max-w-3xl text-base leading-7 text-muted-foreground sm:text-lg">
-                                {toolItem.shortDescription} Use this dedicated page to process files faster with a
-                                focused workflow, stronger SEO targeting, and a cleaner product experience.
-                            </p>
                         </div>
-
-                        <div className="grid gap-4 md:grid-cols-3">
-                            <div className="rounded-3xl border border-border/60 bg-card p-5">
-                                <Zap className="mb-3 h-5 w-5 text-teal-500" />
-                                <h2 className="font-semibold">Fast workflow</h2>
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    Upload, process, and download files in a clean step-by-step experience.
-                                </p>
-                            </div>
-
-                            <div className="rounded-3xl border border-border/60 bg-card p-5">
-                                <Shield className="mb-3 h-5 w-5 text-teal-500" />
-                                <h2 className="font-semibold">Private processing</h2>
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    Clear privacy messaging and secure file handling help build trust.
-                                </p>
-                            </div>
-
-                            <div className="rounded-3xl border border-border/60 bg-card p-5">
-                                <CheckCircle2 className="mb-3 h-5 w-5 text-teal-500" />
-                                <h2 className="font-semibold">Focused conversion</h2>
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    Keep the page centered on one search intent and one primary file action.
-                                </p>
-                            </div>
-                        </div>
+                        <p className="truncate text-xs text-muted-foreground">{toolItem.shortDescription}</p>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <section className="container mx-auto grid gap-8 px-4 py-16 md:px-6 lg:lg:grid-cols-[1.5fr_0.5fr]">
+            <section className="container mx-auto px-4 py-5 sm:py-8 md:px-6">
                 <ToolRenderer
                     toolSlug={toolItem.slug}
                     toolName={toolItem.name}
                     categoryName={toolCategory.title}
                     backHref={`/tools/${toolCategory.slug}`}
                 />
+            </section>
 
-                <aside className="space-y-6">
-                    <div className="rounded-3xl border border-border/60 bg-card p-6">
-                        <h2 className="text-xl font-semibold">Why use this tool</h2>
-                        <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-                            <li>Fast browser-based workflow for quick file tasks.</li>
-                            <li>Dedicated page targeting a specific tool keyword.</li>
-                            <li>Clear conversion-focused content and CTA placement.</li>
-                        </ul>
-                    </div>
-
-                    <div className="rounded-3xl border border-border/60 bg-card p-6">
-                        <h2 className="text-xl font-semibold">Related tools</h2>
-                        <div className="mt-4 space-y-3">
-                            {toolCategory.tools
-                                .filter((item) => item.slug !== toolItem.slug)
-                                .slice(0, 4)
-                                .map((item) => (
-                                    <Link
-                                        key={item.slug}
-                                        href={`/tools/${toolCategory.slug}/${item.slug}`}
-                                        className="block rounded-2xl border border-border/60 p-4 text-sm transition-colors hover:bg-muted/50"
-                                    >
-                                        <p className="font-medium">{item.name}</p>
-                                        <p className="mt-1 text-muted-foreground">{item.shortDescription}</p>
-                                    </Link>
-                                ))}
+            {relatedTools.length > 0 && (
+                <section className="border-t border-border/50">
+                    <div className="container mx-auto px-4 py-8 md:px-6">
+                        <h2 className="text-sm font-medium text-muted-foreground">
+                            More {toolCategory.title.toLowerCase()}
+                        </h2>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {relatedTools.map((item) => (
+                                <Link
+                                    key={item.slug}
+                                    href={`/tools/${toolCategory.slug}/${item.slug}`}
+                                    className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted/60"
+                                >
+                                    {item.name}
+                                    <ArrowRight className="h-3 w-3 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                                </Link>
+                            ))}
                         </div>
                     </div>
-                </aside>
-            </section>
+                </section>
+            )}
         </main>
     )
 }

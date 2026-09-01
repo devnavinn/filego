@@ -1,13 +1,12 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, ArrowRight, } from "lucide-react"
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MagicCard } from "@/components/ui/magic-card"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { getCategoryBySlug, toolCategories } from "@/lib/tools-data"
+import { categoryIconMap, getCategoryBySlug, toolCategories } from "@/lib/tools-data"
 
 type Props = {
     params: Promise<{ category: string }>
@@ -67,43 +66,42 @@ export default async function ToolCategoryPage({ params }: Props) {
 
     if (!category) notFound()
 
+    const Icon = categoryIconMap[category.slug] ?? Sparkles
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <section className="border-b border-border/50">
-                <div className="container mx-auto px-4 py-16 md:px-6 lg:py-20">
-                    <div className="space-y-6">
-                        <Button asChild variant="ghost" className="w-fit rounded-full">
-                            <Link href="/tools">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to tools
-                            </Link>
-                        </Button>
+                <div className="container mx-auto px-4 py-8 sm:py-12 md:px-6">
+                    <Link
+                        href="/tools"
+                        className="inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        All tools
+                    </Link>
 
-                        <div className="space-y-4">
-                            <div className={cn("h-16 w-16 rounded-3xl bg-gradient-to-br", category.accent)} />
-                            <Badge variant="outline" className="rounded-full px-4 py-1.5">
-                                {category.title}
-                            </Badge>
-                            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+                    <div className="mt-4 flex items-center gap-4">
+                        <div
+                            className={cn(
+                                "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br sm:h-14 sm:w-14",
+                                category.accent
+                            )}
+                        >
+                            <Icon className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden="true" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                                 {category.title}
                             </h1>
-                            <p className="max-w-3xl text-base leading-7 text-muted-foreground sm:text-lg">
-                                {category.heroDescription}
+                            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+                                {category.description}
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section className="container mx-auto px-4 py-16 md:px-6">
-                <div className="mb-8 max-w-3xl space-y-4">
-                    <h2 className="text-2xl font-semibold tracking-tight">All {category.title}</h2>
-                    <p className="text-muted-foreground">
-                        Choose a tool below to open a dedicated page with upload flow, processing states,
-                        download actions, and focused SEO targeting for that tool.
-                    </p>
-                </div>
-
+            <section className="container mx-auto px-4 py-10 md:px-6">
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     {category.tools.map((tool) => (
                         <Link
