@@ -5,13 +5,31 @@ import { useEffect, useState } from "react"
 const PDFJS_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
 const PDFJS_WORKER_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
 
-type PdfJsViewport = { width: number; height: number }
+export type PdfJsViewport = {
+    width: number
+    height: number
+    /** Converts a point in PDF-space (native, unrotated) to canvas/CSS pixel space. */
+    convertToViewportPoint: (x: number, y: number) => [number, number]
+    /** Converts a canvas/CSS pixel-space point back to PDF-space (native, unrotated). */
+    convertToPdfPoint: (x: number, y: number) => [number, number]
+}
 
-type PdfJsPage = {
-    getViewport: (params: { scale: number }) => PdfJsViewport
+export type PdfJsTextItem = {
+    str: string
+    /** [a, b, c, d, e, f] text matrix; (e, f) is the glyph run's baseline origin, in native PDF space. */
+    transform: [number, number, number, number, number, number]
+    width: number
+    height: number
+}
+
+export type PdfJsPage = {
+    /** The page's own embedded rotation (0/90/180/270), before any additional rotation. */
+    rotate: number
+    getViewport: (params: { scale: number; rotation?: number }) => PdfJsViewport
     render: (params: { canvasContext: CanvasRenderingContext2D; viewport: PdfJsViewport }) => {
         promise: Promise<void>
     }
+    getTextContent: () => Promise<{ items: PdfJsTextItem[] }>
 }
 
 type PdfJsDocument = {
