@@ -35,7 +35,7 @@ export function McqQuizBuilder({ onCreate, onCancel, isCreating }: McqQuizBuilde
     const [questions, setQuestions] = useState<QuestionDraft[]>([makeQuestion()])
 
     const [aiTopic, setAiTopic] = useState("")
-    const [aiQuestionCount, setAiQuestionCount] = useState(5)
+    const [aiQuestionCount, setAiQuestionCount] = useState(10)
     const [aiDifficulty, setAiDifficulty] = useState<"easy" | "medium" | "hard">("medium")
     const [isGeneratingAi, setIsGeneratingAi] = useState(false)
     const [aiStatus, setAiStatus] = useState<AiGenerateStatus>({ kind: "idle" })
@@ -183,9 +183,9 @@ export function McqQuizBuilder({ onCreate, onCancel, isCreating }: McqQuizBuilde
                         <input
                             type="number"
                             min={1}
-                            max={15}
+                            max={20}
                             value={aiQuestionCount}
-                            onChange={(e) => setAiQuestionCount(Math.min(15, Math.max(1, Number(e.target.value) || 1)))}
+                            onChange={(e) => setAiQuestionCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
                             className="mt-1 h-9 w-20 rounded-lg border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary"
                         />
                     </div>
