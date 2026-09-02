@@ -23,6 +23,9 @@ import { CodeBeautifierTool } from "@/components/tools/code-beautifier-tool"
 import { QrCodeGeneratorTool } from "@/components/tools/qr-code-generator-tool"
 import { QrCodeScannerTool } from "@/components/tools/qr-code-scanner-tool"
 import { WebsiteToMarkdownTool } from "@/components/tools/website-to-markdown-tool"
+import { DocumentSummarizerTool } from "@/components/tools/document-summarizer-tool"
+import { ResumeParserTool } from "@/components/tools/resume-parser-tool"
+import { AiFileChatTool } from "@/components/tools/ai-file-chat-tool"
 import {
     PngToJpgTool,
     JpgToPngTool,
@@ -95,6 +98,9 @@ export const toolComponentMap = {
     "qr-code-generator": QrCodeGeneratorTool,
     "qr-code-scanner": QrCodeScannerTool,
     "website-to-markdown": WebsiteToMarkdownTool,
+    "document-summarizer": DocumentSummarizerTool,
+    "resume-parser": ResumeParserTool,
+    "ai-file-chat": AiFileChatTool,
     "image-compressor": ImageCompressorRedirectTool,
     "image-resizer": ImageResizerTool,
     "image-cropper": ImageCropperTool,
