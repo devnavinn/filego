@@ -12,6 +12,12 @@ export default async function PremiumPage() {
     const isPremium =
         data.activePlan?.planType === "LIFETIME" &&
         data.activePlan?.billingStatus === "ACTIVE";
+
+    const isProActive =
+        data.activePlan?.planType === "PRO" &&
+        data.activePlan?.billingStatus === "ACTIVE" &&
+        (!data.activePlan?.expiresAt || new Date(data.activePlan.expiresAt) > new Date());
+
     return (
         <div className="space-y-6">
             <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8">
@@ -155,6 +161,65 @@ export default async function PremiumPage() {
 
                 <PremiumStatusCard activePlan={data.activePlan} />
             </div>
+
+            <Card className="rounded-3xl border border-border bg-card shadow-sm">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
+                        <Sparkles className="size-4" />
+                        AI generations plan
+                    </CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                    {isProActive ? (
+                        <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/60 p-5 dark:border-emerald-900 dark:bg-emerald-950/30">
+                            <p className="text-sm font-medium text-foreground">AI Pro active</p>
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                You get 100 AI generations per day (MCQ quiz generation and upcoming AI tools).
+                                {data.activePlan?.expiresAt
+                                    ? ` Renews/expires on ${new Date(data.activePlan.expiresAt).toLocaleDateString()}.`
+                                    : ""}
+                            </p>
+                        </div>
+                    ) : (
+                        <>
+                            <p className="text-sm text-muted-foreground">
+                                Free accounts get 5 AI generations/day. Upgrade for 100/day.
+                            </p>
+
+                            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                <div className="rounded-2xl border border-border bg-background p-5">
+                                    <p className="text-2xl font-semibold tracking-tight text-foreground">
+                                        ₹1,000<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                                    </p>
+                                    <p className="mt-2 text-sm text-muted-foreground">Billed monthly.</p>
+                                    <div className="mt-4">
+                                        <UpgradeButton
+                                            plan="PRO_MONTHLY"
+                                            label="Get Monthly"
+                                            description="Filego AI Pro - Monthly"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-primary/40 bg-background p-5">
+                                    <p className="text-2xl font-semibold tracking-tight text-foreground">
+                                        ₹9,999<span className="text-sm font-normal text-muted-foreground">/yr</span>
+                                    </p>
+                                    <p className="mt-2 text-sm text-muted-foreground">Billed yearly — save vs monthly.</p>
+                                    <div className="mt-4">
+                                        <UpgradeButton
+                                            plan="PRO_YEARLY"
+                                            label="Get Yearly"
+                                            description="Filego AI Pro - Yearly"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }

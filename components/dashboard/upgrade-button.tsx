@@ -19,7 +19,17 @@ type RazorpaySuccessResponse = {
     razorpay_signature: string;
 };
 
-export function UpgradeButton() {
+type UpgradeButtonProps = {
+    plan?: "LIFETIME" | "PRO_MONTHLY" | "PRO_YEARLY";
+    label?: string;
+    description?: string;
+};
+
+export function UpgradeButton({
+    plan = "LIFETIME",
+    label,
+    description = "Lifetime Premium Plan",
+}: UpgradeButtonProps) {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -32,6 +42,7 @@ export function UpgradeButton() {
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({ plan }),
             });
 
             const orderData = await orderRes.json().catch(() => null);
@@ -52,7 +63,7 @@ export function UpgradeButton() {
                 amount: orderData.data.amount,
                 currency: orderData.data.currency,
                 name: "Filego",
-                description: "Lifetime Premium Plan",
+                description,
                 order_id: orderData.data.orderId,
                 prefill: orderData.data.prefill,
                 theme: {
@@ -116,7 +127,7 @@ export function UpgradeButton() {
             disabled={loading}
             className="rounded-xl bg-primary text-primary-foreground hover:opacity-90"
         >
-            {loading ? "Processing..." : "Upgrade now"}
+            {loading ? "Processing..." : label ?? "Upgrade now"}
         </Button>
     );
 }

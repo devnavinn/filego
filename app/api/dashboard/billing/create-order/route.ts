@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
-import { BillingStatus } from "@prisma/client";
+import { BillingStatus, PlanType } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { razorpay } from "@/lib/razorpay";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const LIFETIME_PRICE_INR_PAISE = 99900;
+const PLAN_CONFIG = {
+    LIFETIME: { planType: PlanType.LIFETIME, amount: 99900, product: "filego-lifetime" },
+    PRO_MONTHLY: { planType: PlanType.PRO, amount: 100000, product: "filego-pro-monthly" },
+    PRO_YEARLY: { planType: PlanType.PRO, amount: 999900, product: "filego-pro-yearly" },
+} as const;
 
-export async function POST() {
+type PlanKey = keyof typeof PLAN_CONFIG;
+
+export async function POST(req: Request) {
     try {
         const user = await requireUser();
 
@@ -19,16 +25,21 @@ export async function POST() {
             );
         }
 
+        const body = await req.json().catch(() => null);
+        const planKey: PlanKey = body?.plan in PLAN_CONFIG ? body.plan : "LIFETIME";
+        const plan = PLAN_CONFIG[planKey];
+
         const receipt = `fg_${user.id.slice(-8)}_${Date.now().toString().slice(-8)}`;
 
         const order = await razorpay.orders.create({
-            amount: LIFETIME_PRICE_INR_PAISE,
+            amount: plan.amount,
             currency: "INR",
             receipt,
             notes: {
                 userId: user.id,
-                planType: "LIFETIME",
-                product: "filego-lifetime",
+                planType: plan.planType,
+                plan: planKey,
+                product: plan.product,
             },
         });
 
@@ -37,7 +48,7 @@ export async function POST() {
         const existingSubscription = await prisma.subscription.findFirst({
             where: {
                 userId: user.id,
-                planType: "LIFETIME",
+                planType: plan.planType,
             },
             orderBy: {
                 createdAt: "desc",
@@ -62,7 +73,7 @@ export async function POST() {
             await prisma.subscription.create({
                 data: {
                     userId: user.id,
-                    planType: "LIFETIME",
+                    planType: plan.planType,
                     billingStatus: BillingStatus.INACTIVE,
                     provider: "RAZORPAY",
                     providerOrderId: order.id,
@@ -80,7 +91,8 @@ export async function POST() {
                 amount,
                 currency: order.currency,
                 key: process.env.RAZORPAY_KEY_ID,
-                planType: "LIFETIME",
+                planType: plan.planType,
+                plan: planKey,
                 prefill: {
                     name: user.name ?? "",
                     email: user.email ?? "",
@@ -88,7 +100,7 @@ export async function POST() {
             },
         });
     } catch (error) {
-        console.error("[CREATE_LIFETIME_ORDER_ERROR]", error);
+        console.error("[CREATE_ORDER_ERROR]", error);
 
         return NextResponse.json(
             { ok: false, message: "Failed to create order" },

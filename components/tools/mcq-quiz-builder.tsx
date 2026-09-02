@@ -1,10 +1,17 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Loader2, Plus, Trash2 } from "lucide-react"
+import Link from "next/link"
+import { Loader2, Plus, Sparkles, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import type { McqQuiz } from "@/lib/pdf-form-types"
+
+type AiGenerateStatus =
+    | { kind: "idle" }
+    | { kind: "error"; message: string }
+    | { kind: "auth-required" }
+    | { kind: "quota-exceeded"; message: string }
 
 type OptionDraft = { id: string; text: string }
 type QuestionDraft = { id: string; text: string; options: OptionDraft[] }
@@ -26,6 +33,60 @@ type McqQuizBuilderProps = {
 export function McqQuizBuilder({ onCreate, onCancel, isCreating }: McqQuizBuilderProps) {
     const [title, setTitle] = useState("Quiz")
     const [questions, setQuestions] = useState<QuestionDraft[]>([makeQuestion()])
+
+    const [aiTopic, setAiTopic] = useState("")
+    const [aiQuestionCount, setAiQuestionCount] = useState(5)
+    const [aiDifficulty, setAiDifficulty] = useState<"easy" | "medium" | "hard">("medium")
+    const [isGeneratingAi, setIsGeneratingAi] = useState(false)
+    const [aiStatus, setAiStatus] = useState<AiGenerateStatus>({ kind: "idle" })
+
+    async function handleGenerateWithAi() {
+        const topic = aiTopic.trim()
+        if (!topic) return
+
+        setIsGeneratingAi(true)
+        setAiStatus({ kind: "idle" })
+
+        try {
+            const res = await fetch("/api/ai/mcq", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify({ topic, questionCount: aiQuestionCount, difficulty: aiDifficulty }),
+            })
+
+            const data = await res.json().catch(() => null)
+
+            if (res.status === 401) {
+                setAiStatus({ kind: "auth-required" })
+                return
+            }
+
+            if (res.status === 429) {
+                setAiStatus({ kind: "quota-exceeded", message: data?.error || "Daily AI limit reached." })
+                return
+            }
+
+            if (!res.ok || !data?.ok || !data?.quiz) {
+                setAiStatus({ kind: "error", message: data?.error || "AI generation failed. Please try again." })
+                return
+            }
+
+            const quiz = data.quiz as McqQuiz
+            setTitle(quiz.title || "Quiz")
+            setQuestions(
+                quiz.questions.map((q) => ({
+                    id: q.id,
+                    text: q.text,
+                    options: q.options.map((o) => ({ id: o.id, text: o.text })),
+                }))
+            )
+        } catch {
+            setAiStatus({ kind: "error", message: "AI generation failed. Please try again." })
+        } finally {
+            setIsGeneratingAi(false)
+        }
+    }
 
     const isValid = useMemo(
         () =>
@@ -94,6 +155,83 @@ export function McqQuizBuilder({ onCreate, onCancel, isCreating }: McqQuizBuilde
                 <Button type="button" variant="ghost" size="sm" className="rounded-full" onClick={onCancel}>
                     Back to templates
                 </Button>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-border/60 bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Sparkles className="h-4 w-4" />
+                    Generate with AI
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                    Describe a topic and Gemini will draft the questions and options for you.
+                </p>
+
+                <div className="mt-3 flex flex-wrap items-end gap-2">
+                    <div className="min-w-[220px] flex-1">
+                        <label className="text-xs font-medium text-muted-foreground">Topic</label>
+                        <input
+                            type="text"
+                            value={aiTopic}
+                            onChange={(e) => setAiTopic(e.target.value)}
+                            placeholder="e.g. Photosynthesis basics"
+                            maxLength={300}
+                            className="mt-1 h-9 w-full rounded-lg border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-muted-foreground">Questions</label>
+                        <input
+                            type="number"
+                            min={1}
+                            max={15}
+                            value={aiQuestionCount}
+                            onChange={(e) => setAiQuestionCount(Math.min(15, Math.max(1, Number(e.target.value) || 1)))}
+                            className="mt-1 h-9 w-20 rounded-lg border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-muted-foreground">Difficulty</label>
+                        <select
+                            value={aiDifficulty}
+                            onChange={(e) => setAiDifficulty(e.target.value as "easy" | "medium" | "hard")}
+                            className="mt-1 h-9 rounded-lg border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary"
+                        >
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <Button
+                        type="button"
+                        className="rounded-full"
+                        onClick={handleGenerateWithAi}
+                        disabled={!aiTopic.trim() || isGeneratingAi}
+                    >
+                        {isGeneratingAi ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                        {isGeneratingAi ? "Generating..." : "Generate"}
+                    </Button>
+                </div>
+
+                {aiStatus.kind === "auth-required" && (
+                    <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+                        <Link href="/login?callbackUrl=/pdf-forms" className="underline">
+                            Sign in
+                        </Link>{" "}
+                        to generate quizzes with AI.
+                    </p>
+                )}
+                {aiStatus.kind === "quota-exceeded" && (
+                    <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+                        {aiStatus.message}{" "}
+                        <Link href="/dashboard/premium" className="underline">
+                            Upgrade for more
+                        </Link>
+                        .
+                    </p>
+                )}
+                {aiStatus.kind === "error" && (
+                    <p className="mt-3 text-xs text-destructive">{aiStatus.message}</p>
+                )}
             </div>
 
             <div className="mt-5">

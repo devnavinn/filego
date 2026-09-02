@@ -47,7 +47,6 @@ export async function POST(req: Request) {
         const subscription = await prisma.subscription.findFirst({
             where: {
                 userId,
-                planType: "LIFETIME",
                 providerOrderId: razorpayOrderId,
             },
         });
@@ -66,13 +65,21 @@ export async function POST(req: Request) {
             return NextResponse.json({ ok: true, alreadyVerified: true });
         }
 
+        const now = new Date();
+        // PRO plans are billed monthly (₹1000) or yearly (₹9999); LIFETIME never expires.
+        const expiresAt =
+            subscription.planType === "PRO"
+                ? new Date(now.getTime() + (subscription.amount === 999900 ? 365 : 30) * 24 * 60 * 60 * 1000)
+                : null;
+
         await prisma.subscription.update({
             where: { id: subscription.id },
             data: {
                 billingStatus: BillingStatus.ACTIVE,
                 providerPaymentId: razorpayPaymentId,
-                purchasedAt: subscription.purchasedAt ?? new Date(),
-                startsAt: subscription.startsAt ?? new Date(),
+                purchasedAt: now,
+                startsAt: now,
+                expiresAt,
             },
         });
 
