@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next"
 
 import { prisma } from "@/lib/prisma"
 import { toolCategories } from "@/lib/tools-data"
+import { FORM_TEMPLATES } from "@/lib/pdf-form-templates"
 
 export const dynamic = "force-dynamic"
 
@@ -70,6 +71,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }))
     )
 
+    const pdfFormEntries: MetadataRoute.Sitemap = [
+        ...FORM_TEMPLATES.map((template) => template.id),
+        "mcq-quiz",
+        "upload",
+    ].map((slug) => ({
+        url: toAbsoluteUrl(`/pdf-forms/${slug}`),
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.75,
+    }))
+
     const posts = await prisma.blogPost.findMany({
         where: {
             status: "PUBLISHED",
@@ -95,6 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...staticEntries,
         ...categoryEntries,
         ...singleToolEntries,
+        ...pdfFormEntries,
         ...blogEntries,
     ]
 }

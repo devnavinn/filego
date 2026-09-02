@@ -1,17 +1,14 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
     CheckSquare,
-    ChevronRight,
     Download,
     FileEdit,
-    ListChecks,
     Loader2,
     MousePointer2,
     Type,
-    Upload,
-    type LucideIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -47,40 +44,16 @@ function slugify(name: string) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
 }
 
-function TemplateCard({
-    icon: Icon,
-    name,
-    description,
-    disabled,
-    onClick,
-}: {
-    icon: LucideIcon
-    name: string
-    description: string
-    disabled: boolean
-    onClick: () => void
-}) {
-    return (
-        <button
-            type="button"
-            disabled={disabled}
-            onClick={onClick}
-            className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-background p-4 text-left transition-colors hover:border-primary/50 hover:bg-muted/30 disabled:pointer-events-none disabled:opacity-50"
-        >
-            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
-                <Icon className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{name}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-            </div>
-            <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-        </button>
-    )
+type PdfFormsToolProps = {
+    /** A FORM_TEMPLATES id to auto-load on mount, for a template's dedicated page. */
+    initialTemplateId?: string
+    /** Skips straight to the MCQ builder or the upload dropzone on a dedicated page. */
+    initialMode?: "mcq" | "upload"
 }
 
-export function PdfFormsTool() {
+export function PdfFormsTool({ initialTemplateId, initialMode }: PdfFormsToolProps) {
     const { pdfjsLib, error: engineError } = usePdfJs()
+    const router = useRouter()
 
     const [file, setFile] = useState<File | null>(null)
     const [pages, setPages] = useState<FormPage[]>([])
@@ -100,8 +73,7 @@ export function PdfFormsTool() {
     const [isExporting, setIsExporting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [warnings, setWarnings] = useState<FormWarning[]>([])
-    const [showUpload, setShowUpload] = useState(false)
-    const [showMcqBuilder, setShowMcqBuilder] = useState(false)
+    const [showMcqBuilder, setShowMcqBuilder] = useState(initialMode === "mcq")
 
     const activePage = pages.find((p) => p.index === activePageIndex) ?? null
     const selectedField = newFields.find((f) => f.id === selectedFieldId) ?? null
@@ -214,6 +186,15 @@ export function PdfFormsTool() {
         }
     }
 
+    useEffect(() => {
+        if (!initialTemplateId || file || !pdfjsLib) return
+        const template = FORM_TEMPLATES.find((t) => t.id === initialTemplateId)
+        if (!template) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        handleSelectTemplate(template)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialTemplateId, file, pdfjsLib])
+
     async function handleCreateMcq(quiz: McqQuiz) {
         if (!pdfjsLib) {
             setError("The PDF engine is still loading. Try again in a moment.")
@@ -259,8 +240,7 @@ export function PdfFormsTool() {
         setMode("build")
         setError(null)
         setWarnings([])
-        setShowUpload(false)
-        setShowMcqBuilder(false)
+        setShowMcqBuilder(initialMode === "mcq")
     }
 
     function handleFillValueChange(name: string, value: FieldValue) {
@@ -324,7 +304,20 @@ export function PdfFormsTool() {
         if (showMcqBuilder) {
             return (
                 <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-                    <McqQuizBuilder onCreate={handleCreateMcq} onCancel={() => setShowMcqBuilder(false)} isCreating={isLoadingFile} />
+                    <McqQuizBuilder
+                        onCreate={handleCreateMcq}
+                        onCancel={() => router.push("/pdf-forms")}
+                        isCreating={isLoadingFile}
+                    />
+                    {(error || engineError) && <p className="mt-3 text-sm text-destructive">{error || engineError}</p>}
+                </div>
+            )
+        }
+
+        if (initialTemplateId) {
+            return (
+                <div className="rounded-3xl border border-border/60 bg-card p-8 text-center sm:p-10">
+                    <p className="text-sm text-muted-foreground">Preparing your form...</p>
                     {(error || engineError) && <p className="mt-3 text-sm text-destructive">{error || engineError}</p>}
                 </div>
             )
@@ -332,47 +325,13 @@ export function PdfFormsTool() {
 
         return (
             <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">PDF Forms</h2>
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Upload your PDF</h2>
                 <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                    Pick a template, fill in the blanks, and download — no printing or scanning required.
+                    Fill in an existing PDF&apos;s fields, or add new text fields and checkboxes to it — then download.
                 </p>
 
-                <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {FORM_TEMPLATES.map((template) => (
-                        <TemplateCard
-                            key={template.id}
-                            icon={template.icon}
-                            name={template.name}
-                            description={template.description}
-                            disabled={isLoadingFile}
-                            onClick={() => handleSelectTemplate(template)}
-                        />
-                    ))}
-                    <TemplateCard
-                        icon={ListChecks}
-                        name="MCQ / Quiz Builder"
-                        description="Build a multiple-choice quiz or test with your own questions and answer choices."
-                        disabled={isLoadingFile}
-                        onClick={() => setShowMcqBuilder(true)}
-                    />
-                </div>
-
-                <div className="mt-6 border-t border-border/60 pt-4">
-                    {showUpload ? (
-                        <>
-                            <p className="mb-3 text-sm font-medium">Upload your own PDF</p>
-                            <PdfDropzone onFileSelect={handleFileSelect} />
-                        </>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setShowUpload(true)}
-                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-                        >
-                            <Upload className="h-3.5 w-3.5" />
-                            Have your own PDF? Upload it instead
-                        </button>
-                    )}
+                <div className="mt-6">
+                    <PdfDropzone onFileSelect={handleFileSelect} />
                 </div>
 
                 {isLoadingFile && <p className="mt-3 text-sm text-muted-foreground">Preparing your form...</p>}
