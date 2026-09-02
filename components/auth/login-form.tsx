@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import {
     Field,
     FieldContent,
@@ -92,6 +93,8 @@ export function LoginForm() {
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <OAuthButtons callbackUrl={callbackUrl || undefined} />
+
             <FieldSet>
                 <FieldGroup>
                     <Controller
