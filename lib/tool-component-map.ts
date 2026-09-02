@@ -22,6 +22,7 @@ import { SqlFormatterTool } from "@/components/tools/sql-formatter-tool"
 import { CodeBeautifierTool } from "@/components/tools/code-beautifier-tool"
 import { QrCodeGeneratorTool } from "@/components/tools/qr-code-generator-tool"
 import { QrCodeScannerTool } from "@/components/tools/qr-code-scanner-tool"
+import { WebsiteToMarkdownTool } from "@/components/tools/website-to-markdown-tool"
 import {
     PngToJpgTool,
     JpgToPngTool,
@@ -93,6 +94,7 @@ export const toolComponentMap = {
     "code-beautifier": CodeBeautifierTool,
     "qr-code-generator": QrCodeGeneratorTool,
     "qr-code-scanner": QrCodeScannerTool,
+    "website-to-markdown": WebsiteToMarkdownTool,
     "image-compressor": ImageCompressorRedirectTool,
     "image-resizer": ImageResizerTool,
     "image-cropper": ImageCropperTool,

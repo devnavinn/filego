@@ -222,6 +222,7 @@ export const toolCategories: ToolCategory[] = [
             createTool("Code Beautifier", "Format code snippets cleanly."),
             createTool("QR Code Generator", "Generate QR codes from text or URLs."),
             createTool("QR Code Scanner", "Scan and decode QR code content."),
+            createTool("Website to Markdown", "Fetch a web page and convert it into clean Markdown."),
         ],
     },
     {
