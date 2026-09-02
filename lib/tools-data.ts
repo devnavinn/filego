@@ -261,6 +261,18 @@ export function getToolBySlugs(categorySlug: string, toolSlug: string) {
     return { category, tool }
 }
 
+export type SearchableTool = ToolItem & { categorySlug: string; categoryTitle: string }
+
+export function getAllTools(): SearchableTool[] {
+    return toolCategories.flatMap((category) =>
+        category.tools.map((tool) => ({
+            ...tool,
+            categorySlug: category.slug,
+            categoryTitle: category.title,
+        }))
+    )
+}
+
 export const categoryIconMap: Record<string, LucideIcon> = {
     "pdf-tools": FileText,
     "image-tools": ImageIcon,

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -8,7 +9,9 @@ import {
     NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { menuGroups } from "./navbar-data";
+import { categoryIconMap, toolCategories } from "@/lib/tools-data";
+
+const TOOLS_PER_CATEGORY = 4;
 
 export function DesktopNav() {
     return (
@@ -18,37 +21,68 @@ export function DesktopNav() {
                     <NavigationMenuItem>
                         <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
                         <NavigationMenuContent>
-                            <div className="w-[760px] max-w-[calc(100vw-48px)] p-6">
-                                <div className="grid grid-cols-3 gap-6">
-                                    {menuGroups.map((group) => (
-                                        <div key={group.title} className="min-w-0">
-                                            <div className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                                                {group.title}
-                                            </div>
+                            <div className="w-[920px] max-w-[calc(100vw-48px)] p-6">
+                                <div className="grid grid-cols-3 gap-x-6 gap-y-7">
+                                    {toolCategories.map((category) => {
+                                        const CategoryIcon = categoryIconMap[category.slug];
+                                        const visibleTools = category.tools.slice(0, TOOLS_PER_CATEGORY);
+                                        const remaining = category.tools.length - visibleTools.length;
 
-                                            <div className="space-y-1">
-                                                {group.items.map((item) => {
-                                                    const Icon = item.icon;
+                                        return (
+                                            <div key={category.id} className="min-w-0">
+                                                <NavigationMenuLink asChild>
+                                                    <Link
+                                                        href={`/tools/${category.slug}`}
+                                                        className="mb-3 flex items-center gap-2.5 rounded-lg px-1 py-1 transition-colors hover:text-primary"
+                                                    >
+                                                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
+                                                            <CategoryIcon className="h-3.5 w-3.5 text-foreground" />
+                                                        </span>
+                                                        <span className="truncate text-sm font-semibold">
+                                                            {category.title}
+                                                        </span>
+                                                    </Link>
+                                                </NavigationMenuLink>
 
-                                                    return (
-                                                        <NavigationMenuLink key={item.title} asChild>
+                                                <div className="space-y-0.5">
+                                                    {visibleTools.map((tool) => (
+                                                        <NavigationMenuLink key={tool.slug} asChild>
                                                             <Link
-                                                                href={item.href}
-                                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-muted"
+                                                                href={`/tools/${category.slug}/${tool.slug}`}
+                                                                className="block truncate rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                                                             >
-                                                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                                                                    <Icon className="h-4 w-4 text-foreground" />
-                                                                </span>
-                                                                <span className="truncate font-medium">
-                                                                    {item.title}
-                                                                </span>
+                                                                {tool.name}
                                                             </Link>
                                                         </NavigationMenuLink>
-                                                    );
-                                                })}
+                                                    ))}
+                                                </div>
+
+                                                {remaining > 0 ? (
+                                                    <NavigationMenuLink asChild>
+                                                        <Link
+                                                            href={`/tools/${category.slug}`}
+                                                            className="mt-1 flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-primary hover:underline"
+                                                        >
+                                                            View all {category.tools.length}
+                                                            <ArrowRight className="h-3 w-3" />
+                                                        </Link>
+                                                    </NavigationMenuLink>
+                                                ) : null}
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="mt-6 border-t border-border/60 pt-4">
+                                    <NavigationMenuLink asChild>
+                                        <Link
+                                            href="/tools"
+                                            className="flex items-center justify-center gap-1.5 rounded-xl bg-muted px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/70"
+                                        >
+                                            Browse all tools
+                                            <ArrowRight className="h-3.5 w-3.5" />
+                                        </Link>
+                                    </NavigationMenuLink>
                                 </div>
                             </div>
                         </NavigationMenuContent>

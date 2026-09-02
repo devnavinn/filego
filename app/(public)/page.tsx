@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { toolCategories } from "@/lib/tools-data";
+import { categoryIconMap, getToolBySlugs, toolCategories } from "@/lib/tools-data";
 import { cn } from "@/lib/utils";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Meteors } from "@/components/ui/meteors";
+import { ToolSearch } from "@/components/tool-search";
+import { ToolCategoryCard } from "@/components/tool-category-card";
 import {
   ArrowRight,
   CheckCircle2,
-  FileImage,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -17,15 +18,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-const featuredTools = toolCategories.flatMap((category) =>
-  category.tools.slice(0, 2).map((tool) => ({
-    name: tool.name,
-    shortDescription: tool.shortDescription,
-    href: `/tools/${category.slug}/${tool.slug}`,
-    categoryTitle: category.title,
-    accent: category.accent,
-  }))
-).slice(0, 8);
+const totalToolCount = toolCategories.reduce((sum, category) => sum + category.tools.length, 0);
+
+const FEATURED_TOOL_SLUGS: [string, string][] = [
+  ["image-tools", "image-compressor"],
+  ["pdf-tools", "pdf-merge"],
+  ["pdf-tools", "pdf-to-word"],
+  ["pdf-tools", "jpg-to-pdf"],
+  ["image-tools", "background-remover"],
+  ["developer-tools", "website-to-markdown"],
+  ["developer-tools", "qr-code-generator"],
+  ["video-tools", "video-compressor"],
+];
+
+const featuredTools = FEATURED_TOOL_SLUGS.map(([categorySlug, toolSlug]) => {
+  const data = getToolBySlugs(categorySlug, toolSlug);
+  if (!data) return null;
+
+  return {
+    name: data.tool.name,
+    shortDescription: data.tool.shortDescription,
+    href: `/tools/${data.category.slug}/${data.tool.slug}`,
+    categoryTitle: data.category.title,
+    categorySlug: data.category.slug,
+    accent: data.category.accent,
+  };
+}).filter((tool): tool is NonNullable<typeof tool> => tool !== null);
 
 const siteUrl = "https://www.filego.in";
 export const metadata: Metadata = {
@@ -131,7 +149,7 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-4 inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
-              Fast file tools for PDF, image, and document workflows
+              {totalToolCount}+ tools across {toolCategories.length} categories
             </div>
 
             <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
@@ -143,7 +161,11 @@ export default function HomePage() {
               batch-process uploads with a fast, privacy-first experience.
             </p>
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mx-auto mt-7 max-w-xl">
+              <ToolSearch variant="hero" placeholder={`Search ${totalToolCount}+ tools — try "compress", "merge pdf", "qr code"…`} />
+            </div>
+
+            <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-12 rounded-xl px-6">
                 <Link href="/bulk-image-compressor/editor">
                   Try Bulk Compress Image
@@ -195,7 +217,10 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {featuredTools.map((tool) => (
+              {featuredTools.map((tool) => {
+                const Icon = categoryIconMap[tool.categorySlug] ?? Sparkles;
+
+                return (
                 <Link key={tool.href} href={tool.href} className="group block">
                   <MagicCard
                     className="rounded-3xl border border-border/60 bg-background/90 p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
@@ -210,7 +235,7 @@ export default function HomePage() {
                               tool.accent
                             )}
                           >
-                            <FileImage className="h-5 w-5" />
+                            <Icon className="h-5 w-5" />
                           </div>
 
                           <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
@@ -243,9 +268,32 @@ export default function HomePage() {
                     </Card>
                   </MagicCard>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Browse by category</p>
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Every tool, organized by workflow
+            </h2>
+          </div>
+
+          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            {toolCategories.length} categories covering PDF, image, video, audio, document,
+            security, archive, developer, and AI-powered workflows.
+          </p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {toolCategories.map((category) => (
+            <ToolCategoryCard key={category.id} category={category} />
+          ))}
         </div>
       </section>
 

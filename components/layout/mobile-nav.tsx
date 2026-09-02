@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import {
     ArrowRight,
     LayoutDashboard,
+    LayoutGrid,
     LogOut,
     Menu,
     Settings,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { getCategoryIcon, toolCategories } from "@/lib/tools-data";
 import { Button } from "@/components/ui/button";
+import { ToolSearch } from "@/components/tool-search";
 import {
     Sheet,
     SheetClose,
@@ -33,10 +35,13 @@ type MobileNavProps = {
     };
 };
 
-const quickLinks = toolCategories.slice(0, 4).map((category) => ({
+const totalToolCount = toolCategories.reduce((sum, category) => sum + category.tools.length, 0);
+
+const categoryLinks = toolCategories.map((category) => ({
     title: category.title,
     href: `/tools/${category.slug}`,
     icon: getCategoryIcon(category.slug),
+    count: category.tools.length,
 }));
 
 export function MobileNav({ status, user }: MobileNavProps) {
@@ -77,6 +82,10 @@ export function MobileNav({ status, user }: MobileNavProps) {
                                     </p>
                                 </div>
                                 <ModeToggle />
+                            </div>
+
+                            <div className="mt-4">
+                                <ToolSearch variant="nav" />
                             </div>
                         </div>
 
@@ -163,13 +172,26 @@ export function MobileNav({ status, user }: MobileNavProps) {
                             </div>
                         )}
 
-                        <div className="border-b px-5 py-4">
-                            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                                Quick access
+                        <div className="flex-1 overflow-y-auto px-3 py-4">
+                            <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                                Browse by category
                             </p>
 
-                            <div className="grid gap-2">
-                                {quickLinks.map((item) => {
+                            <div className="space-y-1.5">
+                                <SheetClose asChild>
+                                    <Link
+                                        href="/tools"
+                                        className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 px-3 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-primary/10"
+                                    >
+                                        <span className="inline-flex items-center gap-2">
+                                            <LayoutGrid className="h-4 w-4 text-primary" />
+                                            Browse all {totalToolCount} tools
+                                        </span>
+                                        <ArrowRight className="h-4 w-4 text-primary" />
+                                    </Link>
+                                </SheetClose>
+
+                                {categoryLinks.map((item) => {
                                     const Icon = item.icon;
 
                                     return (
@@ -182,16 +204,17 @@ export function MobileNav({ status, user }: MobileNavProps) {
                                                     <Icon className="h-4 w-4 text-muted-foreground" />
                                                     {item.title}
                                                 </span>
-                                                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                                                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                    {item.count}
+                                                    <ArrowRight className="h-3.5 w-3.5" />
+                                                </span>
                                             </Link>
                                         </SheetClose>
                                     );
                                 })}
                             </div>
-                        </div>
 
-                        <div className="flex-1 overflow-y-auto px-3 py-4">
-                            <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            <p className="mt-5 px-2 pb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                                 Navigation
                             </p>
 
