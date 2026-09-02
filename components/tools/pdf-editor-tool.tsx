@@ -125,7 +125,7 @@ export function PdfEditorTool() {
             setElements([])
             setActivePageId(nextPages[0]?.id ?? null)
             setSelectedElementId(null)
-            setTool("select")
+            setTool("edit-text")
         } catch (err) {
             setError(err instanceof Error ? err.message : "Could not read this PDF.")
         } finally {

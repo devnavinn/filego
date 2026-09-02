@@ -1,5 +1,6 @@
 import { BackgroundRemoverTool } from "@/components/tools/background-remover-tool"
 import { JwtDecoderTool } from "@/components/tools/jwt-decoder-tool"
+import { PdfEditorTool } from "@/components/tools/pdf-editor-tool"
 import { PdfMergeTool } from "@/components/tools/pdf-merge-tool"
 import { PdfSplitTool } from "@/components/tools/pdf-split-tool"
 import { PdfCompressTool } from "@/components/tools/pdf-compress-tool"
@@ -73,6 +74,7 @@ import { AudioCompressorTool } from "@/components/tools/audio-compressor-tool"
 import { VolumeBoosterTool } from "@/components/tools/volume-booster-tool"
 
 export const toolComponentMap = {
+    "edit-pdf": PdfEditorTool,
     "pdf-merge": PdfMergeTool,
     "pdf-split": PdfSplitTool,
     "pdf-compress": PdfCompressTool,

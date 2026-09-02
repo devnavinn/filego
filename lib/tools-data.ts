@@ -57,6 +57,7 @@ export const toolCategories: ToolCategory[] = [
         seoDescription:
             "Use fast PDF tools to merge, split, compress, convert, watermark, protect, unlock, and organize PDF files online.",
         tools: [
+            createTool("Edit PDF", "Add text, images, shapes, and drawings, then manage pages and export."),
             createTool("PDF Merge", "Combine multiple PDF files into one document."),
             createTool("PDF Split", "Split one PDF into separate pages or custom ranges."),
             createTool("PDF Compress", "Reduce PDF file size while keeping quality balanced."),
