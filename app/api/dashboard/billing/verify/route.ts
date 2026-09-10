@@ -66,10 +66,10 @@ export async function POST(req: Request) {
         }
 
         const now = new Date();
-        // PRO plans are billed monthly (₹1000) or yearly (₹9999); LIFETIME never expires.
+        // PRO plans are billed monthly (₹199) or yearly (₹499); LIFETIME never expires.
         const expiresAt =
             subscription.planType === "PRO"
-                ? new Date(now.getTime() + (subscription.amount === 999900 ? 365 : 30) * 24 * 60 * 60 * 1000)
+                ? new Date(now.getTime() + (subscription.amount === 49900 ? 365 : 30) * 24 * 60 * 60 * 1000)
                 : null;
 
         await prisma.subscription.update({

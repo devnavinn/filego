@@ -108,7 +108,7 @@ export default async function PremiumPage() {
                             <>
                                 <div>
                                     <p className="text-4xl font-semibold tracking-tight text-foreground">
-                                        ₹999
+                                        ₹1,999
                                     </p>
                                     <p className="mt-2 text-sm text-muted-foreground">
                                         One-time payment for premium Filego access.
@@ -190,7 +190,7 @@ export default async function PremiumPage() {
                             <div className="mt-4 grid gap-4 sm:grid-cols-2">
                                 <div className="rounded-2xl border border-border bg-background p-5">
                                     <p className="text-2xl font-semibold tracking-tight text-foreground">
-                                        ₹1,000<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                                        ₹199<span className="text-sm font-normal text-muted-foreground">/mo</span>
                                     </p>
                                     <p className="mt-2 text-sm text-muted-foreground">Billed monthly.</p>
                                     <div className="mt-4">
@@ -204,7 +204,7 @@ export default async function PremiumPage() {
 
                                 <div className="rounded-2xl border border-primary/40 bg-background p-5">
                                     <p className="text-2xl font-semibold tracking-tight text-foreground">
-                                        ₹9,999<span className="text-sm font-normal text-muted-foreground">/yr</span>
+                                        ₹499<span className="text-sm font-normal text-muted-foreground">/yr</span>
                                     </p>
                                     <p className="mt-2 text-sm text-muted-foreground">Billed yearly — save vs monthly.</p>
                                     <div className="mt-4">

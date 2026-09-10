@@ -7,9 +7,9 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 const PLAN_CONFIG = {
-    LIFETIME: { planType: PlanType.LIFETIME, amount: 99900, product: "filego-lifetime" },
-    PRO_MONTHLY: { planType: PlanType.PRO, amount: 100000, product: "filego-pro-monthly" },
-    PRO_YEARLY: { planType: PlanType.PRO, amount: 999900, product: "filego-pro-yearly" },
+    LIFETIME: { planType: PlanType.LIFETIME, amount: 199900, product: "filego-lifetime" },
+    PRO_MONTHLY: { planType: PlanType.PRO, amount: 19900, product: "filego-pro-monthly" },
+    PRO_YEARLY: { planType: PlanType.PRO, amount: 49900, product: "filego-pro-yearly" },
 } as const;
 
 type PlanKey = keyof typeof PLAN_CONFIG;
