@@ -1,23 +1,18 @@
 "use client"
 
-import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { Button } from "@/components/ui/button"
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
 
 export function ModeToggle() {
-    const { theme, setTheme } = useTheme()
+    const { resolvedTheme, setTheme } = useTheme()
 
     return (
-        <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
+        <AnimatedThemeToggler
+            theme={resolvedTheme === "dark" ? "dark" : "light"}
+            onThemeChange={setTheme}
             aria-label="Toggle theme"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        >
-            <Sun className="h-4 w-4 dark:hidden" />
-            <Moon className="hidden h-4 w-4 dark:block" />
-        </Button>
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent hover:text-accent-foreground [&_svg]:h-4 [&_svg]:w-4"
+        />
     )
 }
