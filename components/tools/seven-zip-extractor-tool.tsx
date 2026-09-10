@@ -96,8 +96,8 @@ export function SevenZipExtractorTool() {
 
     return (
         <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">7Z Extractor</h2>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">7Z Extractor</h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                 Open and unpack 7Z files, powered by a real 7-Zip engine compiled to WebAssembly.
             </p>
 

@@ -147,8 +147,8 @@ export function McqQuizBuilder({ onCreate, onCancel, isCreating }: McqQuizBuilde
         <div>
             <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                    <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">MCQ / Quiz Builder</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <h2 className="text-lg font-semibold tracking-tight sm:text-xl">MCQ / Quiz Builder</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">
                         Add your questions and answer choices, then generate a fillable quiz PDF.
                     </p>
                 </div>

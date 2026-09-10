@@ -1,246 +1,205 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  FileImage,
-  FileText,
-  ShieldCheck,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { categoryIconMap, toolCategories } from "@/lib/tools-data";
 
 export const metadata: Metadata = {
   title: "About | Filego",
   description:
-    "Learn about Filego, our mission, values, and the way we build simple file tools for modern work.",
+    "Filego is a fast, privacy-first workspace for PDF, image, video, and document tools. Learn what we build and why.",
 };
 
-const values = [
+const totalToolCount = toolCategories.reduce((sum, category) => sum + category.tools.length, 0);
+
+const principles = [
   {
     title: "Simple by default",
-    description:
-      "We remove steps, reduce friction, and make common file tasks feel fast and obvious.",
+    description: "Fewer steps, no clutter — open a tool and get straight to the task.",
     icon: Sparkles,
   },
   {
     title: "Privacy aware",
-    description:
-      "We design tools to minimize unnecessary data handling and keep users in control.",
+    description: "Processing stays local where possible; we don't hold onto your files.",
     icon: ShieldCheck,
   },
   {
     title: "Built for speed",
-    description:
-      "Performance matters. File work should feel instant, responsive, and reliable.",
+    description: "Every tool is tuned to feel instant, even on slower connections.",
     icon: Zap,
-  },
-];
-
-const highlights = [
-  {
-    title: "Image tools",
-    description:
-      "Compress, convert, and optimize images without a complicated workflow.",
-    icon: FileImage,
-  },
-  {
-    title: "PDF workflows",
-    description:
-      "Handle merges, splits, conversions, and edits in one clean interface.",
-    icon: FileText,
-  },
-  {
-    title: "Modern UX",
-    description:
-      "Designed for people who need file tools often and don’t want to fight the UI.",
-    icon: Sparkles,
   },
 ];
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <section className="border-b">
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium text-muted-foreground">
+    <main className="min-h-screen bg-background text-foreground">
+      <section className="relative overflow-hidden border-b">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(120,120,120,0.10),transparent_40%)]" />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
               About Filego
-            </p>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-6xl">
+            </div>
+
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">
               File tools that feel lighter, faster, and easier to trust.
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-              Filego is built to make everyday file work simpler. From image
-              compression to PDF workflows, we focus on tools that are fast to
-              open, easy to use, and practical for real work.
+
+            <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
+              Filego is a browser-based workspace for the file tasks people run
+              every day — {totalToolCount}+ tools across {toolCategories.length}{" "}
+              categories, from PDF and image editing to video, audio, and
+              developer utilities.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild className="rounded-xl">
-                <Link href="/bulk-image-compressor/editor">
-                  Try Filego
+                <Link href="/tools">
+                  Browse all tools
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-
               <Button asChild variant="outline" className="rounded-xl">
-                <Link href="/contact">Contact Us</Link>
+                <Link href="/contact">Contact us</Link>
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <section>
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:px-6 md:grid-cols-3 md:py-20">
-          {highlights.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <Card key={item.title} className="rounded-2xl">
-                <CardContent className="p-6">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h2 className="mt-4 text-lg font-semibold">{item.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {item.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="border-t">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:px-6 md:grid-cols-[1.1fr_0.9fr] md:py-24">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Our story
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              We built Filego because file tasks are still more frustrating than
-              they should be.
-            </h2>
-          </div>
-
-          <div className="space-y-5 text-sm leading-7 text-muted-foreground md:text-base">
-            <p>
-              Too many file tools feel cluttered, slow, or overly aggressive
-              with uploads, paywalls, and confusing flows. We wanted a cleaner
-              alternative that focuses on the core job: helping people get from
-              input to output with less friction.
-            </p>
-            <p>
-              Filego is designed around practical workflows. That means faster
-              actions, clearer interfaces, and tools that work well for
-              freelancers, teams, students, and businesses that deal with files
-              every day.
-            </p>
-            <p>
-              Our goal is not to overload the product with everything at once.
-              It is to make the most useful file operations dependable,
-              polished, and easy to return to.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
+      <section className="border-b">
+        <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
           <div className="max-w-2xl">
-            <p className="text-sm font-medium text-muted-foreground">Values</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              What guides the way we build
+            <p className="text-xs font-medium text-muted-foreground">Our story</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
+              We built Filego because file tasks are still more frustrating
+              than they should be.
             </h2>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {values.map((value) => {
-              const Icon = value.icon;
+          <div className="mt-6 grid gap-5 text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7 md:grid-cols-3">
+            <p>
+              Too many tools feel cluttered, slow, or aggressive about
+              uploads, paywalls, and confusing flows. Filego focuses on the
+              core job: get from input to output with less friction.
+            </p>
+            <p>
+              Every tool runs in the browser where possible, so files don't
+              need to leave your device just to get compressed, converted, or
+              cleaned up.
+            </p>
+            <p>
+              We're not trying to do everything at once — we'd rather make
+              the operations people actually use dependable, fast, and easy
+              to come back to.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b">
+        <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">What we cover</p>
+              <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
+                {toolCategories.length} categories, {totalToolCount}+ tools
+              </h2>
+            </div>
+            <Link
+              href="/tools"
+              className="hidden shrink-0 items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-primary sm:inline-flex"
+            >
+              View all
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {toolCategories.map((category) => {
+              const Icon = categoryIconMap[category.slug] ?? Sparkles;
 
               return (
-                <Card key={value.title} className="rounded-2xl bg-background">
-                  <CardContent className="p-6">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted">
-                      <Icon className="h-5 w-5" />
+                <Link
+                  key={category.slug}
+                  href={`/tools/${category.slug}`}
+                  className="group flex items-start gap-2.5 rounded-xl border border-border/60 p-3 transition-colors hover:border-primary/40 hover:bg-muted/30"
+                >
+                  <div
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
+                      category.accent
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-medium tracking-tight transition-colors group-hover:text-primary">
+                        {category.title}
+                      </h3>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold">
-                      {value.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      {value.description}
+                    <p className="mt-0.5 text-xs leading-4 text-muted-foreground">
+                      {category.tools.length} tools
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Link>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="border-t">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-16 md:px-6 md:grid-cols-3 md:py-24">
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">Focus</p>
-              <p className="mt-2 text-2xl font-semibold">Useful tools</p>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                We prioritize file actions people actually need every week, not
-                novelty features.
-              </p>
-            </CardContent>
-          </Card>
+      <section className="border-b bg-muted/30">
+        <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
+          <div className="max-w-xl">
+            <p className="text-xs font-medium text-muted-foreground">Principles</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
+              What guides the way we build
+            </h2>
+          </div>
 
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">Approach</p>
-              <p className="mt-2 text-2xl font-semibold">Product-first</p>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Clear interfaces, fast execution, and steady iteration shape how
-                we improve Filego.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {principles.map((item) => {
+              const Icon = item.icon;
 
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">Promise</p>
-              <p className="mt-2 text-2xl font-semibold">Less friction</p>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Every feature should reduce time, clicks, confusion, or
-                unnecessary handling.
-              </p>
-            </CardContent>
-          </Card>
+              return (
+                <div key={item.title} className="rounded-xl border border-border/60 bg-background p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <h3 className="mt-3 text-sm font-medium">{item.title}</h3>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    {item.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      <section className="border-t">
-        <div className="mx-auto max-w-4xl px-4 py-16 text-center md:px-6 md:py-24">
-          <p className="text-sm font-medium text-muted-foreground">
-            Get started
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+      <section>
+        <div className="mx-auto max-w-4xl px-4 py-12 text-center md:px-6 md:py-16">
+          <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
             Start with one task and see how fast file work can feel.
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-            Try Filego with image compression, PDF utilities, and more. No steep
-            learning curve, just focused tools built for getting work done.
+          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+            No steep learning curve — just focused tools built for getting
+            work done.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button asChild className="rounded-xl">
               <Link href="/bulk-image-compressor/editor">
                 Start free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-
             <Button asChild variant="outline" className="rounded-xl">
               <Link href="/privacy">Privacy</Link>
             </Button>

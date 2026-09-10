@@ -54,8 +54,8 @@ export function HashTextCore({ title, description }: HashTextCoreProps) {
 
     return (
         <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">{description}</p>
+            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">{title}</h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{description}</p>
 
             <div className="mt-6 space-y-3">
                 <p className="text-sm font-medium">Input</p>

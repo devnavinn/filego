@@ -84,8 +84,8 @@ export function ResumeParserTool() {
 
     return (
         <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Resume Parser</h2>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Resume Parser</h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                 Upload a resume (PDF, DOCX, or TXT) and extract structured contact info, skills,
                 experience, and education with AI.
             </p>

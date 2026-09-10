@@ -94,7 +94,7 @@ export function ToolSearch({ variant = "nav", className, placeholder }: ToolSear
                 <div className="absolute top-full left-0 z-50 mt-2 w-full min-w-[320px] overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl">
                     {results.length > 0 ? (
                         <>
-                            <div className="max-h-[60vh] overflow-y-auto p-2">
+                            <div className="max-h-[60vh] overflow-y-auto p-1.5">
                                 {results.map((tool) => {
                                     const Icon = categoryIconMap[tool.categorySlug] ?? Sparkles
 
@@ -103,16 +103,16 @@ export function ToolSearch({ variant = "nav", className, placeholder }: ToolSear
                                             key={`${tool.categorySlug}-${tool.slug}`}
                                             href={`/tools/${tool.categorySlug}/${tool.slug}`}
                                             onClick={() => setOpen(false)}
-                                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted"
+                                            className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-muted"
                                         >
-                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                                                <Icon className="h-4 w-4 text-foreground" />
+                                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
+                                                <Icon className="h-3.5 w-3.5 text-foreground" />
                                             </span>
                                             <span className="min-w-0 flex-1">
-                                                <span className="block truncate text-sm font-medium text-foreground">
+                                                <span className="block truncate text-xs font-medium text-foreground">
                                                     {tool.name}
                                                 </span>
-                                                <span className="block truncate text-xs text-muted-foreground">
+                                                <span className="block truncate text-[11px] text-muted-foreground">
                                                     {tool.shortDescription}
                                                 </span>
                                             </span>
@@ -131,7 +131,7 @@ export function ToolSearch({ variant = "nav", className, placeholder }: ToolSear
                                 <Link
                                     href="/tools"
                                     onClick={() => setOpen(false)}
-                                    className="flex items-center justify-between border-t border-border/60 bg-muted/30 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                                    className="flex items-center justify-between border-t border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                                 >
                                     View all {totalMatches} results in Tools
                                     <ArrowRight className="h-3.5 w-3.5" />
@@ -139,9 +139,9 @@ export function ToolSearch({ variant = "nav", className, placeholder }: ToolSear
                             ) : null}
                         </>
                     ) : (
-                        <div className="p-6 text-center text-sm text-muted-foreground">
+                        <div className="p-4 text-center text-xs text-muted-foreground">
                             No tools found for &ldquo;{query}&rdquo;.
-                            <Link href="/tools" onClick={() => setOpen(false)} className="mt-2 block font-medium text-foreground hover:underline">
+                            <Link href="/tools" onClick={() => setOpen(false)} className="mt-1.5 block font-medium text-foreground hover:underline">
                                 Browse all tools
                             </Link>
                         </div>

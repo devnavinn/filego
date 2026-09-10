@@ -4,8 +4,8 @@ import { ArrowRight, Image as ImageIcon, Images } from "lucide-react"
 export function ImageCompressorRedirectTool() {
     return (
         <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Image Compressor</h2>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Image Compressor</h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                 Image compression already has a dedicated, more capable workspace. Pick the workflow that fits your
                 files.
             </p>

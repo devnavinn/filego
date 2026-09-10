@@ -125,8 +125,8 @@ export function ImageUpscalerTool() {
 
     return (
         <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Image Upscaler</h2>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Image Upscaler</h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                 Enlarge images with high-quality resampling and edge sharpening.
             </p>
             <div className="mt-3 flex items-start gap-2 rounded-xl border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
