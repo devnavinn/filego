@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "seed:tool-guides": "tsx --env-file=.env.local prisma/seed-tool-guides.ts"
+    "seed:tool-guides": "tsx --env-file=.env.local prisma/seed-tool-guides.ts",
+    "seed:archive-guides": "tsx --env-file=.env.local prisma/seed-archive-guides.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

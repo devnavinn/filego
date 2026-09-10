@@ -6,7 +6,7 @@
 // page, so it can rank for informational search intent while funneling
 // readers straight into the tool.
 //
-// Run with: npx tsx prisma/seed-tool-guides.ts
+// Run with: npm run seed:tool-guides
 
 import { neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
@@ -24,6 +24,8 @@ interface ToolGuide {
     seoDescription: string;
     category: string;
     tags: string[];
+    toolLabel: string;
+    toolPath: string;
     content: string;
 }
 
@@ -38,6 +40,8 @@ const guides: ToolGuide[] = [
             "Learn how to merge multiple PDF files into one document online for free, without installing software. Step-by-step instructions, tips, and FAQs.",
         category: "PDF Guides",
         tags: ["merge pdf", "combine pdf", "pdf tools"],
+        toolLabel: "Merge PDF",
+        toolPath: "/merge-pdf",
         content: `Merging PDF files is one of the most common document tasks — combining invoices into one file for accounting, stitching scanned pages into a single report, or putting together a portfolio from separate PDFs. You don't need Adobe Acrobat or any desktop software to do it. Here's how to merge PDF files online for free, in under a minute.
 
 ## Why merge PDFs instead of keeping them separate?
@@ -83,6 +87,8 @@ Ready to combine your files? [Merge your PDFs for free →](/merge-pdf)`,
             "Split a PDF into individual pages or custom page ranges online for free. Step-by-step instructions, use cases, and answers to common questions.",
         category: "PDF Guides",
         tags: ["split pdf", "extract pdf pages", "pdf tools"],
+        toolLabel: "Split PDF",
+        toolPath: "/split-pdf",
         content: `Sometimes you only need a handful of pages out of a much bigger PDF — one chapter from a report, a single invoice from a scanned batch, or a signature page to send separately. Splitting a PDF solves that without touching the original file.
 
 ## When you need to split a PDF
@@ -129,6 +135,8 @@ Need to pull pages out of a PDF right now? [Split your PDF for free →](/split-
             "Edit a PDF online for free: add text, images, shapes, and freehand drawing, plus rotate, reorder, and delete pages. Step-by-step guide.",
         category: "PDF Guides",
         tags: ["edit pdf", "pdf editor", "pdf tools"],
+        toolLabel: "Edit PDF",
+        toolPath: "/edit-pdf",
         content: `PDFs are meant to be a "final" format, but you'll often still need to tweak one — filling in a missing field, covering up an old figure, adding a note, or fixing the page order. Here's how to do it without a desktop editor.
 
 ## What you can typically fix without recreating the document
@@ -176,6 +184,8 @@ Have a PDF that needs a quick fix? [Edit your PDF for free →](/edit-pdf)`,
             "Add a text watermark to every page of a PDF online for free. Control size, opacity, rotation, and color. Step-by-step guide and tips.",
         category: "PDF Guides",
         tags: ["watermark pdf", "protect pdf", "pdf tools"],
+        toolLabel: "Add Watermark",
+        toolPath: "/add-watermark",
         content: `A watermark is a fast way to signal that a document is a draft, confidential, or belongs to you — without redesigning the file. Here's how to stamp one across every page of a PDF online.
 
 ## Common reasons to add a watermark
@@ -222,6 +232,8 @@ Ready to mark up your document? [Add a watermark for free →](/add-watermark)`,
             "Fix sideways or upside-down PDF pages online for free. Rotate individual pages or the whole document instantly. Step-by-step guide.",
         category: "PDF Guides",
         tags: ["rotate pdf", "fix pdf orientation", "pdf tools"],
+        toolLabel: "Rotate PDF",
+        toolPath: "/rotate-pdf",
         content: `Sideways or upside-down pages usually come from a scanner that fed a document in wrong, or a photo taken in the wrong orientation before converting it to PDF. It's an easy fix — you don't need to rescan or re-photograph anything.
 
 ## Why this happens
@@ -267,6 +279,8 @@ Have a sideways PDF to fix? [Rotate your PDF for free →](/rotate-pdf)`,
             "Convert PDF files to editable Word (DOCX) documents online for free. Extract text, preview the recovered structure, and download instantly.",
         category: "PDF Guides",
         tags: ["pdf to word", "pdf to docx", "convert pdf"],
+        toolLabel: "PDF to Word",
+        toolPath: "/pdf-to-word",
         content: `PDF is great for sharing a final version of a document, but it's a poor format for actually editing text. If you need to change wording, fix a typo, or reuse a section, converting the PDF to Word first is much faster than retyping it.
 
 ## When you need PDF to Word conversion
@@ -313,6 +327,8 @@ Need an editable version of a PDF? [Convert PDF to Word for free →](/pdf-to-wo
             "Convert DOCX files to PDF online for free. Preview layout and spacing before exporting, and download instantly. Step-by-step guide.",
         category: "PDF Guides",
         tags: ["word to pdf", "docx to pdf", "convert pdf"],
+        toolLabel: "Word to PDF",
+        toolPath: "/word-to-pdf",
         content: `A Word document can look different depending on which app opens it, what fonts are installed, and what device it's viewed on. Converting it to PDF locks the formatting in place — what you see is exactly what the reader sees, on any device.
 
 ## Why convert Word to PDF before sharing
@@ -358,6 +374,8 @@ Ready to lock in your document's formatting? [Convert Word to PDF for free →](
             "Convert JPG images to a single PDF online for free. Reorder pages, adjust layout and margins, and download instantly. Step-by-step guide.",
         category: "PDF Guides",
         tags: ["jpg to pdf", "image to pdf", "convert pdf"],
+        toolLabel: "JPG to PDF",
+        toolPath: "/jpg-to-pdf",
         content: `Whether it's a stack of photographed receipts, scanned pages, or screenshots, turning JPG images into a single PDF makes them dramatically easier to send, print, and store compared to a folder of separate image files.
 
 ## When JPG to PDF conversion is useful
@@ -404,6 +422,8 @@ Have images to turn into a document? [Convert JPG to PDF for free →](/jpg-to-p
             "Convert PDF pages to JPG images online for free. Choose quality and scale, preview pages, and download instantly. Step-by-step guide.",
         category: "PDF Guides",
         tags: ["pdf to jpg", "pdf to image", "convert pdf"],
+        toolLabel: "PDF to JPG",
+        toolPath: "/pdf-to-jpg",
         content: `Sometimes you don't need the whole PDF — you need one page of it as an image, so it can go into a presentation, a social post, a website, or a quick preview thumbnail. Converting PDF pages to JPG solves that directly.
 
 ## When PDF to JPG conversion is useful
@@ -450,6 +470,8 @@ Need a page from your PDF as an image? [Convert PDF to JPG for free →](/pdf-to
             "Fill in existing PDF forms online, or add new text fields and checkboxes to any PDF, for free. No printing or scanning required.",
         category: "PDF Guides",
         tags: ["pdf forms", "fillable pdf", "pdf tools"],
+        toolLabel: "PDF Forms",
+        toolPath: "/pdf-forms",
         content: `Printing a form, filling it in by hand, and scanning it back is slow and produces a worse-looking document than just filling it in digitally. Here's how to complete a PDF form — or build one — entirely online.
 
 ## Two different situations this solves
@@ -491,15 +513,22 @@ Have a form to fill in or build? [Go to PDF Forms →](/pdf-forms)`,
     },
 ];
 
+function withToolLink(guide: ToolGuide) {
+    const callout = `> **Try it now:** [${guide.toolLabel} →](${guide.toolPath})`;
+    return `${callout}\n\n${guide.content}`;
+}
+
 async function main() {
     for (const guide of guides) {
+        const content = withToolLink(guide);
+
         await prisma.blogPost.upsert({
             where: { slug: guide.slug },
             create: {
                 slug: guide.slug,
                 title: guide.title,
                 excerpt: guide.excerpt,
-                content: guide.content,
+                content,
                 category: guide.category,
                 tags: guide.tags,
                 seoTitle: guide.seoTitle,
@@ -510,7 +539,7 @@ async function main() {
             update: {
                 title: guide.title,
                 excerpt: guide.excerpt,
-                content: guide.content,
+                content,
                 category: guide.category,
                 tags: guide.tags,
                 seoTitle: guide.seoTitle,
