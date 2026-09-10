@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowUpRight } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { ToolRenderer } from "@/components/tools/tool-renderer"
 import { getToolBySlugs, toolCategories } from "@/lib/tools-data"
 
@@ -81,31 +80,17 @@ export default async function SingleToolPage({ params }: Props) {
 
     return (
         <main className="min-h-screen bg-background text-foreground">
-            <div className="border-b border-border/50 bg-muted/20">
-                <div className="container mx-auto flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 md:px-6">
-                    <Link
-                        href={`/tools/${toolCategory.slug}`}
-                        className="inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    >
-                        <ArrowLeft className="h-3.5 w-3.5" />
-                        {toolCategory.title}
-                    </Link>
-
-                    <div className="hidden h-4 w-px bg-border sm:block" />
-
-                    <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h1 className="text-base font-semibold tracking-tight sm:text-lg">{toolItem.name}</h1>
-                            <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px]">
-                                {toolCategory.title}
-                            </Badge>
-                        </div>
-                        <p className="truncate text-xs text-muted-foreground">{toolItem.shortDescription}</p>
-                    </div>
-                </div>
+            <div className="container mx-auto px-4 pt-6 pb-2 md:px-6">
+                <Link
+                    href={`/tools/${toolCategory.slug}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    {toolCategory.title}
+                </Link>
             </div>
 
-            <section className="container mx-auto px-4 py-5 sm:py-8 md:px-6">
+            <section className="container mx-auto px-4 py-5 md:px-6">
                 <ToolRenderer
                     toolSlug={toolItem.slug}
                     toolName={toolItem.name}
@@ -120,18 +105,21 @@ export default async function SingleToolPage({ params }: Props) {
                         <h2 className="text-sm font-medium text-muted-foreground">
                             More {toolCategory.title.toLowerCase()}
                         </h2>
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
                             {relatedTools.map((item) => (
-                                <Link
-                                    key={item.slug}
-                                    href={`/tools/${toolCategory.slug}/${item.slug}`}
-                                    className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted/60"
-                                >
-                                    {item.name}
-                                    <ArrowRight className="h-3 w-3 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                                </Link>
+                                <li key={item.slug}>
+                                    <Link
+                                        href={`/tools/${toolCategory.slug}/${item.slug}`}
+                                        className="group inline-flex items-center gap-1 text-sm text-foreground/80 transition-colors hover:text-primary"
+                                    >
+                                        <span className="underline decoration-border/0 underline-offset-4 group-hover:decoration-primary/50">
+                                            {item.name}
+                                        </span>
+                                        <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    </Link>
+                                </li>
                             ))}
-                        </div>
+                        </ul>
                     </div>
                 </section>
             )}
