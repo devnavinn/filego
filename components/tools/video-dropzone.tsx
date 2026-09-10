@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { forwardRef, useRef, useState } from "react"
 import { RefreshCw, Upload, Video, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -17,9 +17,10 @@ type VideoDropzoneProps = {
     accept?: string
     hint?: string
     className?: string
+    showControls?: boolean
 }
 
-export function VideoDropzone({
+export const VideoDropzone = forwardRef<HTMLVideoElement, VideoDropzoneProps>(function VideoDropzone({
     onFileSelect,
     file = null,
     previewUrl = null,
@@ -28,7 +29,8 @@ export function VideoDropzone({
     accept = "video/*",
     hint = "MP4, MOV, WEBM, or AVI",
     className,
-}: VideoDropzoneProps) {
+    showControls = true,
+}, videoRef) {
     const [isDragging, setIsDragging] = useState(false)
     const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -54,7 +56,13 @@ export function VideoDropzone({
         return (
             <div className={cn("overflow-hidden rounded-2xl border border-border/60 bg-card", className)}>
                 {previewUrl && (
-                    <video src={previewUrl} controls className="max-h-72 w-full bg-black" />
+                    <video
+                        ref={videoRef}
+                        src={previewUrl}
+                        controls={showControls}
+                        playsInline
+                        className="max-h-72 w-full bg-black"
+                    />
                 )}
                 <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-2.5">
                     <div className="min-w-0">
@@ -117,4 +125,6 @@ export function VideoDropzone({
             {fileInput}
         </div>
     )
-}
+})
+
+VideoDropzone.displayName = "VideoDropzone"

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { fetchFile } from "@ffmpeg/util"
-import { Download, Music, Scissors } from "lucide-react"
+import { Download, Music, Pause, Play, Scissors } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -22,8 +22,12 @@ export function Mp3CutterTool() {
     const [output, setOutput] = useState<{ blob: Blob; url: string } | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isPreviewing, setIsPreviewing] = useState(false)
+    const previewAudioRef = useRef<HTMLAudioElement | null>(null)
 
     function handleClear() {
+        previewAudioRef.current?.pause()
+        setIsPreviewing(false)
         setFile(null)
         setPreviewUrl(null)
         setDuration(0)
@@ -33,6 +37,8 @@ export function Mp3CutterTool() {
     }
 
     async function handleFileSelect(next: File) {
+        previewAudioRef.current?.pause()
+        setIsPreviewing(false)
         setError(null)
         setOutput(null)
         try {
@@ -44,6 +50,20 @@ export function Mp3CutterTool() {
         } catch (err) {
             setError(err instanceof Error ? err.message : "Could not load this audio file.")
         }
+    }
+
+    function handleTogglePreview() {
+        const audio = previewAudioRef.current
+        if (!audio) return
+
+        if (isPreviewing) {
+            audio.pause()
+            return
+        }
+
+        audio.currentTime = range[0]
+        audio.play()
+        setIsPreviewing(true)
     }
 
     async function handleCut() {
@@ -108,10 +128,23 @@ export function Mp3CutterTool() {
                     {file && duration > 0 && (
                         <div className="space-y-4 rounded-2xl border border-border/60 bg-muted/30 p-4">
                             <div className="space-y-1.5">
-                                <p className="text-xs font-medium text-muted-foreground">
-                                    {formatDuration(range[0])} – {formatDuration(range[1])} ·{" "}
-                                    {formatDuration(range[1] - range[0])} selected
-                                </p>
+                                <div className="flex items-center justify-between gap-3">
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        {formatDuration(range[0])} – {formatDuration(range[1])} ·{" "}
+                                        {formatDuration(range[1] - range[0])} selected
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-full"
+                                        onClick={handleTogglePreview}
+                                        disabled={range[1] <= range[0]}
+                                    >
+                                        {isPreviewing ? <Pause /> : <Play />}
+                                        {isPreviewing ? "Stop" : "Preview"}
+                                    </Button>
+                                </div>
                                 <Slider
                                     value={range}
                                     onValueChange={(v) => setRange([v[0], v[1]] as [number, number])}
@@ -120,6 +153,25 @@ export function Mp3CutterTool() {
                                     step={0.1}
                                     minStepsBetweenThumbs={1}
                                 />
+                                <p className="text-[11px] text-muted-foreground">
+                                    Preview plays just the selected section so you can fine-tune it before cutting.
+                                </p>
+                                {previewUrl && (
+                                    <audio
+                                        ref={previewAudioRef}
+                                        src={previewUrl}
+                                        className="hidden"
+                                        onTimeUpdate={(e) => {
+                                            const audio = e.currentTarget
+                                            if (audio.currentTime >= range[1]) {
+                                                audio.pause()
+                                                audio.currentTime = range[0]
+                                                setIsPreviewing(false)
+                                            }
+                                        }}
+                                        onPause={() => setIsPreviewing(false)}
+                                    />
+                                )}
                             </div>
 
                             <Button
