@@ -1,7 +1,7 @@
 // lib/blog.ts
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-const POSTS_PER_PAGE = 10;
+const POSTS_PER_PAGE = 12;
 export async function getPublishedBlogPosts(page: number = 1) {
     const currentPage = Math.max(1, page);
     const skip = (currentPage - 1) * POSTS_PER_PAGE;
