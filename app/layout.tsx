@@ -37,9 +37,6 @@ export const metadata: Metadata = {
   other: {
     "google-adsense-account": "ca-pub-4796389804860566",
   },
-  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
-    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-    : undefined,
 };
 
 export default function RootLayout({
