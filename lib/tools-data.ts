@@ -200,6 +200,12 @@ export const toolCategories: ToolCategory[] = [
             createTool("ZIP Creator", "Package files into a ZIP archive."),
             createTool("TAR Extractor", "Extract files from TAR archives."),
             createTool("7Z Extractor", "Open and unpack 7Z files online."),
+            createTool("ZIP to TAR", "Convert ZIP archives into TAR archives."),
+            createTool("TAR to ZIP", "Convert TAR archives into ZIP archives."),
+            createTool("ZIP to 7Z", "Convert ZIP archives into smaller 7Z archives."),
+            createTool("7Z to ZIP", "Convert 7Z archives into widely compatible ZIP archives."),
+            createTool("TAR to 7Z", "Convert TAR archives into smaller 7Z archives."),
+            createTool("7Z to TAR", "Convert 7Z archives into TAR archives."),
         ],
     },
     {

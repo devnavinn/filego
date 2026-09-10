@@ -59,6 +59,14 @@ import { ZipExtractorTool } from "@/components/tools/zip-extractor-tool"
 import { ZipCreatorTool } from "@/components/tools/zip-creator-tool"
 import { TarExtractorTool } from "@/components/tools/tar-extractor-tool"
 import { SevenZipExtractorTool } from "@/components/tools/seven-zip-extractor-tool"
+import {
+    ZipToTarTool,
+    TarToZipTool,
+    ZipToSevenZipTool,
+    SevenZipToZipTool,
+    TarToSevenZipTool,
+    SevenZipToTarTool,
+} from "@/components/tools/archive-format-converter"
 import { VideoThumbnailGeneratorTool } from "@/components/tools/video-thumbnail-generator-tool"
 import { VideoTrimmerTool } from "@/components/tools/video-trimmer-tool"
 import { VideoCompressorTool } from "@/components/tools/video-compressor-tool"
@@ -133,6 +141,12 @@ export const toolComponentMap = {
     "zip-creator": ZipCreatorTool,
     "tar-extractor": TarExtractorTool,
     "7z-extractor": SevenZipExtractorTool,
+    "zip-to-tar": ZipToTarTool,
+    "tar-to-zip": TarToZipTool,
+    "zip-to-7z": ZipToSevenZipTool,
+    "7z-to-zip": SevenZipToZipTool,
+    "tar-to-7z": TarToSevenZipTool,
+    "7z-to-tar": SevenZipToTarTool,
     "video-compressor": VideoCompressorTool,
     "video-to-gif": VideoToGifTool,
     "video-trimmer": VideoTrimmerTool,
