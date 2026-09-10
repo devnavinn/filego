@@ -1,13 +1,26 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, ListChecks, Upload } from "lucide-react";
 import { FORM_TEMPLATES } from "@/lib/pdf-form-templates";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "PDF Forms – Fill & Create Fillable PDF Forms Online | Filego",
-  description:
-    "Fill in existing PDF forms in your browser, or add new text fields and checkboxes to any PDF and download the completed document. No printing or scanning required.",
-};
+const path = "/pdf-forms";
+const title = "PDF Forms – Fill & Create Fillable PDF Forms Online | Filego";
+const description =
+  "Fill in existing PDF forms in your browser, or add new text fields and checkboxes to any PDF and download the completed document. No printing or scanning required.";
+
+export const metadata = buildToolMetadata({
+  path,
+  title,
+  description,
+  keywords: [
+    "pdf forms",
+    "fillable pdf",
+    "fill pdf form online free",
+    "create pdf form",
+    "filego pdf forms",
+  ],
+});
 
 function TemplateLink({
   href,
@@ -38,8 +51,21 @@ function TemplateLink({
 }
 
 export default function PdfFormsPage() {
+  const jsonLd = buildToolJsonLd({
+    path,
+    name: title,
+    description,
+    featureList: [
+      "Fill existing PDF forms in the browser",
+      "Add text fields and checkboxes to any PDF",
+      "Ready-made form templates plus custom uploads",
+      "Instant download, no printing or scanning required",
+    ],
+  });
+
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-10">
+      <JsonLd data={jsonLd} />
       <div className="rounded-3xl border border-border/60 bg-card p-4 sm:p-6">
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">PDF Forms</h1>
         <p className="mt-2 text-sm text-muted-foreground sm:text-base">

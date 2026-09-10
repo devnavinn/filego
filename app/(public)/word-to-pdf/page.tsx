@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { WordToPdfTool } from "@/components/tools/word-to-pdf-tool";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Free Word to PDF Converter Online – Convert DOCX to PDF | Filego",
@@ -35,8 +37,22 @@ export const metadata: Metadata = {
 };
 
 export default function WordToPdfPage() {
+  const jsonLd = buildToolJsonLd({
+    path: "/word-to-pdf",
+    name: "Free Word to PDF Converter Online | Filego",
+    description:
+      "Convert DOCX to PDF free in your browser. Edit spacing, preview, and download clean PDFs instantly.",
+    featureList: [
+      "Convert DOCX files to PDF",
+      "Layout and spacing preview before export",
+      "Browser-based local processing",
+      "Instant download, no signup required",
+    ],
+  });
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
+      <JsonLd data={jsonLd} />
       <WordToPdfTool />
     </main>
   );

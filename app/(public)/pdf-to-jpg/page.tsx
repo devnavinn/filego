@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { PdfToJpgClient } from "./pdf-to-jpg-client";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Free PDF to JPG Converter Online – Convert PDF to Images | Filego",
   description:
@@ -35,8 +37,22 @@ export const metadata: Metadata = {
 };
 
 export default function PdfToJpgPage() {
+  const jsonLd = buildToolJsonLd({
+    path: "/pdf-to-jpg",
+    name: "Free PDF to JPG Converter Online | Filego",
+    description:
+      "Convert PDF pages to JPG free in your browser. Choose quality, preview pages, and download high-res images instantly.",
+    featureList: [
+      "Convert PDF pages to JPG images",
+      "Adjustable quality and scale",
+      "Browser-based local processing",
+      "Instant download, no signup required",
+    ],
+  });
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
+      <JsonLd data={jsonLd} />
       <PdfToJpgClient />
     </main>
   );

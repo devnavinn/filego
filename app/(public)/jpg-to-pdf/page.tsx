@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { JpgToPdfTool } from "@/components/tools/jpg-to-pdf-tool";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Free JPG to PDF Converter Online – Convert Images to PDF | Filego",
@@ -37,8 +39,22 @@ export const metadata: Metadata = {
 };
 
 export default function JpgToPdfPage() {
+  const jsonLd = buildToolJsonLd({
+    path: "/jpg-to-pdf",
+    name: "Free JPG to PDF Converter Online | Filego",
+    description:
+      "Convert JPG images to PDF free in your browser. Reorder pages, adjust layout & margins, and download clean PDFs instantly.",
+    featureList: [
+      "Convert JPG images to PDF",
+      "Reorder pages, adjust page size and margins",
+      "Browser-based local processing",
+      "Instant download, no signup required",
+    ],
+  });
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
+      <JsonLd data={jsonLd} />
       <JpgToPdfTool />
     </main>
   );

@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
+
+export const metadata: Metadata = {
+  title: "Scan to PDF Online | Filego",
+  description:
+    "Turn scanned or photographed documents into clean, organized PDF files from any device. Coming soon to Filego.",
+  alternates: {
+    canonical: "https://www.filego.in/scan-to-pdf",
+  },
+};
 
 export default function ScanToPdfPage() {
   return (
