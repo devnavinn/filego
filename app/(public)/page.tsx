@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { categoryIconMap, getToolBySlugs, toolCategories } from "@/lib/tools-data";
 import { cn } from "@/lib/utils";
-import { MagicCard } from "@/components/ui/magic-card";
 import { Meteors } from "@/components/ui/meteors";
 import { ToolSearch } from "@/components/tool-search";
-import { ToolCategoryCard } from "@/components/tool-category-card";
 import {
   ArrowRight,
   CheckCircle2,
@@ -16,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 const totalToolCount = toolCategories.reduce((sum, category) => sum + category.tools.length, 0);
 
@@ -216,58 +212,38 @@ export default function HomePage() {
               </Button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {featuredTools.map((tool) => {
                 const Icon = categoryIconMap[tool.categorySlug] ?? Sparkles;
 
                 return (
-                <Link key={tool.href} href={tool.href} className="group block">
-                  <MagicCard
-                    className="rounded-3xl border border-border/60 bg-background/90 p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    gradientColor="rgba(1, 105, 111, 0.12)"
+                  <Link
+                    key={tool.href}
+                    href={tool.href}
+                    className="group flex items-start gap-3 rounded-2xl border border-border/60 p-4 transition-colors hover:border-primary/40 hover:bg-muted/30"
                   >
-                    <Card className="rounded-3xl border-0 bg-transparent shadow-none">
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between gap-4">
-                          <div
-                            className={cn(
-                              "flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-sm",
-                              tool.accent
-                            )}
-                          >
-                            <Icon className="h-5 w-5" />
-                          </div>
+                    <div
+                      className={cn(
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br",
+                        tool.accent
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
 
-                          <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
-                        </div>
-
-                        <div className="mt-4 space-y-2">
-                          <h3 className="text-lg font-semibold tracking-tight">
-                            {tool.name}
-                          </h3>
-                          <p className="text-sm leading-6 text-muted-foreground">
-                            {tool.shortDescription}
-                          </p>
-                        </div>
-
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Badge
-                            variant="secondary"
-                            className="rounded-full border border-border/60 bg-muted/60 px-3 py-1 text-xs font-medium text-foreground/90"
-                          >
-                            {tool.categoryTitle}
-                          </Badge>
-                          <Badge
-                            variant="secondary"
-                            className="rounded-full border border-border/60 bg-muted/60 px-3 py-1 text-xs font-medium text-foreground/90"
-                          >
-                            Open tool
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </MagicCard>
-                </Link>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-medium tracking-tight">{tool.name}</h3>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                      </div>
+                      <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                        {tool.shortDescription}
+                      </p>
+                      <span className="mt-2 inline-block text-xs text-muted-foreground/70">
+                        {tool.categoryTitle}
+                      </span>
+                    </div>
+                  </Link>
                 );
               })}
             </div>
@@ -290,10 +266,42 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {toolCategories.map((category) => (
-            <ToolCategoryCard key={category.id} category={category} />
-          ))}
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {toolCategories.map((category) => {
+            const Icon = categoryIconMap[category.slug] ?? Sparkles;
+
+            return (
+              <Link
+                key={category.id}
+                href={`/tools/${category.slug}`}
+                className="group flex items-start gap-3 rounded-2xl border border-border/60 p-4 transition-colors hover:border-primary/40 hover:bg-muted/30"
+              >
+                <div
+                  className={cn(
+                    "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br",
+                    category.accent
+                  )}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-medium tracking-tight transition-colors group-hover:text-primary">
+                      {category.title}
+                    </h3>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    {category.description}
+                  </p>
+                  <span className="mt-1 inline-block text-xs text-muted-foreground/70">
+                    {category.tools.length} tools
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -315,7 +323,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
             {[
               {
                 title: "Privacy first",
@@ -346,35 +354,18 @@ export default function HomePage() {
 
               return (
                 <Link key={item.title} href={item.href} className="group block">
-                  <Card className="h-full rounded-3xl border-border/60 bg-background/90 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                    <CardContent className="p-5">
-                      <div className="flex h-full flex-col justify-between">
-                        <div>
-                          <div className="mb-4 flex items-start justify-between gap-4">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted">
-                              <Icon className="h-5 w-5 text-foreground" />
-                            </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+                    <Icon className="h-5 w-5 text-foreground" />
+                  </div>
 
-                            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
-                          </div>
+                  <h3 className="mt-3 flex items-center gap-1.5 font-medium tracking-tight transition-colors group-hover:text-primary">
+                    {item.title}
+                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                  </h3>
 
-                          <h3 className="text-base font-semibold tracking-tight">
-                            {item.title}
-                          </h3>
-
-                          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                            {item.desc}
-                          </p>
-                        </div>
-
-                        <div className="mt-5">
-                          <span className="inline-flex rounded-full border border-border/60 bg-muted/60 px-3 py-1 text-xs font-medium text-foreground/90">
-                            Learn more
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                    {item.desc}
+                  </p>
                 </Link>
               )
             })}
