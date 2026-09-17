@@ -497,6 +497,54 @@ Yes — the output is plain Markdown text, fully editable in any text editor.
 
 Need a web page's content as clean text? [Convert it to Markdown for free →](/tools/developer-tools/website-to-markdown)`,
     },
+    {
+        slug: "how-to-generate-lorem-ipsum-placeholder-text",
+        title: "How to Generate Lorem Ipsum Placeholder Text Online",
+        excerpt:
+            "Need filler text for a mockup, layout, or design so real content doesn't get in the way? Here's how to generate Lorem Ipsum online, free.",
+        seoTitle: "How to Generate Lorem Ipsum Text Online Free | Filego",
+        seoDescription:
+            "Generate Lorem Ipsum placeholder text online for free — by paragraphs, sentences, or words, with optional HTML tags. Copy or download instantly.",
+        category: "Developer Guides",
+        tags: ["lorem ipsum", "placeholder text", "developer tools"],
+        toolLabel: "Lorem Ipsum Generator",
+        toolPath: "/tools/developer-tools/lorem-ipsum-generator",
+        content: `Real content usually isn't ready when you're building a layout, and using it too early tends to distract from the actual design work. Lorem Ipsum — nonsense Latin-like text — fills that gap: it looks like real prose at a glance, without any meaning that pulls attention away from spacing, typography, and structure.
+
+## When you need Lorem Ipsum
+
+- Filling in a mockup or wireframe before real copy is written
+- Testing how a layout handles different amounts of text — a short heading versus a long paragraph
+- Populating a CMS or design tool with placeholder content during development
+- Demonstrating a template or theme without needing real client content yet
+
+## How to generate Lorem Ipsum, step by step
+
+1. Open the [Lorem Ipsum Generator](/tools/developer-tools/lorem-ipsum-generator).
+2. Choose how much you need — paragraphs, sentences, or words — and enter a count.
+3. Optionally keep the classic "Lorem ipsum dolor sit amet..." opening, or turn it off for fully random text.
+4. Optionally wrap each paragraph in \`<p>\` tags if you're pasting straight into HTML.
+5. Generate, then copy the result or download it as a file.
+
+## Tips for using placeholder text well
+
+- **Match the count to the real content's expected length.** Testing a layout with wildly more or less text than it will actually hold defeats the purpose of the test.
+- **Use word count for short elements** like button labels or headings, and paragraph count for body copy or article layouts.
+- **Keep the HTML wrapping option on** if you're pasting directly into a template or CMS field that expects paragraph markup rather than plain text.
+
+## Common questions
+
+**Why does Lorem Ipsum use fake Latin instead of real words?**
+Because it's meaningless, it doesn't distract from evaluating layout and design — real, readable text tends to draw the eye and attention away from the visual structure being tested.
+
+**Is the generated text the same every time?**
+No — each generation produces new random text (aside from the optional classic opening), so you can generate fresh variations as needed.
+
+**Can I generate more than one paragraph with different lengths?**
+Yes — paragraph lengths vary naturally each time you generate, so a multi-paragraph result won't look uniform or repetitive.
+
+Need placeholder text for a design or mockup? [Generate Lorem Ipsum for free →](/tools/developer-tools/lorem-ipsum-generator)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

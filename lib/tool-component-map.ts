@@ -26,6 +26,7 @@ import { CodeBeautifierTool } from "@/components/tools/code-beautifier-tool"
 import { QrCodeGeneratorTool } from "@/components/tools/qr-code-generator-tool"
 import { QrCodeScannerTool } from "@/components/tools/qr-code-scanner-tool"
 import { WebsiteToMarkdownTool } from "@/components/tools/website-to-markdown-tool"
+import { LoremIpsumGeneratorTool } from "@/components/tools/lorem-ipsum-generator-tool"
 import { DocumentSummarizerTool } from "@/components/tools/document-summarizer-tool"
 import { ResumeParserTool } from "@/components/tools/resume-parser-tool"
 import { AiFileChatTool } from "@/components/tools/ai-file-chat-tool"
@@ -119,6 +120,7 @@ export const toolComponentMap = {
     "qr-code-generator": QrCodeGeneratorTool,
     "qr-code-scanner": QrCodeScannerTool,
     "website-to-markdown": WebsiteToMarkdownTool,
+    "lorem-ipsum-generator": LoremIpsumGeneratorTool,
     "document-summarizer": DocumentSummarizerTool,
     "resume-parser": ResumeParserTool,
     "ai-file-chat": AiFileChatTool,
