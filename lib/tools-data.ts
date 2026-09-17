@@ -142,6 +142,7 @@ export const toolCategories: ToolCategory[] = [
             createTool("Video Trimmer", "Trim unwanted parts from video files."),
             createTool("Video Merger", "Combine multiple video clips into one file."),
             createTool("Extract Audio from Video", "Extract audio tracks from uploaded videos."),
+            createTool("Video to MP3", "Convert a video file straight into an MP3 audio track."),
             createTool("Video Converter (MP4, MOV, AVI)", "Convert videos between popular file formats."),
             createTool("Thumbnail Generator", "Capture thumbnails from video frames."),
         ],

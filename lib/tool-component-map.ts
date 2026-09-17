@@ -77,6 +77,7 @@ import { VideoTrimmerTool } from "@/components/tools/video-trimmer-tool"
 import { VideoCompressorTool } from "@/components/tools/video-compressor-tool"
 import { VideoToGifTool } from "@/components/tools/video-to-gif-tool"
 import { ExtractAudioTool } from "@/components/tools/extract-audio-tool"
+import { VideoToMp3Tool } from "@/components/tools/video-to-mp3-tool"
 import { VideoConverterTool } from "@/components/tools/video-converter-tool"
 import { VideoMergerTool } from "@/components/tools/video-merger-tool"
 import { VoiceRecorderTool } from "@/components/tools/voice-recorder-tool"
@@ -162,6 +163,7 @@ export const toolComponentMap = {
     "video-trimmer": VideoTrimmerTool,
     "video-merger": VideoMergerTool,
     "extract-audio-from-video": ExtractAudioTool,
+    "video-to-mp3": VideoToMp3Tool,
     "video-converter-mp4-mov-avi": VideoConverterTool,
     "thumbnail-generator": VideoThumbnailGeneratorTool,
     "mp3-cutter": Mp3CutterTool,

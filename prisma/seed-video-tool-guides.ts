@@ -364,6 +364,54 @@ Yes — capture as many different frames as you need, one at a time.
 
 Need a still image from your video? [Generate a thumbnail for free →](/tools/video-tools/thumbnail-generator)`,
     },
+    {
+        slug: "how-to-convert-video-to-mp3-online-free",
+        title: "How to Convert a Video to MP3 Online for Free",
+        excerpt:
+            "Just need the audio track as an MP3? Here's how to convert any video file straight into an MP3, online and free, without extra software.",
+        seoTitle: "How to Convert Video to MP3 Online Free | Filego",
+        seoDescription:
+            "Convert a video file into an MP3 audio track online for free. Choose 128, 192, or 320 kbps quality and download instantly. Step-by-step guide.",
+        category: "Video Guides",
+        tags: ["video to mp3", "convert video to audio", "video tools"],
+        toolLabel: "Video to MP3",
+        toolPath: "/tools/video-tools/video-to-mp3",
+        content: `Sometimes a video is really just an audio file that happens to have a picture attached — a recorded lecture, a music video, a podcast filmed on camera. Converting it straight to MP3 gives you a smaller, more portable file with just the sound.
+
+## When you need video to MP3 conversion
+
+- Turning a recorded lecture or interview into an MP3 you can listen to anywhere
+- Pulling a song out of a music video as a standalone audio file
+- Getting a smaller file to store or share when the video part isn't needed
+- Creating an audio-only version of a recording for a podcast feed or playlist
+
+## How to convert a video to MP3, step by step
+
+1. Open the [Video to MP3 tool](/tools/video-tools/video-to-mp3).
+2. Upload the video file containing the audio you want.
+3. Choose an MP3 quality — Standard (128 kbps), High (192 kbps), or Best (320 kbps).
+4. Convert, then preview the result directly in the browser.
+5. Download the MP3 file.
+
+## Tips for choosing the right quality
+
+- **128 kbps is enough for spoken word** — lectures, podcasts, and interviews sound clear at the smallest file size.
+- **192 kbps is a solid default for music** — a good balance between quality and file size for most listening situations.
+- **320 kbps is worth it for critical listening** — if the source audio is high quality and file size isn't a concern, this preserves the most detail.
+
+## Common questions
+
+**Does this work on any video format?**
+Upload the video file you have; the tool reads its audio track and encodes it as MP3 regardless of the source video format.
+
+**Will the audio quality be as good as the original?**
+MP3 is a compressed format, so there's some quality tradeoff — choosing a higher kbps setting keeps it closer to the source audio.
+
+**Is this different from "Extract Audio from Video"?**
+It uses the same underlying process, focused specifically on MP3 output with quality presets. If you need other audio formats like WAV or M4A, see [Extract Audio from Video](/tools/video-tools/extract-audio-from-video).
+
+Just need the sound from a video, as an MP3? [Convert video to MP3 for free →](/tools/video-tools/video-to-mp3)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {
