@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { FileText, Loader2, Send, Sparkles, User } from "lucide-react"
 
@@ -27,6 +27,13 @@ export function AiFileChatTool() {
     const [messages, setMessages] = useState<ChatEntry[]>([])
     const [question, setQuestion] = useState("")
     const [isAsking, setIsAsking] = useState(false)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
+
+    useEffect(() => {
+        if (documentText && status.kind === "idle") {
+            inputRef.current?.focus()
+        }
+    }, [documentText, status.kind])
 
     async function handleFileSelect(nextFile: File) {
         setFile(nextFile)
@@ -158,11 +165,18 @@ export function AiFileChatTool() {
 
             {documentText && !isExtracting && (
                 <div className="mt-6">
-                    <div className="max-h-[420px] min-h-[160px] space-y-3 overflow-y-auto rounded-2xl border border-border/60 bg-muted/30 p-4">
+                    <div
+                        className={cn(
+                            "max-h-[420px] min-h-[160px] space-y-3 overflow-y-auto rounded-2xl p-4",
+                            messages.length === 0
+                                ? "flex items-center justify-center border border-dashed border-border/60 bg-transparent text-center"
+                                : "border border-border/60 bg-muted/30"
+                        )}
+                    >
                         {messages.length === 0 ? (
-                            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                <Sparkles className="h-3.5 w-3.5" />
-                                Ask anything about this document to get started.
+                            <p className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+                                <Sparkles className="h-5 w-5" />
+                                Ask a question below to get started.
                             </p>
                         ) : (
                             messages.map((message, index) => (
@@ -206,6 +220,7 @@ export function AiFileChatTool() {
 
                     <div className="mt-3 flex items-end gap-2">
                         <textarea
+                            ref={inputRef}
                             value={question}
                             onChange={(e) => setQuestion(e.target.value)}
                             onKeyDown={(e) => {
