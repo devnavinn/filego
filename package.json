@@ -14,7 +14,8 @@
     "seed:document-office-guides": "tsx --env-file=.env.local prisma/seed-document-office-guides.ts",
     "seed:ai-guides": "tsx --env-file=.env.local prisma/seed-ai-tool-guides.ts",
     "seed:video-guides": "tsx --env-file=.env.local prisma/seed-video-tool-guides.ts",
-    "seed:audio-guides": "tsx --env-file=.env.local prisma/seed-audio-tool-guides.ts"
+    "seed:audio-guides": "tsx --env-file=.env.local prisma/seed-audio-tool-guides.ts",
+    "seed:security-guides": "tsx --env-file=.env.local prisma/seed-security-tool-guides.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
