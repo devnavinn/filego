@@ -52,6 +52,7 @@ import { XmlToJsonTool } from "@/components/tools/xml-to-json-tool"
 import { MarkdownToHtmlTool } from "@/components/tools/markdown-to-html-tool"
 import { HtmlToMarkdownTool } from "@/components/tools/html-to-markdown-tool"
 import { TextCompareTool } from "@/components/tools/text-compare-tool"
+import { WordCounterTool } from "@/components/tools/word-counter-tool"
 import { Sha256GeneratorTool } from "@/components/tools/sha256-generator-tool"
 import { Md5GeneratorTool } from "@/components/tools/md5-generator-tool"
 import { PasswordGeneratorTool } from "@/components/tools/password-generator-tool"
@@ -137,6 +138,7 @@ export const toolComponentMap = {
     "markdown-to-html": MarkdownToHtmlTool,
     "html-to-markdown": HtmlToMarkdownTool,
     "text-compare-tool": TextCompareTool,
+    "word-counter": WordCounterTool,
     "sha256-generator": Sha256GeneratorTool,
     "md5-generator": Md5GeneratorTool,
     "password-generator": PasswordGeneratorTool,

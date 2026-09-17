@@ -121,6 +121,7 @@ export const toolCategories: ToolCategory[] = [
             createTool("Markdown to HTML", "Transform Markdown into HTML output."),
             createTool("HTML to Markdown", "Convert HTML into readable Markdown."),
             createTool("Text Compare Tool", "Compare two text blocks and highlight differences."),
+            createTool("Word Counter", "Count words, characters, sentences, and paragraphs instantly."),
         ],
     },
     {
