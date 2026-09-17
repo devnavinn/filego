@@ -63,6 +63,8 @@ export const toolCategories: ToolCategory[] = [
             createTool("PDF Compress", "Reduce PDF file size while keeping quality balanced."),
             createTool("PDF to Word", "Convert PDF files into editable Word documents."),
             createTool("Word to PDF", "Convert DOC or DOCX files into PDF format."),
+            createTool("PDF to Excel", "Extract PDF text into an Excel workbook."),
+            createTool("Excel to PDF", "Convert Excel sheets into a paginated PDF."),
             createTool("PDF to JPG", "Export PDF pages into JPG images."),
             createTool("JPG to PDF", "Convert JPG images into a PDF document."),
             createTool("PDF Watermark", "Add text or image watermarks to PDF files."),

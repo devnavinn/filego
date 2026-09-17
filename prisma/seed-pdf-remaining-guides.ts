@@ -204,7 +204,7 @@ Have a PDF you need to unlock? [Unlock your PDF for free →](/tools/pdf-tools/p
 
 - **Match numbering position to the document's existing margins**, so numbers don't overlap with content near the page edges.
 - **Set the correct starting number** if the document is part of a larger set — for example, starting at 13 if it continues from a 12-page section.
-- **Number after merging, not before**, if you're combining multiple files with the [PDF Merge tool](/tools/pdf-tools/merge-pdf) — that way the numbering runs continuously across the whole combined document.
+- **Number after merging, not before**, if you're combining multiple files with the [PDF Merge tool](/merge-pdf) — that way the numbering runs continuously across the whole combined document.
 
 ## Common questions
 
@@ -299,7 +299,7 @@ Have unwanted pages in a PDF? [Delete them for free →](/tools/pdf-tools/delete
 ## Tips for a clean extraction
 
 - **Preview before extracting** to confirm you're selecting exactly the right pages, especially in a long or similar-looking document.
-- **Combine extracted pages with something else afterward** using the [PDF Merge tool](/tools/pdf-tools/merge-pdf), if you need to attach them to a different document.
+- **Combine extracted pages with something else afterward** using the [PDF Merge tool](/merge-pdf), if you need to attach them to a different document.
 - **Use Delete instead if it's easier** — see [Delete PDF Pages](/tools/pdf-tools/delete-pdf-pages) if you'd rather remove the pages you don't want than select the ones you do.
 
 ## Common questions
@@ -311,9 +311,105 @@ No — the original file is left untouched; extraction creates a new file contai
 Yes — select individual pages in any combination, not just a consecutive range.
 
 **Can I extract pages from more than one PDF into a single file?**
-Extract from each PDF separately, then combine the results with the [PDF Merge tool](/tools/pdf-tools/merge-pdf).
+Extract from each PDF separately, then combine the results with the [PDF Merge tool](/merge-pdf).
 
 Need just a few pages from a bigger PDF? [Extract them for free →](/tools/pdf-tools/extract-pdf-pages)`,
+    },
+    {
+        slug: "how-to-convert-pdf-to-excel-online-free",
+        title: "How to Convert a PDF to Excel Online for Free",
+        excerpt:
+            "Need PDF data in a real spreadsheet instead of a static document? Here's how to extract a PDF's content into Excel, online and free.",
+        seoTitle: "How to Convert PDF to Excel Online Free | Filego",
+        seoDescription:
+            "Extract a PDF's text into an Excel workbook online for free, one worksheet per page. No signup required. Step-by-step guide.",
+        category: "PDF Guides",
+        tags: ["pdf to excel", "convert pdf", "pdf tools"],
+        toolLabel: "PDF to Excel",
+        toolPath: "/tools/pdf-tools/pdf-to-excel",
+        content: `A PDF is meant to be a fixed, final layout — great for reading, terrible for actually working with the numbers inside it. If a report or statement only exists as a PDF, pulling its data into Excel means you can sort, filter, total, and reuse it like any other spreadsheet.
+
+## When you need PDF to Excel conversion
+
+- Getting a data table out of a PDF report so you can sort or total it in Excel
+- Reusing figures from a PDF invoice or statement without retyping them
+- Turning a PDF export from another system into an editable spreadsheet
+- Pulling a list or table out of a PDF for further analysis
+
+## How to convert a PDF to Excel, step by step
+
+1. Open the [PDF to Excel tool](/tools/pdf-tools/pdf-to-excel).
+2. Upload the PDF you want to convert.
+3. The tool reads each page's text and reconstructs it into a spreadsheet grid, one worksheet per page.
+4. Preview the first page's result.
+5. Download the Excel workbook.
+
+## Tips for the most accurate results
+
+- **This works best on simple, clearly-separated tables.** The tool reconstructs columns based on the spacing between text in the PDF — a clean table with clear gaps between columns converts far more reliably than a dense, multi-column layout.
+- **Use a text-based PDF, not a scanned image.** Like other PDF text tools, this needs a PDF with a real text layer — run a scanned document through [PDF OCR](/tools/ai-tools/pdf-ocr) first if that's what you have.
+- **Always review the result.** Complex layouts (merged cells, multi-line entries, unusual spacing) may need a quick manual cleanup after conversion.
+
+## Common questions
+
+**Will this perfectly recreate complex tables with merged cells?**
+Not always — the reconstruction is based on text position and spacing, so very complex layouts may need manual adjustment after conversion.
+
+**What if my PDF has multiple pages?**
+Each page becomes its own worksheet in the resulting workbook, so nothing gets mixed together.
+
+**Can I convert a scanned PDF?**
+Not directly — this tool reads existing text content. For scanned documents, use [PDF OCR](/tools/ai-tools/pdf-ocr) to extract text first.
+
+Have PDF data you'd rather work with in a spreadsheet? [Convert PDF to Excel for free →](/tools/pdf-tools/pdf-to-excel)`,
+    },
+    {
+        slug: "how-to-convert-excel-to-pdf-online-free",
+        title: "How to Convert an Excel Sheet to PDF Online for Free",
+        excerpt:
+            "Need to share a spreadsheet as a clean, fixed document instead of an editable file? Here's how to convert Excel to PDF, online and free.",
+        seoTitle: "How to Convert Excel to PDF Online Free | Filego",
+        seoDescription:
+            "Convert an Excel spreadsheet into a paginated PDF table online for free. Choose portrait or landscape and download instantly.",
+        category: "PDF Guides",
+        tags: ["excel to pdf", "convert excel", "pdf tools"],
+        toolLabel: "Excel to PDF",
+        toolPath: "/tools/pdf-tools/excel-to-pdf",
+        content: `A spreadsheet is great for working with data, but not ideal for sharing a final version — recipients can accidentally edit it, and it looks different depending on what app opens it. Converting it to PDF locks in a clean, consistent, read-only version that looks the same everywhere.
+
+## When to convert Excel to PDF
+
+- Sharing a finished report or budget as a fixed document instead of an editable file
+- Submitting a spreadsheet somewhere that expects a PDF, not an Excel file
+- Printing a clean, properly paginated version of a spreadsheet
+- Archiving a snapshot of spreadsheet data that shouldn't be edited later
+
+## How to convert Excel to PDF, step by step
+
+1. Open the [Excel to PDF tool](/tools/pdf-tools/excel-to-pdf).
+2. Upload the .xlsx file you want to convert.
+3. Choose which sheet to export if the workbook has more than one.
+4. Pick portrait or landscape orientation.
+5. Download the resulting PDF — a clean, paginated table.
+
+## Tips for a clean export
+
+- **Use landscape for wide sheets.** A spreadsheet with many columns fits far better in landscape orientation than portrait.
+- **Export one sheet at a time.** Since a PDF doesn't have tabs like Excel, each sheet needs its own export if you have several to share.
+- **Simplify before exporting** if the sheet has a lot of formatting or merged cells — the exported table focuses on the data itself, so very complex formatting may look different in the PDF.
+
+## Common questions
+
+**Will formulas or formatting carry over exactly?**
+The exported PDF shows the calculated values from your sheet as a clean table; complex formatting or conditional styling may not carry over exactly as it appears in Excel.
+
+**Can I convert a workbook with multiple sheets at once?**
+Select and export one sheet at a time — convert each sheet you need separately.
+
+**Does the PDF automatically paginate long sheets?**
+Yes — a long sheet flows across multiple PDF pages automatically rather than getting cut off.
+
+Need to share a spreadsheet as a fixed document? [Convert Excel to PDF for free →](/tools/pdf-tools/excel-to-pdf)`,
     },
 ];
 

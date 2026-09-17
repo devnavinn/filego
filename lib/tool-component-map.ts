@@ -13,6 +13,8 @@ import { PdfPasswordProtectTool } from "@/components/tools/pdf-password-protect-
 import { PdfUnlockTool } from "@/components/tools/pdf-unlock-tool"
 import { PdfToWordTool } from "@/components/tools/pdf-to-word-tool"
 import { WordToPdfTool } from "@/components/tools/word-to-pdf-tool"
+import { PdfToExcelTool } from "@/components/tools/pdf-to-excel-tool"
+import { ExcelToPdfTool } from "@/components/tools/excel-to-pdf-tool"
 import { JpgToPdfTool } from "@/components/tools/jpg-to-pdf-tool"
 import { PdfToJpgTool } from "@/components/tools/pdf-to-jpg-tool"
 import { UrlEncoderDecoderTool } from "@/components/tools/url-encoder-decoder-tool"
@@ -94,6 +96,8 @@ export const toolComponentMap = {
     "pdf-compress": PdfCompressTool,
     "pdf-to-word": PdfToWordTool,
     "word-to-pdf": WordToPdfTool,
+    "pdf-to-excel": PdfToExcelTool,
+    "excel-to-pdf": ExcelToPdfTool,
     "pdf-to-jpg": PdfToJpgTool,
     "jpg-to-pdf": JpgToPdfTool,
     "pdf-watermark": PdfWatermarkTool,
