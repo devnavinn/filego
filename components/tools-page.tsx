@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowUpRight, Sparkles } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react"
 
 import { categoryIconMap, toolCategories } from "@/lib/tools-data"
 import { cn } from "@/lib/utils"
@@ -62,21 +62,36 @@ export function ToolsPage() {
                                     </Link>
                                 </div>
 
-                                <ul className="mt-5 grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                     {category.tools.map((tool) => (
-                                        <li key={tool.slug}>
-                                            <Link
-                                                href={`/tools/${category.slug}/${tool.slug}`}
-                                                className="group flex items-center gap-1.5 py-0.5 text-sm text-foreground/80 transition-colors hover:text-primary"
+                                        <Link
+                                            key={tool.slug}
+                                            href={`/tools/${category.slug}/${tool.slug}`}
+                                            className="group flex items-start gap-2.5 rounded-xl border border-border/60 p-3 transition-colors hover:border-primary/40 hover:bg-muted/30"
+                                        >
+                                            <div
+                                                className={cn(
+                                                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
+                                                    category.accent
+                                                )}
                                             >
-                                                <span className="truncate underline decoration-border/0 underline-offset-4 group-hover:decoration-primary/50">
-                                                    {tool.name}
-                                                </span>
-                                                <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100" />
-                                            </Link>
-                                        </li>
+                                                <Icon className="h-4 w-4" />
+                                            </div>
+
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <h3 className="text-sm font-medium tracking-tight transition-colors group-hover:text-primary">
+                                                        {tool.name}
+                                                    </h3>
+                                                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                                                </div>
+                                                <p className="mt-0.5 text-xs leading-4 text-muted-foreground">
+                                                    {tool.shortDescription}
+                                                </p>
+                                            </div>
+                                        </Link>
                                     ))}
-                                </ul>
+                                </div>
                             </div>
                         )
                     })}
