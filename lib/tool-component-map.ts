@@ -43,6 +43,7 @@ import { ImageWatermarkTool } from "@/components/tools/image-watermark-tool"
 import { ImageMetadataViewerTool } from "@/components/tools/image-metadata-viewer-tool"
 import { ImageUpscalerTool } from "@/components/tools/image-upscaler-tool"
 import { ImageCompressorRedirectTool } from "@/components/tools/image-compressor-redirect-tool"
+import { HeicToJpgTool } from "@/components/tools/heic-to-jpg-tool"
 import { ExcelToCsvTool } from "@/components/tools/excel-to-csv-tool"
 import { CsvToExcelTool } from "@/components/tools/csv-to-excel-tool"
 import { JsonFormatterTool } from "@/components/tools/json-formatter-tool"
@@ -126,6 +127,7 @@ export const toolComponentMap = {
     "webp-to-jpg": WebpToJpgTool,
     "webp-to-png": WebpToPngTool,
     "svg-to-png": SvgToPngTool,
+    "heic-to-jpg": HeicToJpgTool,
     "image-watermark": ImageWatermarkTool,
     "image-upscaler-ai": ImageUpscalerTool,
     "image-metadata-viewer": ImageMetadataViewerTool,

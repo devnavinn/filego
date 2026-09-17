@@ -94,6 +94,7 @@ export const toolCategories: ToolCategory[] = [
             createTool("JPG to PNG", "Convert JPG images into PNG format."),
             createTool("WEBP to JPG", "Convert WEBP files into JPG format."),
             createTool("WEBP to PNG", "Convert WEBP files into PNG format."),
+            createTool("HEIC to JPG", "Convert iPhone HEIC/HEIF photos into JPG images."),
             createTool("SVG to PNG", "Convert SVG graphics into PNG images."),
             createTool("Image Watermark", "Add watermark text or logos to images."),
             createTool("Image Upscaler (AI)", "Enhance and upscale images with AI assistance."),

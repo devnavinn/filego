@@ -604,6 +604,53 @@ Screenshots generally aren't captured with camera hardware, so they don't carry 
 
 Curious what's hidden in your image file? [View image metadata for free →](/tools/image-tools/image-metadata-viewer)`,
     },
+    {
+        slug: "how-to-convert-heic-to-jpg-online-free",
+        title: "How to Convert HEIC Photos to JPG Online for Free",
+        excerpt:
+            "iPhone photos save as HEIC by default, which won't open everywhere. Here's how to convert HEIC to JPG online, free, one photo or a whole batch.",
+        seoTitle: "How to Convert HEIC to JPG Online Free | Filego",
+        seoDescription:
+            "Convert iPhone HEIC/HEIF photos to JPG online for free. Upload one photo or a whole batch and download individually or as a ZIP.",
+        category: "Image Guides",
+        tags: ["heic to jpg", "iphone photos", "image tools"],
+        toolLabel: "HEIC to JPG",
+        toolPath: "/tools/image-tools/heic-to-jpg",
+        content: `iPhones save photos as HEIC by default — a modern, efficient format that Apple's own devices handle natively but plenty of other apps, websites, and older software still don't recognize. If a photo you AirDropped or emailed refuses to open, converting it to JPG almost always fixes it.
+
+## When you need to convert HEIC to JPG
+
+- Uploading an iPhone photo to a website or form that rejects HEIC files
+- Sharing photos with someone on Windows or Android whose apps can't open HEIC
+- Opening an AirDropped or emailed photo in an older editor that doesn't support it
+- Converting a whole camera roll export at once before archiving or sharing it
+
+## How to convert HEIC to JPG, step by step
+
+1. Open the [HEIC to JPG tool](/tools/image-tools/heic-to-jpg).
+2. Upload one photo, or select many at once — the tool accepts batches.
+3. Each file converts automatically; watch the size change from HEIC to JPG update live.
+4. Download a single converted photo, or grab all of them at once as a ZIP.
+
+## Tips for converting a batch of photos
+
+- **Select your whole export at once.** The tool accepts multiple files in one upload, so there's no need to convert an album one photo at a time.
+- **Adjust the quality slider** if the converted files are larger than you need — lower quality still looks good for most sharing purposes and produces smaller files.
+- **Use "Download all" for anything more than a couple of photos** — it packages every converted image into a single ZIP instead of downloading one by one.
+
+## Common questions
+
+**Does converting reduce photo quality?**
+At the default quality setting, the difference is generally not noticeable — you can adjust the quality slider if you want to prioritize smaller file size over maximum quality.
+
+**Why do iPhones save photos as HEIC in the first place?**
+HEIC compresses more efficiently than JPG, so photos take up less storage — the tradeoff is that fewer apps and websites support it compared to JPG.
+
+**Can I convert HEIC to PNG instead of JPG?**
+This tool is focused on JPG output, the most broadly compatible choice for photos. For a format with transparency support, see [PNG to JPG](/tools/image-tools/png-to-jpg) and related converters for other combinations.
+
+Have iPhone photos that won't open somewhere? [Convert HEIC to JPG for free →](/tools/image-tools/heic-to-jpg)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {
