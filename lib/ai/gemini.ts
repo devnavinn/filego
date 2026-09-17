@@ -297,6 +297,13 @@ export type OcrImageInput = {
     mode: OcrMode
 }
 
+/** Keeps OCR output as plain, readable text instead of LaTeX/markdown math markup. */
+const OCR_FORMATTING_RULE =
+    "Write the output as plain text only — never use LaTeX or markdown math notation " +
+    "(no $...$, \\rightarrow, \\times, ^{...}, _{...}, etc.). Render arrows, symbols, and " +
+    "super/subscripts using plain Unicode characters instead (e.g. → for an arrow, " +
+    "Na⁺ for a superscript plus, CO₂ for a subscript 2)."
+
 export async function recognizeImageText(input: OcrImageInput): Promise<string> {
     const ai = getClient()
 
@@ -304,9 +311,9 @@ export async function recognizeImageText(input: OcrImageInput): Promise<string> 
         input.mode === "handwritten"
             ? "Transcribe all handwritten text in this image exactly as written, preserving line breaks " +
               "and layout as closely as possible. If a word is illegible, mark it with [illegible]. " +
-              "Return only the transcribed text, with no commentary or explanation."
+              `${OCR_FORMATTING_RULE} Return only the transcribed text, with no commentary or explanation.`
             : "Extract all readable text from this image exactly as it appears, preserving line breaks " +
-              "and layout as closely as possible. Return only the extracted text, with no commentary or explanation."
+              `and layout as closely as possible. ${OCR_FORMATTING_RULE} Return only the extracted text, with no commentary or explanation.`
 
     const response = await ai.models.generateContent({
         model: MODEL,
@@ -346,8 +353,9 @@ export async function recognizePdfPages(pages: OcrPageInput[]): Promise<string[]
             {
                 text:
                     "Extract all readable text from each of the following scanned document page images, in order. " +
-                    "Preserve line breaks and structure within each page as closely as possible. Return exactly " +
-                    `${pages.length} strings in the "pages" array, one per page image, in the same order.`,
+                    "Preserve line breaks and structure within each page as closely as possible. " +
+                    `${OCR_FORMATTING_RULE} Return exactly ${pages.length} strings in the "pages" array, ` +
+                    "one per page image, in the same order.",
             },
             ...pageParts,
         ],

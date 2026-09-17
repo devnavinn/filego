@@ -2,14 +2,21 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { FileText, Loader2 } from "lucide-react"
+import { ChevronDown, FileText, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { GenericFileDropzone } from "@/components/tools/generic-file-dropzone"
 import { CopyButton } from "@/components/tools/copy-button"
 import { usePdfJs } from "@/lib/use-pdfjs"
 import { canvasToBlob, downloadBlob } from "@/lib/image-tool-utils"
 import { fileToBase64 } from "@/lib/file-to-base64"
+import { textToImageBlob, textToPdfBlob } from "@/lib/text-export"
 
 type Status =
     | { kind: "idle" }
@@ -29,7 +36,9 @@ export function PdfOcrTool() {
     const { pdfjsLib } = usePdfJs()
     const [file, setFile] = useState<File | null>(null)
     const [status, setStatus] = useState<Status>({ kind: "idle" })
-    const [pages, setPages] = useState<string[] | null>(null)
+    const [text, setText] = useState<string | null>(null)
+    const [pageCount, setPageCount] = useState(0)
+    const [isExporting, setIsExporting] = useState(false)
     const [truncatedNote, setTruncatedNote] = useState<string | null>(null)
 
     async function handleFileSelect(nextFile: File) {
@@ -39,14 +48,15 @@ export function PdfOcrTool() {
         }
 
         setFile(nextFile)
-        setPages(null)
+        setText(null)
+        setPageCount(0)
         setTruncatedNote(null)
         setStatus({ kind: "rendering", message: "Reading PDF..." })
 
         try {
             const buffer = new Uint8Array(await nextFile.arrayBuffer())
             const doc = await pdfjsLib.getDocument({ data: buffer }).promise
-            const pageCount = Math.min(doc.numPages, MAX_OCR_PAGES)
+            const pagesToProcess = Math.min(doc.numPages, MAX_OCR_PAGES)
 
             if (doc.numPages > MAX_OCR_PAGES) {
                 setTruncatedNote(`This PDF has ${doc.numPages} pages — only the first ${MAX_OCR_PAGES} were processed.`)
@@ -54,8 +64,8 @@ export function PdfOcrTool() {
 
             const images: { imageBase64: string; mimeType: string }[] = []
 
-            for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
-                setStatus({ kind: "rendering", message: `Rendering page ${pageNumber} of ${pageCount}...` })
+            for (let pageNumber = 1; pageNumber <= pagesToProcess; pageNumber++) {
+                setStatus({ kind: "rendering", message: `Rendering page ${pageNumber} of ${pagesToProcess}...` })
 
                 const page = await doc.getPage(pageNumber)
                 const viewport = page.getViewport({ scale: RENDER_SCALE })
@@ -103,7 +113,13 @@ export function PdfOcrTool() {
                 return
             }
 
-            setPages(data.pages as string[])
+            const recognizedPages = data.pages as string[]
+            const combined = recognizedPages
+                .map((pageText, index) => `--- Page ${index + 1} ---\n${pageText}`)
+                .join("\n\n")
+
+            setText(combined)
+            setPageCount(recognizedPages.length)
             setStatus({ kind: "idle" })
         } catch (err) {
             setStatus({ kind: "error", message: err instanceof Error ? err.message : "Could not process this PDF." })
@@ -112,18 +128,38 @@ export function PdfOcrTool() {
 
     function handleClear() {
         setFile(null)
-        setPages(null)
+        setText(null)
+        setPageCount(0)
         setTruncatedNote(null)
         setStatus({ kind: "idle" })
     }
 
-    const combinedText = pages
-        ? pages.map((text, index) => `--- Page ${index + 1} ---\n${text}`).join("\n\n")
-        : ""
+    function handleDownloadTxt() {
+        if (!text) return
+        downloadBlob(new Blob([text], { type: "text/plain" }), "pdf-ocr-text.txt")
+    }
 
-    function handleDownload() {
-        if (!combinedText) return
-        downloadBlob(new Blob([combinedText], { type: "text/plain" }), "pdf-ocr-text.txt")
+    async function handleDownloadPdf() {
+        if (!text) return
+        setIsExporting(true)
+        try {
+            downloadBlob(textToPdfBlob(text), "pdf-ocr-text.pdf")
+        } finally {
+            setIsExporting(false)
+        }
+    }
+
+    async function handleDownloadImage() {
+        if (!text) return
+        setIsExporting(true)
+        try {
+            const blob = await textToImageBlob(text)
+            downloadBlob(blob, "pdf-ocr-text.png")
+        } catch {
+            setStatus({ kind: "error", message: "Could not create an image from this text." })
+        } finally {
+            setIsExporting(false)
+        }
     }
 
     const isBusy = status.kind === "rendering" || status.kind === "recognizing"
@@ -194,32 +230,40 @@ export function PdfOcrTool() {
                 <p className="mt-4 text-sm text-amber-600 dark:text-amber-400">{truncatedNote}</p>
             )}
 
-            {pages && !isBusy && (
+            {text !== null && !isBusy && (
                 <div className="mt-6 space-y-3">
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium">
-                            Extracted text ({pages.length} {pages.length === 1 ? "page" : "pages"})
+                            Extracted text ({pageCount} {pageCount === 1 ? "page" : "pages"})
                         </p>
                         <div className="flex items-center gap-1.5">
-                            <CopyButton value={combinedText} label="Copy all" variant="ghost" className="sm:w-auto" />
-                            <Button type="button" variant="ghost" size="sm" onClick={handleDownload}>
-                                Download .txt
-                            </Button>
+                            <CopyButton value={text} label="Copy all" variant="ghost" className="sm:w-auto" />
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button type="button" variant="ghost" size="sm" disabled={isExporting}>
+                                        {isExporting ? (
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <ChevronDown className="h-3.5 w-3.5" />
+                                        )}
+                                        Download
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={handleDownloadTxt}>Text (.txt)</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleDownloadPdf}>PDF (.pdf)</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleDownloadImage}>Image (.png)</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
 
-                    <div className="max-h-96 space-y-4 overflow-y-auto rounded-2xl border border-border/60 bg-muted/30 p-4">
-                        {pages.map((text, index) => (
-                            <div key={index}>
-                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                                    Page {index + 1}
-                                </p>
-                                <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-foreground">
-                                    {text || "No text recognized on this page."}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                    <textarea
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        rows={16}
+                        className="max-h-96 min-h-56 w-full resize-y rounded-2xl border border-border/60 bg-muted/30 p-4 text-sm leading-6 text-foreground outline-none focus:border-primary"
+                    />
                 </div>
             )}
         </div>
