@@ -460,6 +460,53 @@ Yes — it works on any plain text content, including code, config files, and st
 
 Need to find what changed between two versions? [Compare your text for free →](/tools/document-office-tools/text-compare-tool)`,
     },
+    {
+        slug: "how-to-count-words-and-characters-online-free",
+        title: "How to Count Words and Characters in Your Text Online",
+        excerpt:
+            "Hitting an essay word limit, a tweet character cap, or a resume length guideline? Here's how to count words, characters, and more, free.",
+        seoTitle: "How to Count Words and Characters Online Free | Filego",
+        seoDescription:
+            "Count words, characters, sentences, and paragraphs online for free, with reading time and most-frequent-word stats. No signup required.",
+        category: "Document Guides",
+        tags: ["word counter", "character counter", "office tools"],
+        toolLabel: "Word Counter",
+        toolPath: "/tools/document-office-tools/word-counter",
+        content: `Word and character limits show up constantly — an essay assignment, a tweet, a meta description, a resume length guideline. Rather than guessing or counting by hand, a live word counter gives you exact numbers as you type or paste.
+
+## When you need a word or character count
+
+- Checking an essay, article, or assignment against a required word count
+- Staying under a character limit for a tweet, ad headline, or SEO meta description
+- Trimming a resume or cover letter to a recommended length
+- Estimating how long a script or speech will take to read aloud
+
+## How to count words and characters, step by step
+
+1. Open the [Word Counter](/tools/document-office-tools/word-counter).
+2. Paste or type your text into the box.
+3. Word count, character count (with and without spaces), sentence count, and paragraph count update instantly.
+4. Check the estimated reading and speaking time for the same text.
+
+## Tips for working with length limits
+
+- **Character count, not word count, usually matters for social media and meta descriptions** — check which limit applies before trimming.
+- **Use the most-frequent-words list to catch repetition** — if the same word shows up far more than expected, it might be worth varying your language.
+- **Reading time is a rough guide, not a guarantee** — it's based on an average reading speed, so dense or technical text may take longer in practice.
+
+## Common questions
+
+**Does this count words the same way as Microsoft Word?**
+It uses a standard whitespace-based word count, which matches most word processors closely, though exact edge-case handling (like hyphenated words) can vary slightly between tools.
+
+**Is my text sent anywhere?**
+No — counting happens directly in your browser as you type; nothing is uploaded.
+
+**Can I count words in a file, not just pasted text?**
+Copy the text from your document into the counter, or open it directly if it's already in a text-editable format.
+
+Need an exact word or character count? [Count your text for free →](/tools/document-office-tools/word-counter)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {
