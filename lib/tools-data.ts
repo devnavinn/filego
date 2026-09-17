@@ -252,6 +252,7 @@ export const toolCategories: ToolCategory[] = [
             createTool("OCR Image to Text", "Extract readable text from images."),
             createTool("PDF OCR", "Recognize text from scanned PDF documents."),
             createTool("Handwriting to Text", "Convert handwriting into editable text."),
+            createTool("Speech to Text", "Transcribe spoken audio into text with AI."),
             createTool("Document Summarizer", "Summarize long documents quickly."),
             createTool("Resume Parser", "Extract structured data from resumes."),
             createTool("AI File Chat", "Ask questions and get answers from PDFs and documents."),

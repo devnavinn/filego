@@ -380,3 +380,29 @@ export async function recognizePdfPages(pages: OcrPageInput[]): Promise<string[]
 
     return result
 }
+
+export type TranscribeAudioInput = { audioBase64: string; mimeType: string }
+
+export async function transcribeAudio(input: TranscribeAudioInput): Promise<string> {
+    const ai = getClient()
+
+    const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: [
+            { inlineData: { data: input.audioBase64, mimeType: input.mimeType } },
+            {
+                text:
+                    "Transcribe all speech in this audio accurately. Use natural punctuation and start a new " +
+                    "paragraph when the speaker or topic changes. Write the transcript as plain text only — no " +
+                    "timestamps and no speaker labels unless a speaker change is clearly identifiable. " +
+                    "If there is no discernible speech, say so briefly instead of transcribing silence or noise. " +
+                    "Return only the transcript, with no commentary or explanation.",
+            },
+        ],
+    })
+
+    const text = response.text?.trim()
+    if (!text) throw new Error("No speech could be transcribed from this audio.")
+
+    return text
+}

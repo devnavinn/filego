@@ -335,6 +335,57 @@ Each question uses one of your daily AI generations — 5 per day free, 100 per 
 
 Have a document you'd rather ask than read? [Chat with your file for free →](/tools/ai-tools/ai-file-chat)`,
     },
+    {
+        slug: "how-to-transcribe-audio-to-text-with-ai",
+        title: "How to Transcribe Audio to Text with AI (Free)",
+        excerpt:
+            "Turn a voice memo, lecture, or interview recording into a real transcript — no manual typing. Here's how AI audio transcription works.",
+        seoTitle: "How to Transcribe Audio to Text with AI Free | Filego",
+        seoDescription:
+            "Transcribe MP3, WAV, M4A, and other audio recordings into text with AI, for free. Voice memos, lectures, interviews, and podcasts.",
+        category: "AI Guides",
+        tags: ["speech to text", "audio transcription", "ai tools"],
+        toolLabel: "Speech to Text",
+        toolPath: "/tools/ai-tools/speech-to-text",
+        content: `Typing out a recording by hand — replaying a few seconds at a time, pausing, rewinding — is one of the slowest ways to turn spoken audio into text. An AI transcription tool listens to the whole file and gives you a written transcript in the time it takes to upload it.
+
+## When audio transcription saves time
+
+- Turning a recorded lecture or meeting into notes you can search and skim
+- Getting an interview or podcast episode into text for quotes or show notes
+- Transcribing a voice memo instead of replaying it to type it out
+- Creating a text record of a call or conversation for reference
+
+## How to transcribe audio to text, step by step
+
+1. Open the [Speech to Text tool](/tools/ai-tools/speech-to-text) and sign in.
+2. Upload an MP3, WAV, M4A, AAC, OGG, or FLAC file — up to 12 MB.
+3. The AI listens to the audio and returns a transcript, split into natural paragraphs.
+4. Edit the transcript directly to fix anything that needs a correction.
+5. Copy it, or download it as .txt, .pdf, or .png.
+
+## Tips for the most accurate transcript
+
+- **Clear audio transcribes best.** Background noise, overlapping speakers, or heavy accents can reduce accuracy — a clean recording gives the AI the most to work with.
+- **Keep files under the size limit.** If a recording is longer than fits in 12 MB, trim it down first with the [MP3 Cutter](/tools/audio-tools/mp3-cutter) or compress it with the [Audio Compressor](/tools/audio-tools/audio-compressor).
+- **Review names, numbers, and jargon.** These are the most common spots where any transcription — human or AI — can slip, so give them a quick check.
+
+## Common questions
+
+**Does it label who's speaking?**
+It generally transcribes as continuous text, starting a new paragraph when the speaker or topic changes, rather than adding speaker labels — since reliably identifying who's speaking isn't guaranteed from audio alone.
+
+**What if my recording has background noise?**
+The AI does its best with imperfect audio, but heavy noise or overlapping speech will reduce accuracy — a cleaner recording always transcribes better.
+
+**Can I transcribe a video's audio instead of a standalone audio file?**
+Pull the audio out first with [Extract Audio from Video](/tools/video-tools/extract-audio-from-video) or [Video to MP3](/tools/video-tools/video-to-mp3), then upload the result here.
+
+**How many transcriptions can I run for free?**
+5 per day on the free plan, shared across all AI tools; 100 per day on Pro.
+
+Have a recording you'd rather read than replay? [Transcribe your audio for free →](/tools/ai-tools/speech-to-text)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {
