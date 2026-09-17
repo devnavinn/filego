@@ -1,5 +1,4 @@
 export const mobileLinks = [
-    { title: "API", href: "/api-docs" },
     { title: "About", href: "/about" },
     { title: "Blog", href: '/blog' }
 ] as const;

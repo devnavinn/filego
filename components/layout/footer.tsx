@@ -16,9 +16,7 @@ const footerLinks = {
   ],
   Resources: [
     { label: "Help Center", href: "/help" },
-    { label: "API", href: "/api-docs" },
     { label: "Status", href: "/status" },
-    { label: "Developers", href: "/developers" },
   ],
   Company: [
     { label: "About", href: "/about" },

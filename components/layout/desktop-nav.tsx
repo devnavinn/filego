@@ -90,12 +90,6 @@ export function DesktopNav() {
 
                     <NavigationMenuItem>
                         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                            <Link href="/api-docs">API</Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                             <Link href="/about">About</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
