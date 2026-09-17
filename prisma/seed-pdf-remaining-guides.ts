@@ -411,6 +411,59 @@ Yes — a long sheet flows across multiple PDF pages automatically rather than g
 
 Need to share a spreadsheet as a fixed document? [Convert Excel to PDF for free →](/tools/pdf-tools/excel-to-pdf)`,
     },
+    {
+        slug: "how-to-compress-pdf-to-100kb-or-any-target-size",
+        title: "How to Compress a PDF to 100KB (Or Any Target Size)",
+        excerpt:
+            "Exam and government portals often cap uploads at a fixed size — 100KB, 200KB, 500KB. Here's how to hit that exact target automatically, free.",
+        seoTitle: "How to Compress PDF to 100KB Online Free | Filego",
+        seoDescription:
+            "Compress a PDF to an exact target size — 50KB, 100KB, 200KB, 500KB, or 1MB — online for free. The tool finds the best quality automatically.",
+        category: "PDF Guides",
+        tags: ["compress pdf to 100kb", "compress pdf to target size", "pdf tools"],
+        toolLabel: "PDF Compress",
+        toolPath: "/tools/pdf-tools/pdf-compress",
+        content: `Plenty of forms don't just ask for "a smaller PDF" — they demand an exact ceiling: "upload must be under 100KB," a common requirement on exam boards, government portals, and job application forms. Guessing at a compression percentage until you land under that number wastes time. A target-size mode does the guessing for you.
+
+## When you need an exact target size, not just "smaller"
+
+- An exam portal or application form that rejects files over a specific size, like 100KB or 200KB
+- A government form with a strict upload limit for scanned documents
+- An email system with a hard attachment size cap
+- Any situation where "somewhat smaller" isn't good enough — you need to be under a specific number
+
+## How to compress a PDF to a target size, step by step
+
+1. Open the [PDF Compress tool](/tools/pdf-tools/pdf-compress).
+2. Upload the PDF you need to shrink.
+3. Select **Target size**.
+4. Pick a common target (50KB, 100KB, 200KB, 500KB, 1MB) or type your own value and unit.
+5. Compress — the tool automatically searches for the highest quality that still fits under your target.
+6. Download the result, sized to fit.
+
+## How the automatic targeting works
+
+Rather than applying one fixed quality setting and hoping it lands close enough, the tool renders your pages and tests different quality levels, narrowing in on the highest one that still keeps the file under your target size. If quality reduction alone can't get there, it also reduces the page resolution and tries again — the same two levers you'd adjust by hand, just automated.
+
+## Tips for the best result at a tight target
+
+- **Very tight targets on many-page documents are the hardest case.** A 100KB target on a 1-page scan is easy; the same target on a 20-page document leaves very little room per page.
+- **Split first if the target is unrealistic for the page count** — use [Extract PDF Pages](/tools/pdf-tools/extract-pdf-pages) to submit only the pages that are actually required, if the form allows it.
+- **If the tool can't fully reach your target**, it tells you and gives you its smallest possible result — that's a sign the target is very aggressive for this document, not a bug.
+
+## Common questions
+
+**What if my PDF can't be compressed enough to hit the target?**
+The tool will say so and return the smallest size it could reach. This usually means the target is very tight relative to the number of pages or how image-heavy the document is.
+
+**Does this affect text selectability?**
+Yes — like the other rasterized compression levels, hitting a small target size means pages are re-rendered as images, so text is no longer selectable in the result.
+
+**Can I use a custom size instead of the presets?**
+Yes — type any number and choose KB or MB; the presets are just shortcuts for common portal requirements.
+
+Need your PDF under an exact size limit? [Hit your target size for free →](/tools/pdf-tools/pdf-compress)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {
