@@ -9,7 +9,9 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "seed:tool-guides": "tsx --env-file=.env.local prisma/seed-tool-guides.ts",
-    "seed:archive-guides": "tsx --env-file=.env.local prisma/seed-archive-guides.ts"
+    "seed:archive-guides": "tsx --env-file=.env.local prisma/seed-archive-guides.ts",
+    "seed:image-guides": "tsx --env-file=.env.local prisma/seed-image-tool-guides.ts",
+    "seed:document-office-guides": "tsx --env-file=.env.local prisma/seed-document-office-guides.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
