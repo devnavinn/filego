@@ -3,12 +3,53 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { FileText, Loader2, Send, Sparkles, User } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 import { Button } from "@/components/ui/button"
 import { GenericFileDropzone } from "@/components/tools/generic-file-dropzone"
 import { usePdfJs } from "@/lib/use-pdfjs"
 import { extractTextFromFile } from "@/lib/ai-file-text-extract"
 import { cn } from "@/lib/utils"
+
+const chatMarkdownComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => <p className="mb-2 last:mb-0">{children}</p>,
+    strong: ({ children }: { children?: React.ReactNode }) => (
+        <strong className="font-semibold">{children}</strong>
+    ),
+    ul: ({ children }: { children?: React.ReactNode }) => (
+        <ul className="mb-2 list-disc space-y-1 pl-4 last:mb-0">{children}</ul>
+    ),
+    ol: ({ children }: { children?: React.ReactNode }) => (
+        <ol className="mb-2 list-decimal space-y-1 pl-4 last:mb-0">{children}</ol>
+    ),
+    li: ({ children }: { children?: React.ReactNode }) => <li className="leading-6">{children}</li>,
+    h1: ({ children }: { children?: React.ReactNode }) => (
+        <p className="mb-1.5 font-semibold last:mb-0">{children}</p>
+    ),
+    h2: ({ children }: { children?: React.ReactNode }) => (
+        <p className="mb-1.5 font-semibold last:mb-0">{children}</p>
+    ),
+    h3: ({ children }: { children?: React.ReactNode }) => (
+        <p className="mb-1.5 font-semibold last:mb-0">{children}</p>
+    ),
+    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+            {children}
+        </a>
+    ),
+    code: ({ children }: { children?: React.ReactNode }) => (
+        <code className="rounded bg-muted px-1 py-0.5 text-[0.85em]">{children}</code>
+    ),
+    pre: ({ children }: { children?: React.ReactNode }) => (
+        <pre className="mb-2 overflow-x-auto rounded-lg bg-muted p-2.5 text-[0.85em] last:mb-0">{children}</pre>
+    ),
+    blockquote: ({ children }: { children?: React.ReactNode }) => (
+        <blockquote className="mb-2 border-l-2 border-border pl-3 text-foreground/80 last:mb-0">
+            {children}
+        </blockquote>
+    ),
+}
 
 type Status =
     | { kind: "idle" }
@@ -192,7 +233,7 @@ export function AiFileChatTool() {
                                     >
                                         {message.role === "user" ? <User className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
                                     </span>
-                                    <p
+                                    <div
                                         className={cn(
                                             "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm leading-6",
                                             message.role === "user"
@@ -200,8 +241,14 @@ export function AiFileChatTool() {
                                                 : "border border-border/60 bg-card text-foreground"
                                         )}
                                     >
-                                        {message.content}
-                                    </p>
+                                        {message.role === "user" ? (
+                                            <p className="whitespace-pre-wrap">{message.content}</p>
+                                        ) : (
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={chatMarkdownComponents}>
+                                                {message.content}
+                                            </ReactMarkdown>
+                                        )}
+                                    </div>
                                 </div>
                             ))
                         )}
