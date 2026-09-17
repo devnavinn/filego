@@ -1,10 +1,14 @@
 import { GoogleGenAI, Type } from "@google/genai"
+import type { Part } from "@google/genai"
 import type { McqQuiz } from "@/lib/pdf-form-types"
 
 const MODEL = "gemini-3.5-flash-lite"
 
 /** Keeps prompts within a predictable cost/latency budget on the lite model. */
 export const MAX_DOCUMENT_CHARS = 60_000
+
+/** Upper bound on scanned pages sent to the AI in a single PDF OCR request. */
+export const MAX_OCR_PAGES = 12
 
 let client: GoogleGenAI | null = null
 
@@ -283,4 +287,88 @@ export async function answerFileQuestion(input: {
     if (!answer) throw new Error("The AI returned an empty response.")
 
     return answer
+}
+
+export type OcrMode = "printed" | "handwritten"
+
+export type OcrImageInput = {
+    imageBase64: string
+    mimeType: string
+    mode: OcrMode
+}
+
+export async function recognizeImageText(input: OcrImageInput): Promise<string> {
+    const ai = getClient()
+
+    const instruction =
+        input.mode === "handwritten"
+            ? "Transcribe all handwritten text in this image exactly as written, preserving line breaks " +
+              "and layout as closely as possible. If a word is illegible, mark it with [illegible]. " +
+              "Return only the transcribed text, with no commentary or explanation."
+            : "Extract all readable text from this image exactly as it appears, preserving line breaks " +
+              "and layout as closely as possible. Return only the extracted text, with no commentary or explanation."
+
+    const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: [{ inlineData: { data: input.imageBase64, mimeType: input.mimeType } }, { text: instruction }],
+    })
+
+    const text = response.text?.trim()
+    if (!text) throw new Error("No text could be recognized in this image.")
+
+    return text
+}
+
+const pdfOcrResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        pages: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+        },
+    },
+    required: ["pages"],
+}
+
+export type OcrPageInput = { imageBase64: string; mimeType: string }
+
+export async function recognizePdfPages(pages: OcrPageInput[]): Promise<string[]> {
+    const ai = getClient()
+
+    const pageParts: Part[] = pages.flatMap((page, index) => [
+        { text: `Page ${index + 1}:` },
+        { inlineData: { data: page.imageBase64, mimeType: page.mimeType } },
+    ])
+
+    const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: [
+            {
+                text:
+                    "Extract all readable text from each of the following scanned document page images, in order. " +
+                    "Preserve line breaks and structure within each page as closely as possible. Return exactly " +
+                    `${pages.length} strings in the "pages" array, one per page image, in the same order.`,
+            },
+            ...pageParts,
+        ],
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: pdfOcrResponseSchema,
+        },
+    })
+
+    const raw = response.text
+    if (!raw) throw new Error("The AI returned an empty response.")
+
+    let parsed: { pages?: string[] }
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        throw new Error("The AI returned an unreadable response.")
+    }
+
+    const result = (parsed.pages ?? []).map((page) => page.trim())
+    if (result.length === 0) throw new Error("No text could be recognized in this document.")
+
+    return result
 }
