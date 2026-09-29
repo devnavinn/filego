@@ -10,6 +10,7 @@ import React, {
 import { Download, ImagePlus, Minus, Plus, RotateCcw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
+import { useFileLimits } from "@/hooks/use-file-limits";
 type OutputFormat = "webp" | "avif" | "jpeg" | "png";
 
 type WorkerInput = {
@@ -56,6 +57,7 @@ export function ImageSquooshEditor() {
       : null;
 
   const [file, setFile] = useState<File | null>(initialPendingFile);
+  const { allowFiles } = useFileLimits();
   const [originalUrl, setOriginalUrl] = useState<string | null>(() =>
     initialPendingFile ? URL.createObjectURL(initialPendingFile) : null,
   );
@@ -390,7 +392,7 @@ export function ImageSquooshEditor() {
               accept="image/*"
               className="hidden"
               onChange={(e) => {
-                const next = e.target.files?.[0];
+                const [next] = allowFiles(e.target.files?.[0]);
                 if (!next) return;
                 handleFile(next);
               }}

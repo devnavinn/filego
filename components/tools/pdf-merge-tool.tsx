@@ -7,17 +7,19 @@ import { ArrowDown, ArrowUp, Combine, Download, FileText, Upload, X } from "luci
 import { Button } from "@/components/ui/button"
 import { formatBytes } from "@/lib/image-utils"
 import { downloadBlob, pdfBytesToBlob } from "@/lib/pdf-tool-utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type FileEntry = { id: string; file: File }
 
 export function PdfMergeTool() {
     const [entries, setEntries] = useState<FileEntry[]>([])
+    const { allowFiles } = useFileLimits()
     const [isMerging, setIsMerging] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const inputRef = useRef<HTMLInputElement | null>(null)
 
     function addFiles(fileList: FileList | null) {
-        const files = Array.from(fileList ?? []).filter((f) => f.type === "application/pdf")
+        const files = allowFiles(Array.from(fileList ?? []).filter((f) => f.type === "application/pdf"), { existing: entries.length })
         if (files.length === 0) return
         setError(null)
         setEntries((prev) => [...prev, ...files.map((file) => ({ id: crypto.randomUUID(), file }))])

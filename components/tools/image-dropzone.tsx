@@ -6,6 +6,7 @@ import { ImagePlus, RefreshCw, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatBytes } from "@/lib/image-utils"
 import { cn } from "@/lib/utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type ImageDropzoneProps = {
     onFileSelect: (file: File) => void
@@ -47,8 +48,10 @@ export function ImageDropzone({
         return () => URL.revokeObjectURL(url)
     }, [file])
 
+    const { allowFiles } = useFileLimits()
+
     function handleFiles(fileList: FileList | null) {
-        const next = fileList?.[0]
+        const [next] = allowFiles(fileList?.[0])
         if (next) onFileSelect(next)
     }
 

@@ -7,17 +7,19 @@ import { Archive, FileIcon, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatBytes } from "@/lib/image-utils"
 import { downloadBlob } from "@/lib/pdf-tool-utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type FileEntry = { id: string; file: File }
 
 export function ZipCreatorTool() {
     const [entries, setEntries] = useState<FileEntry[]>([])
+    const { allowFiles } = useFileLimits()
     const [zipName, setZipName] = useState("archive.zip")
     const [isCreating, setIsCreating] = useState(false)
     const inputRef = useRef<HTMLInputElement | null>(null)
 
     function addFiles(fileList: FileList | null) {
-        const files = Array.from(fileList ?? [])
+        const files = allowFiles(Array.from(fileList ?? []), { existing: entries.length })
         if (files.length === 0) return
         setEntries((prev) => [...prev, ...files.map((file) => ({ id: crypto.randomUUID(), file }))])
     }

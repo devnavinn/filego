@@ -10,18 +10,20 @@ import { useFFmpeg } from "@/lib/use-ffmpeg"
 import { bytesToBlob } from "@/lib/video-tool-utils"
 import { formatBytes } from "@/lib/image-utils"
 import { downloadBlob } from "@/lib/pdf-tool-utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type FileEntry = { id: string; file: File }
 
 export function AudioMergerTool() {
     const { ensureLoaded, isLoading, progress, error: engineError, setError: setEngineError } = useFFmpeg()
     const [entries, setEntries] = useState<FileEntry[]>([])
+    const { allowFiles } = useFileLimits()
     const [output, setOutput] = useState<{ blob: Blob; url: string } | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     function addFiles(fileList: FileList | null) {
-        const files = Array.from(fileList ?? []).filter((f) => f.type.startsWith("audio/"))
+        const files = allowFiles(Array.from(fileList ?? []).filter((f) => f.type.startsWith("audio/")), { existing: entries.length })
         if (files.length === 0) return
         setOutput(null)
         setEntries((prev) => [...prev, ...files.map((file) => ({ id: crypto.randomUUID(), file }))])

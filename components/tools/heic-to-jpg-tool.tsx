@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider"
 import { formatBytes } from "@/lib/image-utils"
 import { downloadBlob } from "@/lib/image-tool-utils"
 import { cn } from "@/lib/utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type ConvertedFile = {
     id: string
@@ -28,6 +29,7 @@ function outputName(name: string) {
 
 export function HeicToJpgTool() {
     const [items, setItems] = useState<ConvertedFile[]>([])
+    const { allowFiles } = useFileLimits()
     const [quality, setQuality] = useState(90)
     const [isDragging, setIsDragging] = useState(false)
     const inputRef = useRef<HTMLInputElement | null>(null)
@@ -60,7 +62,7 @@ export function HeicToJpgTool() {
     }
 
     function handleFiles(fileList: FileList | null) {
-        const files = Array.from(fileList ?? [])
+        const files = allowFiles(Array.from(fileList ?? []), { existing: items.length })
         if (files.length === 0) return
 
         const newItems: ConvertedFile[] = files.map((file) => ({

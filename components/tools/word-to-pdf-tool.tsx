@@ -20,6 +20,7 @@ import {
     Upload,
     Zap,
 } from "lucide-react";
+import { useFileLimits } from "@/hooks/use-file-limits";
 
 type PageFormat = "a4" | "letter";
 type PageMargin = "narrow" | "normal" | "wide";
@@ -74,8 +75,10 @@ export function WordToPdfTool() {
         }
     }, [editableHtml]);
 
+    const { allowFiles } = useFileLimits();
+
     const addFile = async (picked: File | null) => {
-        if (!picked) return;
+        if (!picked || !allowFiles(picked).length) return;
 
         const isDocx =
             picked.type ===

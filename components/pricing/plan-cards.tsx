@@ -3,18 +3,12 @@ import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { UpgradeButton } from "@/components/dashboard/upgrade-button";
-import { PLAN_LIMITS, PRO_PASSES, type PassKey, type PlanTier } from "@/lib/plans";
+import { PLAN_LIMITS, PRO_PASSES, formatLimitBytes, type PassKey, type PlanTier } from "@/lib/plans";
 import { cn } from "@/lib/utils";
-
-const MB = 1024 * 1024;
-
-function formatBytes(bytes: number) {
-    return bytes >= 1024 * MB ? `${bytes / (1024 * MB)} GB` : `${bytes / MB} MB`;
-}
 
 const freeFeatures = [
     `${PLAN_LIMITS.free.aiDaily} AI generations a day`,
-    `Files up to ${formatBytes(PLAN_LIMITS.free.maxFileBytes)}`,
+    `Files up to ${formatLimitBytes(PLAN_LIMITS.free.maxFileBytes)}`,
     `Up to ${PLAN_LIMITS.free.maxBatchFiles} files per batch`,
     "All browser-based tools",
     "Activity history in your dashboard",
@@ -22,7 +16,7 @@ const freeFeatures = [
 
 const proFeatures = [
     `${PLAN_LIMITS.pro.aiDaily} AI generations a day`,
-    `Files up to ${formatBytes(PLAN_LIMITS.pro.maxFileBytes)}`,
+    `Files up to ${formatLimitBytes(PLAN_LIMITS.pro.maxFileBytes)}`,
     "Unlimited files per batch",
     "No ads anywhere on Filego",
     "Everything in Free",

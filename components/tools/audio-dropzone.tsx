@@ -8,6 +8,7 @@ import { formatBytes } from "@/lib/image-utils"
 import { formatDuration } from "@/lib/video-tool-utils"
 import type { AudioMeta } from "@/lib/audio-tool-utils"
 import { cn } from "@/lib/utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type AudioDropzoneProps = {
     onFileSelect: (file: File) => void
@@ -33,8 +34,10 @@ export function AudioDropzone({
     const [isDragging, setIsDragging] = useState(false)
     const inputRef = useRef<HTMLInputElement | null>(null)
 
+    const { allowFiles } = useFileLimits()
+
     function handleFiles(fileList: FileList | null) {
-        const next = fileList?.[0]
+        const [next] = allowFiles(fileList?.[0])
         if (next) onFileSelect(next)
     }
 

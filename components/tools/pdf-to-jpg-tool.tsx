@@ -17,6 +17,8 @@ import {
     Zap,
 } from "lucide-react";
 import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
+import { useFileLimits } from "@/hooks/use-file-limits";
+
 type OutputImage = {
     name: string;
     url: string;
@@ -85,8 +87,10 @@ export function PdfToJpgTool() {
         setProgressText("");
     };
 
+    const { allowFiles } = useFileLimits();
+
     const addFile = (picked: File | null) => {
-        if (!picked) return;
+        if (!picked || !allowFiles(picked).length) return;
 
         const isPdf =
             picked.type === "application/pdf" || picked.name.toLowerCase().endsWith(".pdf");

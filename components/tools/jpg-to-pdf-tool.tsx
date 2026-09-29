@@ -19,6 +19,7 @@ import {
     Upload,
     Zap,
 } from "lucide-react";
+import { useFileLimits } from "@/hooks/use-file-limits";
 
 type ImageItem = {
     id: string;
@@ -45,6 +46,7 @@ function toSafeArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 
 export function JpgToPdfTool() {
     const [images, setImages] = useState<ImageItem[]>([]);
+    const { allowFiles } = useFileLimits();
     const [isDragging, setIsDragging] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [pageSize, setPageSize] = useState<PageSize>("fit-image");
@@ -69,14 +71,17 @@ export function JpgToPdfTool() {
     }, [images]);
 
     const addFiles = async (fileList: FileList | File[]) => {
-        const picked = Array.from(fileList).filter((file) =>
+        const supported = Array.from(fileList).filter((file) =>
             /image\/(jpeg|jpg|png|webp)/.test(file.type)
         );
 
-        if (!picked.length) {
+        if (!supported.length) {
             setError("Please choose JPG, PNG, or WebP images.");
             return;
         }
+
+        const picked = allowFiles(supported, { existing: images.length });
+        if (!picked.length) return;
 
         const items = await Promise.all(
             picked.map(async (file) => {

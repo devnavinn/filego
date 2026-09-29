@@ -58,3 +58,8 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     free: { aiDaily: 5, maxFileBytes: 100 * MB, maxBatchFiles: 20, showAds: true },
     pro: { aiDaily: 500, maxFileBytes: 2048 * MB, maxBatchFiles: null, showAds: false },
 };
+
+/** Formats a size limit for display, e.g. "100 MB" or "2 GB". */
+export function formatLimitBytes(bytes: number) {
+    return bytes >= 1024 * MB ? `${bytes / (1024 * MB)} GB` : `${bytes / MB} MB`;
+}

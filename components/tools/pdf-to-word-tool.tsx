@@ -24,6 +24,8 @@ import {
     Settings2,
 } from "lucide-react";
 import { completeUsageJob, startUsageJob } from "@/lib/usage-client";
+import { useFileLimits } from "@/hooks/use-file-limits";
+
 type ExtractionMode = "balanced" | "text-first";
 type SpacingMode = "compact" | "normal" | "loose";
 type PdfStatus = "idle" | "loading" | "ready" | "error";
@@ -109,8 +111,10 @@ export function PdfToWordTool() {
         setPageCount(0);
     };
 
+    const { allowFiles } = useFileLimits();
+
     const addFile = (picked: File | null) => {
-        if (!picked) return;
+        if (!picked || !allowFiles(picked).length) return;
 
         const isPdf =
             picked.type === "application/pdf" ||

@@ -2,12 +2,16 @@
 
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useFileLimits } from "@/hooks/use-file-limits";
 
 export function ImageSquooshLanding() {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const router = useRouter();
 
+    const { allowFiles } = useFileLimits();
+
     const handleFile = (file: File) => {
+        if (!allowFiles(file).length) return;
         (window as typeof window & { __imageSquooshFile?: File }).__imageSquooshFile = file;
         router.push("/image-squoosh/editor");
     };

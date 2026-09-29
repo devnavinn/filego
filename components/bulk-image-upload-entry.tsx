@@ -10,6 +10,7 @@ import {
     pickFolderImagesViaFSAccess,
     pickFolderImagesViaInput,
 } from "@/lib/folder-utils";
+import { useFileLimits } from "@/hooks/use-file-limits";
 
 type StoredEntry = {
     file: File;
@@ -23,8 +24,11 @@ export function BulkImageUploadEntry() {
 
     const [isDragging, setIsDragging] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const { allowFiles } = useFileLimits();
 
-    async function saveAndOpenEditor(entries: StoredEntry[]) {
+    async function saveAndOpenEditor(picked: StoredEntry[]) {
+        const allowed = new Set(allowFiles(picked.map((entry) => entry.file)));
+        const entries = picked.filter((entry) => allowed.has(entry.file));
         if (!entries.length) return;
 
         try {

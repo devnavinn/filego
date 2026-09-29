@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { formatBytes } from "@/lib/image-utils"
 import { formatDuration, type VideoMeta } from "@/lib/video-tool-utils"
 import { cn } from "@/lib/utils"
+import { useFileLimits } from "@/hooks/use-file-limits"
 
 type VideoDropzoneProps = {
     onFileSelect: (file: File) => void
@@ -34,8 +35,10 @@ export const VideoDropzone = forwardRef<HTMLVideoElement, VideoDropzoneProps>(fu
     const [isDragging, setIsDragging] = useState(false)
     const inputRef = useRef<HTMLInputElement | null>(null)
 
+    const { allowFiles } = useFileLimits()
+
     function handleFiles(fileList: FileList | null) {
-        const next = fileList?.[0]
+        const [next] = allowFiles(fileList?.[0])
         if (next) onFileSelect(next)
     }
 

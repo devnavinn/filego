@@ -4,6 +4,7 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { LimitReachedDialog } from "@/components/limit-reached-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -130,6 +131,7 @@ export default function RootLayout({
             <TooltipProvider>
               {children}
               <Toaster richColors position="top-right" />
+              <LimitReachedDialog />
             </TooltipProvider>
           </ThemeProvider>
         </AuthSessionProvider>

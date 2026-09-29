@@ -47,6 +47,7 @@ import {
   pickFolderImagesViaFSAccess,
   pickFolderImagesViaInput,
 } from "@/lib/folder-utils";
+import { useFileLimits } from "@/hooks/use-file-limits";
 
 type StoredEntry = {
   file: File;
@@ -391,6 +392,7 @@ export function ImageCompressor() {
   const [customTargetKB, setCustomTargetKB] = useState(150);
 
   const [items, setItems] = useState<QueueItem[]>([]);
+  const { allowFiles } = useFileLimits();
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -512,7 +514,13 @@ export function ImageCompressor() {
     resetProcessedState();
   };
 
-  const addFiles = async (entries: StoredEntry[]) => {
+  const addFiles = async (picked: StoredEntry[]) => {
+    const allowed = new Set(
+      allowFiles(picked.map((entry) => entry.file), { existing: items.length })
+    );
+    const entries = picked.filter((entry) => allowed.has(entry.file));
+    if (!entries.length) return;
+
     const enrichedEntries = await Promise.all(
       entries.map(async (entry) => {
         const meta = await getImageMeta(entry.file);
