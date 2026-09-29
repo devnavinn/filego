@@ -418,8 +418,8 @@ export default function HomePage() {
               Get more done with a free Filego account
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-white/85">
-              Unlock AI tools, track your activity, and be first in line for Filego Pro, with bigger
-              files, no ads and priority processing.
+              Unlock AI tools and track your activity. Need more? Filego Pro removes ads and raises
+              your limits, from ₹199 a month.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
@@ -438,7 +438,7 @@ export default function HomePage() {
                 variant="ghost"
                 className="h-12 rounded-full px-7 text-base font-semibold text-white hover:bg-white/15 hover:text-white"
               >
-                <Link href="/tools">Explore tools</Link>
+                <Link href="/pricing">See Pro plans</Link>
               </Button>
             </div>
             <p className="mt-5 inline-flex items-center gap-1.5 text-xs text-white/75">

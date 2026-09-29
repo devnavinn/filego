@@ -1,18 +1,11 @@
 import { NextResponse } from "next/server";
-import { BillingStatus, PlanType } from "@prisma/client";
+import { BillingPeriod, BillingStatus, PlanType } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { razorpay } from "@/lib/razorpay";
 import { prisma } from "@/lib/prisma";
+import { PRO_PASSES, isPassKey } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
-
-const PLAN_CONFIG = {
-    LIFETIME: { planType: PlanType.LIFETIME, amount: 199900, product: "filego-lifetime" },
-    PRO_MONTHLY: { planType: PlanType.PRO, amount: 19900, product: "filego-pro-monthly" },
-    PRO_YEARLY: { planType: PlanType.PRO, amount: 49900, product: "filego-pro-yearly" },
-} as const;
-
-type PlanKey = keyof typeof PLAN_CONFIG;
 
 export async function POST(req: Request) {
     try {
@@ -20,69 +13,50 @@ export async function POST(req: Request) {
 
         if (!razorpay) {
             return NextResponse.json(
-                { ok: false, message: "Billing not configured" },
+                { ok: false, error: "Billing not configured" },
                 { status: 500 }
             );
         }
 
         const body = await req.json().catch(() => null);
-        const planKey: PlanKey = body?.plan in PLAN_CONFIG ? body.plan : "LIFETIME";
-        const plan = PLAN_CONFIG[planKey];
+        const planKey: unknown = body?.plan;
 
+        if (!isPassKey(planKey)) {
+            return NextResponse.json(
+                { ok: false, error: "Unknown plan" },
+                { status: 400 }
+            );
+        }
+
+        const pass = PRO_PASSES[planKey];
         const receipt = `fg_${user.id.slice(-8)}_${Date.now().toString().slice(-8)}`;
 
         const order = await razorpay.orders.create({
-            amount: plan.amount,
+            amount: pass.amount,
             currency: "INR",
             receipt,
             notes: {
                 userId: user.id,
-                planType: plan.planType,
-                plan: planKey,
-                product: plan.product,
+                planType: PlanType.PRO,
+                plan: pass.key,
             },
         });
 
         const amount = Number(order.amount);
 
-        const existingSubscription = await prisma.subscription.findFirst({
-            where: {
+        // One row per order, so renewals keep their own history.
+        await prisma.subscription.create({
+            data: {
                 userId: user.id,
-                planType: plan.planType,
-            },
-            orderBy: {
-                createdAt: "desc",
+                planType: PlanType.PRO,
+                billingPeriod: BillingPeriod[pass.period],
+                billingStatus: BillingStatus.INACTIVE,
+                provider: "RAZORPAY",
+                providerOrderId: order.id,
+                amount,
+                currency: order.currency,
             },
         });
-
-        if (existingSubscription) {
-            await prisma.subscription.update({
-                where: { id: existingSubscription.id },
-                data: {
-                    billingStatus: BillingStatus.INACTIVE,
-                    provider: "RAZORPAY",
-                    providerOrderId: order.id,
-                    providerPaymentId: null,
-                    amount,
-                    currency: order.currency,
-                    purchasedAt: null,
-                    startsAt: null,
-                },
-            });
-        } else {
-            await prisma.subscription.create({
-                data: {
-                    userId: user.id,
-                    planType: plan.planType,
-                    billingStatus: BillingStatus.INACTIVE,
-                    provider: "RAZORPAY",
-                    providerOrderId: order.id,
-                    providerPaymentId: null,
-                    amount,
-                    currency: order.currency,
-                },
-            });
-        }
 
         return NextResponse.json({
             ok: true,
@@ -91,8 +65,7 @@ export async function POST(req: Request) {
                 amount,
                 currency: order.currency,
                 key: process.env.RAZORPAY_KEY_ID,
-                planType: plan.planType,
-                plan: planKey,
+                plan: pass.key,
                 prefill: {
                     name: user.name ?? "",
                     email: user.email ?? "",
@@ -103,7 +76,7 @@ export async function POST(req: Request) {
         console.error("[CREATE_ORDER_ERROR]", error);
 
         return NextResponse.json(
-            { ok: false, message: "Failed to create order" },
+            { ok: false, error: "Failed to create order" },
             { status: 500 }
         );
     }

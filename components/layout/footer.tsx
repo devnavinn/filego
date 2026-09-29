@@ -15,6 +15,7 @@ const footerLinks = {
     { label: "JPG to PDF", href: "/tools/pdf-tools/jpg-to-pdf" },
   ],
   Resources: [
+    { label: "Pricing", href: "/pricing" },
     { label: "Help Center", href: "/help" },
     { label: "Status", href: "/status" },
   ],

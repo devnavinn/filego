@@ -9,6 +9,13 @@ export const razorpay =
         })
         : null;
 
+function hmacMatches(secret: string, payload: string, signature: string) {
+    const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+    const a = Buffer.from(expected);
+    const b = Buffer.from(signature);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 export function verifyRazorpayPayment({
     orderId,
     paymentId,
@@ -21,10 +28,13 @@ export function verifyRazorpayPayment({
     const secret = process.env.RAZORPAY_KEY_SECRET;
     if (!secret) throw new Error("Missing Razorpay secret");
 
-    const expected = crypto
-        .createHmac("sha256", secret)
-        .update(`${orderId}|${paymentId}`)
-        .digest("hex");
+    return hmacMatches(secret, `${orderId}|${paymentId}`, signature);
+}
 
-    return expected === signature;
+/** Checks the X-Razorpay-Signature header against the raw webhook body. */
+export function verifyRazorpayWebhook(rawBody: string, signature: string) {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret) throw new Error("Missing RAZORPAY_WEBHOOK_SECRET");
+
+    return hmacMatches(secret, rawBody, signature);
 }

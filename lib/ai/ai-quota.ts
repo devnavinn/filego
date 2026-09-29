@@ -1,9 +1,7 @@
-import { BillingStatus, PlanType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { getUserPlan } from "@/lib/entitlements"
 
 const ENTITLEMENT_KEY = "ai_generate"
-const FREE_DAILY_LIMIT = 5
-const PRO_DAILY_LIMIT = 100
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export type AiQuotaResult = {
@@ -13,25 +11,11 @@ export type AiQuotaResult = {
     isPro: boolean
 }
 
-async function isProUser(userId: string) {
-    const activeSub = await prisma.subscription.findFirst({
-        where: {
-            userId,
-            billingStatus: BillingStatus.ACTIVE,
-            planType: { in: [PlanType.PRO, PlanType.LIFETIME] },
-        },
-        orderBy: { createdAt: "desc" },
-    })
-
-    if (!activeSub) return false
-    if (activeSub.planType === PlanType.LIFETIME) return true
-    return !activeSub.expiresAt || activeSub.expiresAt > new Date()
-}
-
 /** Checks the caller's daily AI quota and consumes one unit if allowed. */
 export async function consumeAiQuota(userId: string): Promise<AiQuotaResult> {
-    const isPro = await isProUser(userId)
-    const limit = isPro ? PRO_DAILY_LIMIT : FREE_DAILY_LIMIT
+    const plan = await getUserPlan(userId)
+    const isPro = plan.tier === "pro"
+    const limit = plan.limits.aiDaily
     const now = new Date()
 
     const entitlement = await prisma.featureEntitlement.findUnique({

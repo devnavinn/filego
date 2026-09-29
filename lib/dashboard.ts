@@ -1,6 +1,7 @@
-import { BillingStatus, JobStatus } from "@prisma/client";
+import { JobStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { serializeBigInt } from "@/lib/bigint";
+import { getUserPlan } from "@/lib/entitlements";
 
 const EMPTY_DASHBOARD_DATA = {
     summary: {
@@ -83,13 +84,7 @@ export async function getDashboardOverview(userId?: string) {
         GROUP BY 1
         ORDER BY 1 ASC
       `,
-            prisma.subscription.findFirst({
-                where: {
-                    userId,
-                    billingStatus: BillingStatus.ACTIVE,
-                },
-                orderBy: { createdAt: "desc" },
-            }),
+            getUserPlan(userId).then((plan) => plan.subscription),
         ]);
 
     return serializeBigInt({

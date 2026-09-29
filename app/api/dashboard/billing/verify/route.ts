@@ -1,24 +1,20 @@
 import { NextResponse } from "next/server";
-import { BillingStatus } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-provider";
 import { prisma } from "@/lib/prisma";
 import { verifyRazorpayPayment } from "@/lib/razorpay";
+import { activatePass } from "@/lib/entitlements";
 
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-
-        const userId =
-            (session as { id?: string; user?: { id?: string } } | null)?.id ??
-            (session as { user?: { id?: string } } | null)?.user?.id ??
-            null;
+        const userId = session?.user?.id;
 
         if (!userId) {
             return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
         }
 
-        const body = await req.json();
+        const body = await req.json().catch(() => null);
 
         const razorpayOrderId = body?.razorpay_order_id;
         const razorpayPaymentId = body?.razorpay_payment_id;
@@ -44,46 +40,25 @@ export async function POST(req: Request) {
             );
         }
 
-        const subscription = await prisma.subscription.findFirst({
-            where: {
-                userId,
-                providerOrderId: razorpayOrderId,
-            },
+        const owned = await prisma.subscription.findFirst({
+            where: { userId, providerOrderId: razorpayOrderId },
+            select: { id: true },
         });
 
-        if (!subscription) {
+        if (!owned) {
             return NextResponse.json(
                 { ok: false, error: "Subscription not found" },
                 { status: 404 }
             );
         }
 
-        if (
-            subscription.billingStatus === BillingStatus.ACTIVE &&
-            subscription.providerPaymentId === razorpayPaymentId
-        ) {
-            return NextResponse.json({ ok: true, alreadyVerified: true });
-        }
-
-        const now = new Date();
-        // PRO plans are billed monthly (₹199) or yearly (₹499); LIFETIME never expires.
-        const expiresAt =
-            subscription.planType === "PRO"
-                ? new Date(now.getTime() + (subscription.amount === 49900 ? 365 : 30) * 24 * 60 * 60 * 1000)
-                : null;
-
-        await prisma.subscription.update({
-            where: { id: subscription.id },
-            data: {
-                billingStatus: BillingStatus.ACTIVE,
-                providerPaymentId: razorpayPaymentId,
-                purchasedAt: now,
-                startsAt: now,
-                expiresAt,
-            },
+        const result = await activatePass({
+            orderId: razorpayOrderId,
+            paymentId: razorpayPaymentId,
+            signature: razorpaySignature,
         });
 
-        return NextResponse.json({ ok: true });
+        return NextResponse.json({ ok: true, alreadyVerified: result.status === "already_active" });
     } catch (error) {
         console.error("[BILLING_VERIFY_ERROR]", error);
 

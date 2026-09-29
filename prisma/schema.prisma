@@ -39,6 +39,11 @@ enum PlanType {
   PRO
 }
 
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
 enum BillingStatus {
   ACTIVE
   INACTIVE
@@ -246,6 +251,7 @@ model Subscription {
   id                 String        @id @default(cuid())
   userId             String
   planType           PlanType      @default(FREE)
+  billingPeriod      BillingPeriod?
   billingStatus      BillingStatus @default(INACTIVE)
   provider           String?
   providerCustomerId String?
@@ -262,7 +268,7 @@ model Subscription {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, planType])
+  @@index([userId, billingStatus, expiresAt])
   @@index([providerOrderId])
   @@index([providerPaymentId])
 }

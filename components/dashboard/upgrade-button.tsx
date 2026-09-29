@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { invalidatePlan } from "@/hooks/use-plan";
+import { PRO_PASSES, type PassKey } from "@/lib/plans";
 declare global {
     interface Window {
         Razorpay: new (options: Record<string, unknown>) => {
@@ -20,15 +22,15 @@ type RazorpaySuccessResponse = {
 };
 
 type UpgradeButtonProps = {
-    plan?: "LIFETIME" | "PRO_MONTHLY" | "PRO_YEARLY";
+    plan: PassKey;
     label?: string;
-    description?: string;
+    className?: string;
 };
 
 export function UpgradeButton({
-    plan = "LIFETIME",
+    plan,
     label,
-    description = "Lifetime Premium Plan",
+    className,
 }: UpgradeButtonProps) {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -63,7 +65,7 @@ export function UpgradeButton({
                 amount: orderData.data.amount,
                 currency: orderData.data.currency,
                 name: "Filego",
-                description,
+                description: `Filego ${PRO_PASSES[plan].name}`,
                 order_id: orderData.data.orderId,
                 prefill: orderData.data.prefill,
                 theme: {
@@ -94,7 +96,8 @@ export function UpgradeButton({
                             toast.error(verifyData?.error || "Payment verification failed");
                             return;
                         }
-                        toast.success("Premium activated successfully");
+                        invalidatePlan();
+                        toast.success("Filego Pro is active. Thanks for upgrading!");
                         router.refresh();
                     } catch (error) {
                         console.error("verify payment error", error);
@@ -125,7 +128,7 @@ export function UpgradeButton({
             id="upgrade-button"
             onClick={handleUpgrade}
             disabled={loading}
-            className="rounded-xl bg-primary text-primary-foreground hover:opacity-90"
+            className={className ?? "rounded-xl bg-primary text-primary-foreground hover:opacity-90"}
         >
             {loading ? "Processing..." : label ?? "Upgrade now"}
         </Button>

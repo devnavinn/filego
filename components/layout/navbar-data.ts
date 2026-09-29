@@ -1,4 +1,5 @@
 export const mobileLinks = [
+    { title: "Pricing", href: "/pricing" },
     { title: "About", href: "/about" },
     { title: "Blog", href: '/blog' }
 ] as const;

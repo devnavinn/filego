@@ -1,10 +1,4 @@
-import {
-    BillingStatus,
-    JobStatus,
-    PlanType,
-    Prisma,
-    ToolType,
-} from "@prisma/client";
+import { JobStatus, Prisma, ToolType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type StartUsageInput = {
@@ -178,31 +172,4 @@ const pdfTools: readonly ToolType[] = [
 
 function isPdfTool(toolType: ToolType) {
     return pdfTools.includes(toolType);
-}
-
-export async function ensureFreeEntitlements(userId: string) {
-    const sub = await prisma.subscription.findFirst({
-        where: {
-            userId,
-            billingStatus: BillingStatus.ACTIVE,
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
-
-    if (sub) return sub;
-
-    return prisma.subscription.create({
-        data: {
-            userId,
-            planType: PlanType.FREE,
-            billingStatus: BillingStatus.ACTIVE,
-            provider: "system",
-            amount: 0,
-            currency: "INR",
-            startsAt: new Date(),
-            purchasedAt: new Date(),
-        },
-    });
 }
