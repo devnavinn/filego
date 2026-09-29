@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
     title: "Privacy Policy | Filego",
     description:
-        "Read Filego's Privacy Policy to understand how we handle files, analytics, cookies, and account data.",
+        "Read Filego's Privacy Policy to understand how we handle files, analytics, advertising, cookies, and account data.",
 };
 
 export default function PrivacyPage() {
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
                         information when you use our website and file tools.
                     </p>
                     <p className="mt-4 text-sm text-muted-foreground">
-                        Last updated: June 10, 2026
+                        Last updated: September 29, 2026
                     </p>
                 </div>
             </section>
@@ -58,9 +58,9 @@ export default function PrivacyPage() {
                                     if you create an account.
                                 </li>
                                 <li>
-                                    Billing information, such as payment status, subscription plan, and
-                                    transaction references, if you purchase a paid plan. Payment card details
-                                    are typically processed by our payment providers, not stored directly by us.
+                                    Billing information, such as payment status, the Pro pass you bought, its
+                                    start and end dates, and transaction references. Payments are processed by
+                                    Razorpay; we do not receive or store your full card, UPI, or bank details.
                                 </li>
                                 <li>
                                     Usage information, such as browser type, device type, pages visited,
@@ -107,7 +107,8 @@ export default function PrivacyPage() {
                                 <li>Provide, maintain, and improve Filego.</li>
                                 <li>Process files and return requested outputs.</li>
                                 <li>Authenticate users and manage accounts.</li>
-                                <li>Process subscriptions, payments, and invoices.</li>
+                                <li>Process Pro pass payments and send reminders before a pass ends.</li>
+                                <li>Show ads to visitors on the Free plan.</li>
                                 <li>Monitor performance, detect abuse, and prevent fraud.</li>
                                 <li>Respond to support requests and service inquiries.</li>
                                 <li>Comply with legal obligations and enforce our terms.</li>
@@ -124,10 +125,67 @@ export default function PrivacyPage() {
                                 users interact with the site.
                             </p>
                             <p>
-                                We may also use privacy-conscious analytics and error monitoring tools to
-                                understand traffic, feature adoption, and reliability. These tools may collect
-                                technical information such as IP address, browser details, device data, and
-                                page events.
+                                We use Google Analytics, Google Tag Manager, and Vercel Web Analytics and Speed
+                                Insights to understand traffic, feature adoption, and reliability. These tools may
+                                collect technical information such as IP address, browser details, device data, and
+                                page events. Our{" "}
+                                <Link href="/cookies" className="underline underline-offset-4">
+                                    Cookie Policy
+                                </Link>{" "}
+                                lists the cookies we use.
+                            </p>
+                        </section>
+
+                        <section className="space-y-3">
+                            <h2 className="text-2xl font-semibold tracking-tight">
+                                Advertising
+                            </h2>
+                            <p>
+                                Filego shows ads from Google AdSense to visitors who are not signed in and to
+                                users on the Free plan. Ads appear on tool, category, and blog pages, never
+                                inside the tools themselves. Filego Pro users see no ads, and the AdSense code
+                                is not loaded for them.
+                            </p>
+                            <p>
+                                Google and its partners use cookies and similar identifiers to serve ads based on
+                                your visits to Filego and other websites, to limit how often you see an ad, and to
+                                measure ad performance. Google&apos;s use of this information is covered by its own
+                                policies; see{" "}
+                                <a
+                                    href="https://policies.google.com/technologies/partner-sites"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline underline-offset-4"
+                                >
+                                    how Google uses information from sites that use its services
+                                </a>
+                                .
+                            </p>
+                            <p>
+                                If you are in the European Economic Area, the UK, or Switzerland, we ask for your
+                                consent through Google&apos;s consent message before personalized ads are shown.
+                                Anywhere, you can turn off personalized ads in{" "}
+                                <a
+                                    href="https://myadcenter.google.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline underline-offset-4"
+                                >
+                                    Google My Ad Center
+                                </a>{" "}
+                                or opt out of personalized ads from many providers at{" "}
+                                <a
+                                    href="https://optout.aboutads.info/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline underline-offset-4"
+                                >
+                                    aboutads.info
+                                </a>
+                                .
+                            </p>
+                            <p>
+                                We do not give your files, file contents, or account details to advertisers.
                             </p>
                         </section>
 
@@ -137,10 +195,14 @@ export default function PrivacyPage() {
                             </h2>
                             <p>We may share information with trusted third parties only when needed to operate the service, including:</p>
                             <ul className="list-disc space-y-2 pl-5 text-foreground/90">
-                                <li>Hosting and infrastructure providers.</li>
-                                <li>Payment processors and billing platforms.</li>
-                                <li>Analytics, monitoring, and customer support vendors.</li>
-                                <li>Storage or processing vendors used to complete file operations.</li>
+                                <li>Hosting and infrastructure providers, such as Vercel and Neon.</li>
+                                <li>Our payment processor, Razorpay.</li>
+                                <li>Analytics and advertising providers, such as Google Analytics and Google AdSense.</li>
+                                <li>Email providers, such as Resend, for sign-in codes, password resets, and Pro reminders.</li>
+                                <li>
+                                    AI providers, such as Google Gemini, which process the files or text you submit
+                                    to our AI tools in order to return a result.
+                                </li>
                                 <li>Authorities or legal recipients when required by law.</li>
                             </ul>
                             <p>

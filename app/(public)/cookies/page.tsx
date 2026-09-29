@@ -7,7 +7,7 @@ const SITE_URL = "https://www.filego.in";
 export const metadata: Metadata = {
     title: `Cookie Policy | ${SITE_NAME}`,
     description:
-        "Read the Filego cookie policy to understand how we use essential, analytics, and preference cookies, how long they last, and how you can manage them.",
+        "Read the Filego cookie policy to understand how we use essential, analytics, advertising, and consent cookies, how long they last, and how you can manage them.",
     alternates: {
         canonical: `${SITE_URL}/cookies`,
     },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: `Cookie Policy | ${SITE_NAME}`,
         description:
-            "Read the Filego cookie policy to understand how we use essential, analytics, and preference cookies, how long they last, and how you can manage them.",
+            "Read the Filego cookie policy to understand how we use essential, analytics, advertising, and consent cookies, how long they last, and how you can manage them.",
         url: `${SITE_URL}/cookies`,
         siteName: SITE_NAME,
         type: "website",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         card: "summary",
         title: `Cookie Policy | ${SITE_NAME}`,
         description:
-            "Read the Filego cookie policy to understand how we use essential, analytics, and preference cookies, how long they last, and how you can manage them.",
+            "Read the Filego cookie policy to understand how we use essential, analytics, advertising, and consent cookies, how long they last, and how you can manage them.",
     },
 };
 
@@ -35,38 +35,67 @@ const cookieSections = [
     {
         title: "Essential cookies",
         description:
-            "These cookies help Filego operate correctly, including core navigation, security-related functions, and basic product behavior required to use the site.",
+            "These keep you signed in, protect forms against cross-site request forgery, and let payments complete. Filego cannot work properly without them.",
     },
     {
         title: "Analytics cookies",
         description:
-            "These cookies help us understand how visitors use Filego so we can improve performance, usability, and product experience over time.",
+            "Google Analytics uses these to tell us which pages and tools people use, so we can improve performance and fix problems.",
     },
     {
-        title: "Preference cookies",
+        title: "Advertising cookies",
         description:
-            "These cookies remember choices such as language, display settings, or other site preferences to provide a more consistent experience.",
+            "Google AdSense uses these to show ads to visitors on the Free plan, limit how often you see the same ad, and measure ad performance. Pro users see no ads.",
+    },
+    {
+        title: "Consent cookies",
+        description:
+            "These remember the choices you make in the cookie consent message, so we don't ask you again on every visit.",
     },
 ];
 
 const cookieTable = [
     {
-        name: "_session",
-        purpose: "Keeps the current session active while you use Filego.",
+        name: "next-auth.session-token",
+        purpose: "Keeps you signed in to your Filego account. Named __Secure-next-auth.session-token on HTTPS.",
+        expiry: "30 days",
+        type: "Essential",
+    },
+    {
+        name: "next-auth.csrf-token",
+        purpose: "Protects sign-in and account forms against cross-site request forgery.",
         expiry: "Session",
         type: "Essential",
     },
     {
-        name: "cookie_preferences",
-        purpose: "Stores your cookie consent and preference choices.",
-        expiry: "6 months",
-        type: "Preference",
+        name: "next-auth.callback-url",
+        purpose: "Remembers which page to return you to after you sign in.",
+        expiry: "Session",
+        type: "Essential",
     },
     {
-        name: "_analytics",
-        purpose: "Helps measure page visits, feature usage, and product trends.",
-        expiry: "13 months",
+        name: "_ga, _ga_<ID>",
+        purpose: "Google Analytics: distinguishes visitors and sessions to measure site usage.",
+        expiry: "Up to 2 years",
         type: "Analytics",
+    },
+    {
+        name: "__gads, __gpi",
+        purpose: "Google AdSense: serves ads, limits how often an ad repeats, and measures ad performance.",
+        expiry: "Up to 13 months",
+        type: "Advertising",
+    },
+    {
+        name: "__eoi",
+        purpose: "Google AdSense: helps detect ad fraud and invalid clicks.",
+        expiry: "Up to 6 months",
+        type: "Advertising",
+    },
+    {
+        name: "FCCDCF, FCNEC",
+        purpose: "Google's consent message: stores your cookie and ad personalization choices.",
+        expiry: "Up to 13 months",
+        type: "Consent",
     },
 ];
 
@@ -76,7 +105,7 @@ const jsonLd = {
     name: `Cookie Policy | ${SITE_NAME}`,
     url: `${SITE_URL}/cookies`,
     description:
-        "Cookie policy for Filego explaining essential, analytics, and preference cookies, retention periods, and cookie management choices.",
+        "Cookie policy for Filego explaining essential, analytics, advertising, and consent cookies, retention periods, and cookie management choices.",
     isPartOf: {
         "@type": "WebSite",
         name: SITE_NAME,
@@ -113,7 +142,7 @@ export default function CookiesPage() {
                 </p>
             </section>
 
-            <section className="mt-12 grid gap-6 md:grid-cols-3" aria-label="Cookie categories">
+            <section className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4" aria-label="Cookie categories">
                 {cookieSections.map((section) => (
                     <article
                         key={section.title}
@@ -136,9 +165,11 @@ export default function CookiesPage() {
                 </h2>
 
                 <p className="mt-2 text-sm text-gray-600 dark:text-neutral-300">
-                    The examples below show the type of information users should be able to
-                    review, including cookie name, category, purpose, and how long the cookie
-                    remains active on a device or browser.
+                    These are the main cookies set on filego.in. Google may change the names and
+                    lifetimes of its cookies over time, and may also set cookies on its own domains
+                    (such as doubleclick.net) when ads are shown. Razorpay sets its own cookies on
+                    its checkout window when you pay. Your theme choice is kept in your
+                    browser&apos;s local storage, not in a cookie.
                 </p>
 
                 <div className="mt-6 overflow-x-auto">
@@ -189,12 +220,40 @@ export default function CookiesPage() {
                     Managing cookies
                 </h2>
 
-                <p className="mt-4 text-sm leading-6 text-gray-600 dark:text-neutral-300">
-                    You can control non-essential cookies through the cookie banner, preference
-                    settings, or your browser configuration. If we introduce new non-essential
-                    cookies or materially change how they are used, users should be asked to
-                    review and update their choices again.
-                </p>
+                <div className="mt-4 space-y-4 text-sm leading-6 text-gray-600 dark:text-neutral-300">
+                    <p>
+                        If you visit from the European Economic Area, the UK, or Switzerland, Google&apos;s
+                        consent message asks for your permission before advertising cookies are used for
+                        personalized ads. You can change your choice at any time from the privacy and
+                        cookie settings link that the message provides.
+                    </p>
+                    <p>
+                        Wherever you are, you can turn off personalized ads from Google at{" "}
+                        <a
+                            href="https://myadcenter.google.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4"
+                        >
+                            My Ad Center
+                        </a>
+                        , and read how Google uses information from sites that use its services at{" "}
+                        <a
+                            href="https://policies.google.com/technologies/partner-sites"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4"
+                        >
+                            policies.google.com
+                        </a>
+                        .
+                    </p>
+                    <p>
+                        You can also block or delete cookies in your browser settings. Blocking essential
+                        cookies will stop sign-in from working. Filego Pro removes ads entirely, so no
+                        advertising cookies are set by ads on our pages while you are signed in to Pro.
+                    </p>
+                </div>
             </section>
         </main>
     );
