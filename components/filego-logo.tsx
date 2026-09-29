@@ -19,3 +19,16 @@ export function FilegoLogo({ className = "h-9 w-9" }: { className?: string }) {
     </svg>
   );
 }
+/** Gradient app tile with the Filego glyph, used wherever the brand appears. */
+export function FilegoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const box = { sm: "h-8 w-8 rounded-lg", md: "h-9 w-9 rounded-xl", lg: "h-11 w-11 rounded-2xl" }[size];
+  const glyph = { sm: "h-4 w-4", md: "h-[18px] w-[18px]", lg: "h-5 w-5" }[size];
+
+  return (
+    <span
+      className={`bg-gradient-brand flex shrink-0 items-center justify-center text-white shadow-md shadow-primary/25 ring-1 ring-white/20 ring-inset ${box}`}
+    >
+      <FilegoLogo className={glyph} />
+    </span>
+  );
+}

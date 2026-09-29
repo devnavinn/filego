@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
+import { ArrowLeft, Sparkles } from "lucide-react"
+import { ToolCard } from "@/components/tool-card"
 import { cn } from "@/lib/utils"
 import { categoryIconMap, getCategoryBySlug, toolCategories } from "@/lib/tools-data"
 
@@ -67,60 +68,50 @@ export default async function ToolCategoryPage({ params }: Props) {
 
     return (
         <main className="min-h-screen bg-background text-foreground">
-            <div className="container mx-auto px-4 pt-6 pb-2 md:px-6">
-                <Link
-                    href="/tools"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    All tools
-                </Link>
-
-                <div className="mt-3 flex items-center gap-2.5">
-                    <div
-                        className={cn(
-                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
-                            category.accent
-                        )}
+            <section className="relative isolate border-b border-border/60">
+                <div className="bg-hero-mesh pointer-events-none absolute inset-0 -z-10 opacity-80" />
+                <div className="container mx-auto px-4 pt-6 pb-10 md:px-6 md:pb-14">
+                    <Link
+                        href="/tools"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
                     >
-                        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{category.title}</h1>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{category.description}</p>
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        All tools
+                    </Link>
+
+                    <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
+                        <div
+                            className={cn(
+                                "flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg",
+                                category.accent
+                            )}
+                        >
+                            <Icon className="h-8 w-8" aria-hidden="true" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{category.title}</h1>
+                            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                                {category.heroDescription}
+                            </p>
+                            <p className="mt-3 inline-flex rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground">
+                                {category.tools.length} free tools
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <section className="container mx-auto px-4 py-8 md:px-6">
+            <section className="container mx-auto px-4 py-10 md:px-6">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {category.tools.map((tool) => (
-                        <Link
+                        <ToolCard
                             key={tool.slug}
                             href={`/tools/${category.slug}/${tool.slug}`}
-                            className="group flex items-start gap-2.5 rounded-xl border border-border/60 p-3 transition-colors hover:border-primary/40 hover:bg-muted/30"
-                        >
-                            <div
-                                className={cn(
-                                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
-                                    category.accent
-                                )}
-                            >
-                                <Icon className="h-4 w-4" />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                                <div className="flex items-start justify-between gap-2">
-                                    <h3 className="text-sm font-medium tracking-tight transition-colors group-hover:text-primary">
-                                        {tool.name}
-                                    </h3>
-                                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
-                                </div>
-                                <p className="mt-0.5 text-xs leading-4 text-muted-foreground">
-                                    {tool.shortDescription}
-                                </p>
-                            </div>
-                        </Link>
+                            name={tool.name}
+                            description={tool.shortDescription}
+                            categorySlug={category.slug}
+                            accent={category.accent}
+                        />
                     ))}
                 </div>
             </section>

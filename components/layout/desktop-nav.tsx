@@ -10,6 +10,7 @@ import {
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { categoryIconMap, toolCategories } from "@/lib/tools-data";
+import { cn } from "@/lib/utils";
 
 const TOOLS_PER_CATEGORY = 4;
 
@@ -35,8 +36,8 @@ export function DesktopNav() {
                                                         href={`/tools/${category.slug}`}
                                                         className="mb-3 flex items-center gap-2.5 rounded-lg px-1 py-1 transition-colors hover:text-primary"
                                                     >
-                                                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
-                                                            <CategoryIcon className="h-3.5 w-3.5 text-foreground" />
+                                                        <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm", category.accent)}>
+                                                            <CategoryIcon className="h-3.5 w-3.5" />
                                                         </span>
                                                         <span className="truncate text-sm font-semibold">
                                                             {category.title}
@@ -77,7 +78,7 @@ export function DesktopNav() {
                                     <NavigationMenuLink asChild>
                                         <Link
                                             href="/tools"
-                                            className="flex items-center justify-center gap-1.5 rounded-xl bg-muted px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/70"
+                                            className="bg-gradient-brand flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-opacity hover:opacity-90"
                                         >
                                             Browse all tools
                                             <ArrowRight className="h-3.5 w-3.5" />

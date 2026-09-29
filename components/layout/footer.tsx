@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FilegoLogo } from "@/components/filego-logo";
+import { FilegoMark } from "@/components/filego-logo";
 
 const footerLinks = {
   Product: [
@@ -38,17 +38,18 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/30">
+    <footer className="relative overflow-hidden border-t border-border/60 bg-muted/30">
+      <div className="bg-gradient-brand pointer-events-none absolute inset-x-0 top-0 h-px opacity-60" />
       <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_1.4fr]">
           <div className="max-w-md">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background">
-                <FilegoLogo className="h-5 w-5" />
-              </div>
+              <FilegoMark size="lg" />
 
               <div>
-                <div className="font-semibold tracking-tight">Filego</div>
+                <div className="font-heading text-lg font-extrabold tracking-tight">
+                  File<span className="text-gradient-brand">go</span>
+                </div>
                 <div className="text-sm text-muted-foreground">
                   Fast tools for modern file workflows
                 </div>
@@ -63,16 +64,16 @@ export function Footer() {
 
             <div className="mt-5 flex flex-wrap gap-2">
               <Link
-                href="/tools"
-                className="inline-flex rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                href="/register"
+                className="bg-gradient-brand inline-flex rounded-full px-4 py-2 text-xs font-semibold text-white shadow-md shadow-primary/20 transition-opacity hover:opacity-90"
               >
-                Browse tools
+                Sign up free
               </Link>
               <Link
-                href="/bulk-image-compressor/editor"
-                className="inline-flex rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                href="/tools"
+                className="inline-flex rounded-full border border-border/60 bg-background px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
               >
-                Start free
+                Browse tools
               </Link>
             </div>
           </div>
@@ -89,7 +90,7 @@ export function Footer() {
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
                       >
                         {link.label}
                       </Link>

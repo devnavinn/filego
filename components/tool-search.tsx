@@ -12,6 +12,7 @@ import { categoryIconMap, getAllTools } from "@/lib/tools-data"
 const MAX_RESULTS = 8
 
 const allTools = getAllTools()
+const TOTAL_TOOL_COUNT = allTools.length
 
 type ToolSearchProps = {
     variant?: "nav" | "hero"
@@ -68,7 +69,7 @@ export function ToolSearch({ variant = "nav", className, placeholder }: ToolSear
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setOpen(true)}
-                    placeholder={placeholder ?? "Search 74+ tools…"}
+                    placeholder={placeholder ?? `Search ${TOTAL_TOOL_COUNT}+ tools…`}
                     className={cn(
                         "rounded-full pl-9",
                         variant === "hero" ? "h-12 text-base pr-9" : "h-9 pr-9"

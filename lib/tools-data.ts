@@ -52,7 +52,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Conversion, editing, protection, and page-level utilities.",
         heroDescription:
             "Handle PDF conversion, editing, compression, page actions, and protection from one clean workspace.",
-        accent: "from-teal-500/20 to-cyan-500/10",
+        accent: "from-rose-500 to-orange-400 text-white",
         seoTitle: "PDF Tools – Merge, Split, Compress, Convert PDFs Online",
         seoDescription:
             "Use fast PDF tools to merge, split, compress, convert, watermark, protect, unlock, and organize PDF files online.",
@@ -83,7 +83,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Compression, resize, crop, format conversion, and AI enhancement.",
         heroDescription:
             "Optimize and transform images for e-commerce, design, marketing, and everyday asset workflows.",
-        accent: "from-sky-500/20 to-indigo-500/10",
+        accent: "from-sky-500 to-indigo-500 text-white",
         seoTitle: "Image Tools – Compress, Resize, Convert, Crop Images Online",
         seoDescription:
             "Compress, resize, crop, convert, watermark, remove backgrounds, and enhance images online with fast browser-based tools.",
@@ -110,7 +110,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Formatting, conversion, and structured text workflows.",
         heroDescription:
             "Handle office conversions, markup transforms, and text formatting tasks from one efficient toolkit.",
-        accent: "from-amber-500/20 to-orange-500/10",
+        accent: "from-blue-500 to-cyan-400 text-white",
         seoTitle: "Document & Office Tools – CSV, JSON, XML, Markdown Utilities",
         seoDescription:
             "Convert CSV, Excel, JSON, XML, Markdown, and text formats online with practical office and developer-friendly tools.",
@@ -134,7 +134,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Quick editing, conversion, and social-ready exports.",
         heroDescription:
             "Process videos faster with browser-based trimming, conversion, compression, and export utilities.",
-        accent: "from-violet-500/20 to-fuchsia-500/10",
+        accent: "from-violet-500 to-fuchsia-500 text-white",
         seoTitle: "Video Tools – Compress, Trim, Convert, Merge Videos Online",
         seoDescription:
             "Compress, trim, merge, convert, and extract media from video files online with fast and simple tools.",
@@ -156,7 +156,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Cut, merge, convert, compress, and record in-browser audio.",
         heroDescription:
             "Use fast browser-ready audio tools for recording, conversion, clipping, compression, and merging.",
-        accent: "from-emerald-500/20 to-lime-500/10",
+        accent: "from-emerald-500 to-teal-400 text-white",
         seoTitle: "Audio Tools – Cut, Convert, Merge, Compress Audio Online",
         seoDescription:
             "Cut MP3 files, merge audio, convert formats, record voice, and compress sound files online.",
@@ -176,7 +176,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Encoding, encryption, hashing, and password utilities.",
         heroDescription:
             "Generate hashes, encrypt content, create passwords, and inspect file integrity from one utility set.",
-        accent: "from-rose-500/20 to-red-500/10",
+        accent: "from-slate-700 to-slate-500 text-white",
         seoTitle: "Security Tools – Hash, Encrypt, Encode, Generate Passwords",
         seoDescription:
             "Use online security tools for SHA256, MD5, AES encryption, base64 encoding, checksums, and password generation.",
@@ -196,7 +196,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Create and extract common file archive formats quickly.",
         heroDescription:
             "Handle ZIP, TAR, and 7Z archive workflows with quick extraction and packaging tools.",
-        accent: "from-orange-500/20 to-yellow-500/10",
+        accent: "from-amber-500 to-yellow-400 text-white",
         seoTitle: "Archive Tools – ZIP, TAR, 7Z Extractor and Creator Online",
         seoDescription:
             "Extract and create ZIP, TAR, and 7Z archives online with simple browser-based archive tools.",
@@ -220,7 +220,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Practical utilities for APIs, debugging, and quick formatting.",
         heroDescription:
             "Use reliable small tools for debugging, payload inspection, formatting, and common engineering tasks.",
-        accent: "from-cyan-500/20 to-blue-500/10",
+        accent: "from-indigo-600 to-slate-700 text-white",
         seoTitle: "Developer Tools – JWT, Regex, SQL, UUID, URL Utilities Online",
         seoDescription:
             "Use developer utilities online for JWT decoding, regex testing, SQL formatting, URL encoding, UUID generation, and more.",
@@ -245,7 +245,7 @@ export const toolCategories: ToolCategory[] = [
         description: "OCR, parsing, summarization, and question-answering workflows.",
         heroDescription:
             "Deliver document intelligence with OCR, parsing, summarization, and AI-powered file interactions.",
-        accent: "from-fuchsia-500/20 to-pink-500/10",
+        accent: "from-purple-600 via-fuchsia-500 to-orange-400 text-white",
         seoTitle: "AI File Tools – OCR, Summarizer, Resume Parser, PDF Chat",
         seoDescription:
             "Use AI-powered tools for OCR, handwriting recognition, document summarization, resume parsing, and PDF question answering.",

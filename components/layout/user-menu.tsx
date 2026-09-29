@@ -103,14 +103,14 @@ export function UserMenu({ status, user }: UserMenuProps) {
                 </DropdownMenu>
             ) : (
                 <>
-                    <Button asChild variant="ghost">
+                    <Button asChild variant="ghost" className="rounded-full">
                         <Link href="/login">Sign in</Link>
                     </Button>
 
-                    <Button asChild className="rounded-xl">
-                        <Link href="/bulk-image-compressor/editor">
-                            Start free
-                            <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button asChild className="bg-gradient-brand rounded-full px-4 text-white shadow-md shadow-primary/25 hover:opacity-90">
+                        <Link href="/register">
+                            Sign up free
+                            <ArrowRight className="ml-1 h-4 w-4" />
                         </Link>
                     </Button>
                 </>

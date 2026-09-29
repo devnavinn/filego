@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getCategoryIcon, toolCategories } from "@/lib/tools-data";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ToolSearch } from "@/components/tool-search";
 import {
     Sheet,
@@ -41,6 +42,7 @@ const categoryLinks = toolCategories.map((category) => ({
     title: category.title,
     href: `/tools/${category.slug}`,
     icon: getCategoryIcon(category.slug),
+    accent: category.accent,
     count: category.tools.length,
 }));
 
@@ -163,8 +165,8 @@ export function MobileNav({ status, user }: MobileNavProps) {
                                         </SheetClose>
 
                                         <SheetClose asChild>
-                                            <Button asChild className="w-full rounded-xl">
-                                                <Link href="/bulk-image-compressor/editor">Start free</Link>
+                                            <Button asChild className="bg-gradient-brand w-full rounded-xl text-white shadow-md shadow-primary/25 hover:opacity-90">
+                                                <Link href="/register">Sign up free</Link>
                                             </Button>
                                         </SheetClose>
                                     </div>
@@ -198,10 +200,12 @@ export function MobileNav({ status, user }: MobileNavProps) {
                                         <SheetClose asChild key={item.title}>
                                             <Link
                                                 href={item.href}
-                                                className="flex items-center justify-between rounded-xl border border-border/60 bg-card/70 px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
+                                                className="flex items-center justify-between rounded-xl border border-border/60 bg-card/70 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
                                             >
-                                                <span className="inline-flex items-center gap-2">
-                                                    <Icon className="h-4 w-4 text-muted-foreground" />
+                                                <span className="inline-flex items-center gap-2.5">
+                                                    <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br", item.accent)}>
+                                                        <Icon className="h-3.5 w-3.5" />
+                                                    </span>
                                                     {item.title}
                                                 </span>
                                                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
