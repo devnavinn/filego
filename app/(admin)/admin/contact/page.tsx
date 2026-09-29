@@ -11,14 +11,51 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, Building2, MessageSquareText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Mail, Phone, Building2, MessageSquareText, Reply, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ContactStatus } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import { AdminActionButton } from "@/components/admin/admin-action-button";
+import { deleteContact, setContactStatus } from "../actions";
+
+const STATUS_FILTERS: Array<{ label: string; value: ContactStatus | null }> = [
+    { label: "All", value: null },
+    { label: "New", value: "NEW" },
+    { label: "Read", value: "READ" },
+    { label: "Replied", value: "REPLIED" },
+    { label: "Archived", value: "ARCHIVED" },
+];
+
+const STATUS_STYLES: Record<ContactStatus, string> = {
+    NEW: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    READ: "bg-muted text-muted-foreground",
+    REPLIED: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    ARCHIVED: "bg-muted text-muted-foreground",
+};
+
+/** Status transitions offered on each message. */
+const NEXT_STATUSES: Record<ContactStatus, Array<{ label: string; value: ContactStatus }>> = {
+    NEW: [{ label: "Mark read", value: "READ" }, { label: "Mark replied", value: "REPLIED" }, { label: "Archive", value: "ARCHIVED" }],
+    READ: [{ label: "Mark replied", value: "REPLIED" }, { label: "Archive", value: "ARCHIVED" }, { label: "Mark new", value: "NEW" }],
+    REPLIED: [{ label: "Archive", value: "ARCHIVED" }, { label: "Mark new", value: "NEW" }],
+    ARCHIVED: [{ label: "Restore", value: "READ" }],
+};
+
+function statusHref(q: string, status: ContactStatus | null) {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (status) params.set("status", status);
+    const query = params.toString();
+    return query ? `/admin/contact?${query}` : "/admin/contact";
+}
 
 const TAKE = 10;
 
 export default async function AdminContactPage({
     searchParams,
 }: {
-    searchParams: Promise<{ q?: string; page?: string }>;
+    searchParams: Promise<{ q?: string; page?: string; status?: string }>;
 }) {
     await requireAdmin();
 
@@ -27,7 +64,11 @@ export default async function AdminContactPage({
     const page = Math.max(1, Number(params.page) || 1);
     const skip = (page - 1) * TAKE;
 
-    const where = q
+    const status = STATUS_FILTERS.find((filter) => filter.value === params.status)?.value ?? null;
+
+    const where = {
+        ...(status ? { status } : {}),
+        ...(q
         ? {
             OR: [
                 { name: { contains: q, mode: "insensitive" as const } },
@@ -38,7 +79,8 @@ export default async function AdminContactPage({
                 { phone: { contains: q, mode: "insensitive" as const } },
             ],
         }
-        : {};
+        : {}),
+    };
 
     const [rows, total] = await Promise.all([
         prisma.contactSubmission.findMany({
@@ -66,6 +108,23 @@ export default async function AdminContactPage({
                 </CardHeader>
             </Card>
 
+            <div className="flex flex-wrap gap-2">
+                {STATUS_FILTERS.map((filter) => (
+                    <Link
+                        key={filter.label}
+                        href={statusHref(q, filter.value)}
+                        className={cn(
+                            "rounded-full border px-3 py-1.5 text-sm transition-colors",
+                            status === filter.value
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                    >
+                        {filter.label}
+                    </Link>
+                ))}
+            </div>
+
             <div className="grid gap-4">
                 {rows.length ? (
                     rows.map((item) => (
@@ -75,8 +134,8 @@ export default async function AdminContactPage({
                                     <div className="space-y-3">
                                         <div className="flex flex-wrap items-center gap-3">
                                             <h3 className="text-lg font-semibold">{item.name}</h3>
-                                            <Badge variant="secondary" className="rounded-full">
-                                                {item.status}
+                                            <Badge variant="secondary" className={cn("rounded-full", STATUS_STYLES[item.status])}>
+                                                {item.status.toLowerCase()}
                                             </Badge>
                                         </div>
 
@@ -118,8 +177,37 @@ export default async function AdminContactPage({
                                         </div>
                                     </div>
 
-                                    <div className="shrink-0 text-sm text-muted-foreground">
-                                        {new Date(item.createdAt).toLocaleString()}
+                                    <div className="flex shrink-0 flex-col gap-3 lg:items-end">
+                                        <p className="text-sm text-muted-foreground">
+                                            {item.createdAt.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" })}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 lg:justify-end">
+                                            <Button asChild size="sm" className="rounded-xl">
+                                                <a href={`mailto:${item.email}?subject=${encodeURIComponent(`Re: ${item.subject || "Your message to Filego"}`)}`}>
+                                                    <Reply className="mr-1.5 size-4" />
+                                                    Reply
+                                                </a>
+                                            </Button>
+                                            {NEXT_STATUSES[item.status].map((next) => (
+                                                <AdminActionButton
+                                                    key={next.value}
+                                                    action={setContactStatus}
+                                                    fields={{ id: item.id, status: next.value }}
+                                                >
+                                                    {next.label}
+                                                </AdminActionButton>
+                                            ))}
+                                            <AdminActionButton
+                                                action={deleteContact}
+                                                fields={{ id: item.id }}
+                                                confirm={`Delete the message from ${item.name}? This can’t be undone.`}
+                                                variant="ghost"
+                                                className="rounded-xl text-destructive hover:text-destructive"
+                                            >
+                                                <Trash2 className="size-4" />
+                                                <span className="sr-only">Delete</span>
+                                            </AdminActionButton>
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -138,7 +226,7 @@ export default async function AdminContactPage({
                 <p className="text-sm text-muted-foreground">
                     Showing {rows.length} of {total} submissions
                 </p>
-                <TablePagination page={page} totalPages={totalPages} searchParams={{ q }} />
+                <TablePagination page={page} totalPages={totalPages} searchParams={{ q, status: status ?? undefined }} />
             </div>
         </main>
     );

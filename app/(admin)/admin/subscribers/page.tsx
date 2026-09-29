@@ -10,8 +10,10 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MailPlus, Globe, CalendarDays } from "lucide-react";
+import { MailPlus, Globe, CalendarDays, Download, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AdminActionButton } from "@/components/admin/admin-action-button";
+import { deleteSubscriber } from "../actions";
 
 const TAKE = 12;
 
@@ -59,7 +61,16 @@ export default async function AdminSubscribersPage({
                             Browse waitlist and notification signups with source tracking.
                         </CardDescription>
                     </div>
-                    <TableSearch placeholder="Search email, source, or page..." />
+                    <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto">
+                        <TableSearch placeholder="Search email, source, or page..." />
+                        <Button asChild variant="outline" className="rounded-xl">
+                            {/* A plain anchor: the route returns a file download, not a page. */}
+                            <a href="/api/admin/subscribers/export" download>
+                                <Download className="mr-2 size-4" />
+                                Export CSV
+                            </a>
+                        </Button>
+                    </div>
                 </CardHeader>
             </Card>
 
@@ -72,9 +83,16 @@ export default async function AdminSubscribersPage({
                                     <div className="rounded-2xl bg-primary/10 p-3 text-primary">
                                         <MailPlus className="size-5" />
                                     </div>
-                                    <Badge variant="secondary" className="rounded-full">
-                                        Subscriber
-                                    </Badge>
+                                    <AdminActionButton
+                                        action={deleteSubscriber}
+                                        fields={{ id: item.id }}
+                                        confirm={`Remove ${item.email} from the list?`}
+                                        variant="ghost"
+                                        className="rounded-xl text-destructive hover:text-destructive"
+                                    >
+                                        <Trash2 className="size-4" />
+                                        <span className="sr-only">Remove subscriber</span>
+                                    </AdminActionButton>
                                 </div>
 
                                 <div>
@@ -88,7 +106,7 @@ export default async function AdminSubscribersPage({
                                     </div>
                                     <div className="inline-flex items-center gap-2">
                                         <CalendarDays className="size-4" />
-                                        {new Date(item.createdAt).toLocaleString()}
+                                        {item.createdAt.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" })}
                                     </div>
                                     <p className="truncate">Page: {item.page || "—"}</p>
                                 </div>

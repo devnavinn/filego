@@ -1,14 +1,18 @@
 // components/admin/admin-header.tsx
+import Link from "next/link";
+import Form from "next/form";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Bell, Search } from "lucide-react";
+import { Inbox, Search } from "lucide-react";
+import { ModeToggle } from "@/components/mode-toggle";
 
 interface AdminHeaderProps {
     title: string;
     subtitle?: string;
     adminName?: string | null;
     adminEmail?: string | null;
+    newMessageCount: number;
 }
 
 export function AdminHeader({
@@ -16,6 +20,7 @@ export function AdminHeader({
     subtitle,
     adminName,
     adminEmail,
+    newMessageCount,
 }: AdminHeaderProps) {
     return (
         <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
@@ -36,19 +41,34 @@ export function AdminHeader({
                     ) : null}
                 </div>
 
-                <div className="hidden w-full max-w-sm lg:block">
+                <Form action="/admin/users" className="hidden w-full max-w-sm lg:block" role="search">
                     <div className="relative">
                         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Search blog, contacts, subscribers..."
+                            name="q"
+                            type="search"
+                            aria-label="Search users"
+                            placeholder="Search users by name or email..."
                             className="pl-9"
                         />
                     </div>
-                </div>
+                </Form>
 
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="rounded-xl">
-                        <Bell className="size-4" />
+                    <ModeToggle />
+
+                    <Button asChild variant="outline" size="icon" className="relative rounded-xl">
+                        <Link
+                            href="/admin/contact?status=NEW"
+                            aria-label={newMessageCount > 0 ? `${newMessageCount} new messages` : "Messages"}
+                        >
+                            <Inbox className="size-4" />
+                            {newMessageCount > 0 ? (
+                                <span className="absolute -right-1.5 -top-1.5 flex min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-5 text-primary-foreground">
+                                    {newMessageCount > 99 ? "99+" : newMessageCount}
+                                </span>
+                            ) : null}
+                        </Link>
                     </Button>
 
                     <div className="hidden rounded-2xl border bg-muted/40 px-3 py-2 text-right sm:block">

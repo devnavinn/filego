@@ -40,7 +40,7 @@ function TrendIcon({ direction }: { direction?: TrendDirection }) {
 
 export function DashboardKpiCards({ items }: DashboardKpiCardsProps) {
     return (
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {items.map((item) => {
                 const Icon = item.icon;
                 const content = (

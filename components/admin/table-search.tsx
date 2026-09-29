@@ -7,6 +7,8 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+const DEBOUNCE_MS = 300;
+
 interface TableSearchProps {
     placeholder?: string;
 }
@@ -17,24 +19,37 @@ export function TableSearch({
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const [value, setValue] = React.useState(searchParams.get("q") ?? "");
+    const urlValue = searchParams.get("q") ?? "";
+    const [value, setValue] = React.useState(urlValue);
+    const [syncedUrlValue, setSyncedUrlValue] = React.useState(urlValue);
+    const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    React.useEffect(() => {
-        setValue(searchParams.get("q") ?? "");
-    }, [searchParams]);
+    // Follow outside URL changes (e.g. header search, back button) without an effect.
+    if (urlValue !== syncedUrlValue) {
+        setSyncedUrlValue(urlValue);
+        setValue(urlValue);
+    }
 
-    function updateQuery(term: string) {
-        const params = new URLSearchParams(searchParams.toString());
+    React.useEffect(() => () => {
+        if (timer.current) clearTimeout(timer.current);
+    }, []);
 
-        if (term.trim()) {
-            params.set("q", term.trim());
-            params.set("page", "1");
-        } else {
-            params.delete("q");
-            params.set("page", "1");
-        }
+    function updateQuery(term: string, immediate = false) {
+        if (timer.current) clearTimeout(timer.current);
 
-        router.replace(`${pathname}?${params.toString()}`);
+        const apply = () => {
+            const params = new URLSearchParams(searchParams.toString());
+
+            if (term.trim()) params.set("q", term.trim());
+            else params.delete("q");
+            params.delete("page");
+
+            const query = params.toString();
+            router.replace(query ? `${pathname}?${query}` : pathname);
+        };
+
+        if (immediate) apply();
+        else timer.current = setTimeout(apply, DEBOUNCE_MS);
     }
 
     return (
@@ -48,6 +63,7 @@ export function TableSearch({
                     updateQuery(next);
                 }}
                 placeholder={placeholder}
+                aria-label={placeholder}
                 className="pl-9 pr-10"
             />
             {value ? (
@@ -55,10 +71,11 @@ export function TableSearch({
                     type="button"
                     variant="ghost"
                     size="icon"
+                    aria-label="Clear search"
                     className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-lg"
                     onClick={() => {
                         setValue("");
-                        updateQuery("");
+                        updateQuery("", true);
                     }}
                 >
                     <X className="size-4" />

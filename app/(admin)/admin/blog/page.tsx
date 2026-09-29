@@ -14,6 +14,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { PenSquare, Plus, CalendarDays, Tag } from "lucide-react";
+import { DeleteBlogPostButton } from "@/components/admin/delete-blog-post-button";
 
 const TAKE = 10;
 
@@ -142,7 +143,7 @@ export default async function AdminBlogPage({
                                         </div>
                                     </div>
 
-                                    <div className="flex shrink-0 gap-2">
+                                    <div className="flex shrink-0 flex-wrap gap-2">
                                         <Button asChild variant="outline" className="rounded-xl">
                                             <Link href={`/admin/blog/${post.id}`}>
                                                 <PenSquare className="mr-2 size-4" />
@@ -157,6 +158,8 @@ export default async function AdminBlogPage({
                                                 </Link>
                                             </Button>
                                         ) : null}
+
+                                        <DeleteBlogPostButton postId={post.id} title={post.title} />
                                     </div>
                                 </div>
                             </CardContent>

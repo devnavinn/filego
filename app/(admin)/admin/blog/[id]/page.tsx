@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { AddEditBlogForm } from "@/components/admin/add-edit-blog-form";
+import { DeleteBlogPostButton } from "@/components/admin/delete-blog-post-button";
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -33,12 +34,15 @@ export default async function EditBlogPostPage({ params }: Props) {
 
     return (
         <main className="space-y-6">
-            <section className="rounded-3xl border bg-background p-6 shadow-sm">
-                <p className="text-sm text-muted-foreground">Blog management</p>
-                <h2 className="mt-2 text-3xl font-semibold tracking-tight">Edit post</h2>
-                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                    Update content, metadata, and publishing status.
-                </p>
+            <section className="flex flex-col gap-4 rounded-3xl border bg-background p-6 shadow-sm sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <p className="text-sm text-muted-foreground">Blog management</p>
+                    <h2 className="mt-2 text-3xl font-semibold tracking-tight">Edit post</h2>
+                    <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                        Update content, metadata, and publishing status.
+                    </p>
+                </div>
+                <DeleteBlogPostButton postId={post.id} title={post.title} redirectTo="/admin/blog" />
             </section>
 
             <AddEditBlogForm

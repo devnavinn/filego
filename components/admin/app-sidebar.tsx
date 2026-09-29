@@ -9,8 +9,12 @@ import {
     MessageSquareText,
     MailPlus,
     Users,
-    Settings,
+    CreditCard,
+    UserCog,
+    ExternalLink,
+    LogOut,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 import {
     Sidebar,
     SidebarContent,
@@ -49,6 +53,11 @@ const items = [
         label: "Users",
         href: "/admin/users",
         icon: Users,
+    },
+    {
+        label: "Payments",
+        href: "/admin/payments",
+        icon: CreditCard,
     },
 ];
 
@@ -100,11 +109,25 @@ export function AppSidebar() {
             <SidebarFooter className="border-t p-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Settings">
-                            <Link href="/admin/settings">
-                                <Settings className="size-4" />
-                                <span>Settings</span>
+                        <SidebarMenuButton asChild tooltip="My account">
+                            <Link href="/dashboard/settings">
+                                <UserCog className="size-4" />
+                                <span>My account</span>
                             </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="View site">
+                            <Link href="/" target="_blank">
+                                <ExternalLink className="size-4" />
+                                <span>View site</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Sign out" onClick={() => signOut({ callbackUrl: "/" })}>
+                            <LogOut className="size-4" />
+                            <span>Sign out</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
