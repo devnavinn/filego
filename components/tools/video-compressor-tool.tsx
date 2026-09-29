@@ -99,7 +99,7 @@ export function VideoCompressorTool() {
 
     function handleDownload() {
         if (!output || !file) return
-        downloadBlob(output.blob, replaceExtension(file.name, "mp4"))
+        downloadBlob(output.blob, replaceExtension(file.name, "mp4"), { originalBytes: file.size })
     }
 
     return (

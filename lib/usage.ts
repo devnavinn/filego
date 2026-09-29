@@ -173,3 +173,72 @@ const pdfTools: readonly ToolType[] = [
 function isPdfTool(toolType: ToolType) {
     return pdfTools.includes(toolType);
 }
+
+const MAX_FILES = 1000;
+const MAX_BYTES = 50 * 1024 ** 3;
+
+type RecordJobInput = {
+    userId: string;
+    toolType: ToolType;
+    toolSlug: string;
+    toolName: string;
+    filesCount: number;
+    originalBytes: number;
+    outputBytes: number;
+    formats: string[];
+};
+
+/** Stores a finished tool run in one step and rolls it into the user's summary. */
+export async function recordCompletedJob(input: RecordJobInput) {
+    const filesCount = Math.min(Math.max(1, input.filesCount), MAX_FILES);
+    const originalBytes = Math.min(Math.max(0, input.originalBytes), MAX_BYTES);
+    const outputBytes = Math.min(Math.max(0, input.outputBytes), MAX_BYTES);
+    const savedBytes = originalBytes > outputBytes ? originalBytes - outputBytes : 0;
+    const compressionRate = originalBytes > 0 ? (savedBytes / originalBytes) * 100 : null;
+    const now = new Date();
+
+    await prisma.$transaction(async (tx) => {
+        await tx.toolJob.create({
+            data: {
+                userId: input.userId,
+                toolType: input.toolType,
+                status: JobStatus.COMPLETED,
+                filesCount,
+                originalBytes: BigInt(originalBytes),
+                outputBytes: BigInt(outputBytes),
+                savedBytes: BigInt(savedBytes),
+                compressionRate,
+                mimeTypes: input.formats,
+                source: "download",
+                metadata: { toolSlug: input.toolSlug, toolName: input.toolName },
+                startedAt: now,
+                completedAt: now,
+            },
+        });
+
+        await tx.userUsageSummary.upsert({
+            where: { userId: input.userId },
+            create: {
+                userId: input.userId,
+                totalJobs: 1,
+                totalFiles: filesCount,
+                totalOriginalBytes: BigInt(originalBytes),
+                totalOutputBytes: BigInt(outputBytes),
+                totalSavedBytes: BigInt(savedBytes),
+                totalImageCompressions: isImageTool(input.toolType) ? 1 : 0,
+                totalPdfOperations: isPdfTool(input.toolType) ? 1 : 0,
+                lastActivityAt: now,
+            },
+            update: {
+                totalJobs: { increment: 1 },
+                totalFiles: { increment: filesCount },
+                totalOriginalBytes: { increment: BigInt(originalBytes) },
+                totalOutputBytes: { increment: BigInt(outputBytes) },
+                totalSavedBytes: { increment: BigInt(savedBytes) },
+                totalImageCompressions: { increment: isImageTool(input.toolType) ? 1 : 0 },
+                totalPdfOperations: { increment: isPdfTool(input.toolType) ? 1 : 0 },
+                lastActivityAt: now,
+            },
+        });
+    });
+}

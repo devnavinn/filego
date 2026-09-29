@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
     BarChart3,
     Crown,
@@ -13,14 +14,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import type { DashboardUser } from "./dashboard-shell";
 
 type DashboardSidebarProps = {
-    user: {
-        id: string;
-        name?: string | null;
-        email?: string | null;
-        role?: "USER" | "ADMIN";
-    };
+    user: DashboardUser;
+    isPro: boolean;
 };
 
 const desktopNavItems = [
@@ -40,7 +38,7 @@ const mobileNavItems = [
     { label: "Premium", href: "/dashboard/premium", icon: Crown },
 ];
 
-export function DashboardSidebar({ user }: DashboardSidebarProps) {
+export function DashboardSidebar({ user, isPro }: DashboardSidebarProps) {
     const pathname = usePathname();
 
     return (
@@ -105,16 +103,17 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                         <p className="truncate text-xs text-muted-foreground">
                             {user.email}
                         </p>
+                        <p className="mt-1 text-xs font-medium text-muted-foreground">
+                            {isPro ? "Filego Pro" : "Free plan"}
+                        </p>
 
                         <Button
                             variant="outline"
                             className="mt-3 w-full justify-start rounded-xl border-border bg-background hover:bg-accent hover:text-accent-foreground"
-                            asChild
+                            onClick={() => signOut({ callbackUrl: "/" })}
                         >
-                            <Link href="/api/auth/signout">
-                                <LogOut className="mr-2 size-4" />
-                                Sign out
-                            </Link>
+                            <LogOut className="mr-2 size-4" />
+                            Sign out
                         </Button>
                     </div>
                 </div>

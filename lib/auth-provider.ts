@@ -77,12 +77,21 @@ export const authOptions: NextAuthOptions = {
             : []),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger }) {
             if (user) {
                 token.id = user.id;
                 token.role = (user as any).role;
                 token.name = user.name;
                 token.email = user.email;
+            }
+
+            // Profile edits call `update()`; reload from the database rather than trusting the client.
+            if (trigger === "update" && token.id) {
+                const fresh = await prisma.user.findUnique({
+                    where: { id: token.id },
+                    select: { name: true },
+                });
+                if (fresh) token.name = fresh.name;
             }
             return token;
         },

@@ -82,7 +82,7 @@ export function AudioCompressorTool() {
 
     function handleDownload() {
         if (!output || !file) return
-        downloadBlob(output.blob, replaceExtension(file.name, "mp3"))
+        downloadBlob(output.blob, replaceExtension(file.name, "mp3"), { originalBytes: file.size })
     }
 
     return (

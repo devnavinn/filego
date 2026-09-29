@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatBytesSafe, formatDateSafe } from "@/lib/dashboard-formatters";
+import { jobToolLabel } from "@/lib/tool-labels";
 
 type Job = {
     id: string;
@@ -11,23 +13,41 @@ type Job = {
     outputBytes: string | number | bigint;
     savedBytes: string | number | bigint;
     compressionRate?: number | null;
+    metadata?: unknown;
     createdAt: string | Date;
     completedAt?: string | Date | null;
 };
 
-export function RecentJobsTable({ jobs }: { jobs: Job[] }) {
+type RecentJobsTableProps = {
+    jobs: Job[];
+    title?: string;
+    viewAllHref?: string;
+    emptyMessage?: string;
+};
+
+export function RecentJobsTable({
+    jobs,
+    title = "Recent activity",
+    viewAllHref,
+    emptyMessage = "No processing history yet.",
+}: RecentJobsTableProps) {
     return (
         <Card className="rounded-3xl border border-border bg-card shadow-sm">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-base font-semibold text-foreground">
-                    Recent activity
+                    {title}
                 </CardTitle>
+                {viewAllHref && jobs.length > 0 ? (
+                    <Link href={viewAllHref} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+                        View all
+                    </Link>
+                ) : null}
             </CardHeader>
 
             <CardContent>
                 {jobs.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-8 text-sm text-muted-foreground">
-                        No processing history yet.
+                        {emptyMessage}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -36,7 +56,7 @@ export function RecentJobsTable({ jobs }: { jobs: Job[] }) {
                                 <tr className="border-b border-border text-left">
                                     <th className="pb-3 font-medium text-muted-foreground">Tool</th>
                                     <th className="pb-3 font-medium text-muted-foreground">Files</th>
-                                    <th className="pb-3 font-medium text-muted-foreground">Original</th>
+                                    <th className="pb-3 font-medium text-muted-foreground">Output</th>
                                     <th className="pb-3 font-medium text-muted-foreground">Saved</th>
                                     <th className="pb-3 font-medium text-muted-foreground">Status</th>
                                     <th className="pb-3 font-medium text-muted-foreground">Date</th>
@@ -45,16 +65,25 @@ export function RecentJobsTable({ jobs }: { jobs: Job[] }) {
 
                             <tbody>
                                 {jobs.map((job) => (
-                                    <tr key={job.id} className="border-b border-border/60">
+                                    <tr key={job.id} className="border-b border-border/60 last:border-0">
                                         <td className="py-4 font-medium text-foreground">
-                                            {job.toolType.replaceAll("_", " ")}
+                                            {jobToolLabel(job)}
                                         </td>
                                         <td className="py-4 text-muted-foreground">{job.filesCount}</td>
                                         <td className="py-4 text-muted-foreground">
-                                            {formatBytesSafe(job.originalBytes)}
+                                            {formatBytesSafe(job.outputBytes)}
                                         </td>
                                         <td className="py-4 text-muted-foreground">
-                                            {formatBytesSafe(job.savedBytes)}
+                                            {Number(job.savedBytes) > 0 ? (
+                                                <>
+                                                    {formatBytesSafe(job.savedBytes)}
+                                                    {job.compressionRate ? (
+                                                        <span className="ml-1 text-xs">(−{Math.round(job.compressionRate)}%)</span>
+                                                    ) : null}
+                                                </>
+                                            ) : (
+                                                "—"
+                                            )}
                                         </td>
                                         <td className="py-4">
                                             <Badge

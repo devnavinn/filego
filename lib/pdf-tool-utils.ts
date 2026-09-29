@@ -1,3 +1,5 @@
+import { trackDownload, type DownloadUsage } from "@/lib/usage-tracker"
+
 /**
  * pdf-lib's `save()` returns a `Uint8Array<ArrayBufferLike>`, whose backing
  * buffer type (`ArrayBuffer | SharedArrayBuffer`) is wider than `BlobPart`
@@ -9,7 +11,8 @@ export function pdfBytesToBlob(bytes: Uint8Array, type = "application/pdf"): Blo
     return new Blob([buffer], { type })
 }
 
-export function downloadBlob(blob: Blob, filename: string) {
+export function downloadBlob(blob: Blob, filename: string, usage?: DownloadUsage) {
+    trackDownload(blob, filename, usage)
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url

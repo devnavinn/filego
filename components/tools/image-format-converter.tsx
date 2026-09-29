@@ -101,7 +101,7 @@ export function ImageFormatConverterCore({
 
     function handleDownload() {
         if (!output || !source) return
-        downloadBlob(output.blob, replaceExtension(source.file.name, targetExt))
+        downloadBlob(output.blob, replaceExtension(source.file.name, targetExt), { originalBytes: source.file.size })
     }
 
     const showQuality = targetMime !== "image/png"

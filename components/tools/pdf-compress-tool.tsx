@@ -235,7 +235,7 @@ export function PdfCompressTool() {
 
     function handleDownload() {
         if (!result || !file) return
-        downloadBlob(result.blob, replaceExtension(file.name, "compressed.pdf"))
+        downloadBlob(result.blob, replaceExtension(file.name, "compressed.pdf"), { originalBytes: file.size })
     }
 
     return (

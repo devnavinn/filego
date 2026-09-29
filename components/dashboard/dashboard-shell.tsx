@@ -1,24 +1,27 @@
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
+export type DashboardUser = {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    role?: "USER" | "ADMIN";
+};
+
 type DashboardShellProps = {
-    user: {
-        id: string;
-        name?: string | null;
-        email?: string | null;
-        role?: "USER" | "ADMIN";
-    };
+    user: DashboardUser;
+    isPro: boolean;
     children: React.ReactNode;
 };
 
-export function DashboardShell({ user, children }: DashboardShellProps) {
+export function DashboardShell({ user, isPro, children }: DashboardShellProps) {
     return (
         <div className="h-screen overflow-hidden bg-background text-foreground">
             <div className="flex h-screen w-full overflow-hidden">
-                <DashboardSidebar user={user} />
+                <DashboardSidebar user={user} isPro={isPro} />
 
                 <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-                    <DashboardHeader user={user} />
+                    <DashboardHeader user={user} isPro={isPro} />
 
                     <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-6">
                         <div className="mx-auto min-w-0 w-full max-w-7xl">

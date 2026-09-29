@@ -1,12 +1,18 @@
+import { Clock, FileImage, FileText, Percent } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getDashboardOverview } from "@/lib/dashboard";
+import { formatDateSafe } from "@/lib/dashboard-formatters";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { UsageBreakdownCard } from "@/components/dashboard/usage-breakdown-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatBytesSafe } from "@/lib/dashboard-formatters";
+import { MonthlyUsageChart } from "@/components/dashboard/monthly-usage-chart";
 
 export default async function AnalyticsPage() {
     const user = await requireUser();
     const data = await getDashboardOverview(user.id);
+
+    const original = Number(data.summary.totalOriginalBytes);
+    const saved = Number(data.summary.totalSavedBytes);
+    const reduction = original > 0 ? Math.round((saved / original) * 100) : null;
 
     return (
         <div className="space-y-6">
@@ -20,51 +26,37 @@ export default async function AnalyticsPage() {
                 </p>
             </section>
 
-            <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-                <UsageBreakdownCard items={data.toolBreakdown ?? []} />
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard
+                    title="Average reduction"
+                    value={reduction === null ? "—" : `${reduction}%`}
+                    description="Size saved across compression jobs."
+                    icon={Percent}
+                    tone="success"
+                />
+                <StatCard
+                    title="Image jobs"
+                    value={String(data.summary.totalImageCompressions)}
+                    description="Image compression runs."
+                    icon={FileImage}
+                />
+                <StatCard
+                    title="PDF jobs"
+                    value={String(data.summary.totalPdfOperations)}
+                    description="Merges, splits, conversions and more."
+                    icon={FileText}
+                />
+                <StatCard
+                    title="Last active"
+                    value={formatDateSafe(data.summary.lastActivityAt)}
+                    description="Your most recent completed job."
+                    icon={Clock}
+                />
+            </section>
 
-                <Card className="rounded-3xl border border-border bg-card shadow-sm">
-                    <CardHeader>
-                        <CardTitle className="text-base font-semibold text-foreground">
-                            Monthly usage
-                        </CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="space-y-3">
-                        {(data.monthlyJobs ?? []).length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-8 text-sm text-muted-foreground">
-                                Monthly analytics will appear after more completed jobs.
-                            </div>
-                        ) : (
-                            data.monthlyJobs.map(
-                                (month: {
-                                    month: string;
-                                    jobs: string | number | bigint;
-                                    files: string | number | bigint;
-                                    savedBytes: string | number | bigint;
-                                }) => (
-                                    <div
-                                        key={month.month}
-                                        className="flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-3"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-medium text-foreground">
-                                                {month.month}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {String(month.jobs)} jobs · {String(month.files)} files
-                                            </p>
-                                        </div>
-
-                                        <div className="text-right text-sm font-semibold text-foreground">
-                                            {formatBytesSafe(month.savedBytes)}
-                                        </div>
-                                    </div>
-                                )
-                            )
-                        )}
-                    </CardContent>
-                </Card>
+            <div className="grid gap-6 xl:grid-cols-2">
+                <MonthlyUsageChart months={data.monthlyJobs} />
+                <UsageBreakdownCard items={data.toolBreakdown} />
             </div>
         </div>
     );

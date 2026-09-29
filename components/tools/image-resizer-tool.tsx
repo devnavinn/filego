@@ -100,7 +100,7 @@ export function ImageResizerTool() {
     function handleDownload() {
         if (!output || !source) return
         const { ext } = resolveOutput(source.file)
-        downloadBlob(output.blob, replaceExtension(source.file.name, ext))
+        downloadBlob(output.blob, replaceExtension(source.file.name, ext), { originalBytes: source.file.size })
     }
 
     function handleClear() {

@@ -1,3 +1,5 @@
+import { trackDownload, type DownloadUsage } from "@/lib/usage-tracker"
+
 export type LoadedImage = {
     img: HTMLImageElement
     url: string
@@ -28,7 +30,8 @@ export function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: 
     })
 }
 
-export function downloadBlob(blob: Blob, filename: string) {
+export function downloadBlob(blob: Blob, filename: string, usage?: DownloadUsage) {
+    trackDownload(blob, filename, usage)
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url

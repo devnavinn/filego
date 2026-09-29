@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getDashboardOverview } from "@/lib/dashboard";
-import { formatBytesSafe } from "@/lib/dashboard-formatters";
+import { formatBytesSafe, formatDateSafe } from "@/lib/dashboard-formatters";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecentJobsTable } from "@/components/dashboard/recent-jobs-table";
 import { UsageBreakdownCard } from "@/components/dashboard/usage-breakdown-card";
@@ -16,9 +16,9 @@ import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-stat
 export default async function DashboardPage() {
     const user = await requireUser();
     const data = await getDashboardOverview(user.id);
+    const isPro = data.plan.tier === "pro";
 
-    const hasAnyData =
-        (data.summary?.totalJobs ?? 0) > 0 || (data.recentJobs?.length ?? 0) > 0;
+    const hasAnyData = data.summary.totalJobs > 0 || data.recentJobs.length > 0;
 
     return (
         <div className="space-y-6">
@@ -28,50 +28,60 @@ export default async function DashboardPage() {
                     Welcome back, {user.name?.split(" ")[0] || "there"}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-                    Track file processing, storage savings, premium access, and recent activity from one clean workspace.
+                    {data.summary.lastActivityAt
+                        ? `Your last file was processed on ${formatDateSafe(data.summary.lastActivityAt)}.`
+                        : "Files you download from Filego tools while signed in show up here."}
                 </p>
             </section>
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                     title="Files processed"
-                    value={String(data.summary?.totalFiles ?? 0)}
+                    value={data.summary.totalFiles.toLocaleString("en-IN")}
                     description="Total files handled across your completed jobs."
                     icon={Files}
                 />
                 <StatCard
                     title="Space saved"
-                    value={formatBytesSafe(data.summary?.totalSavedBytes ?? 0)}
-                    description="Combined reduction from your optimization history."
+                    value={formatBytesSafe(data.summary.totalSavedBytes)}
+                    description="Combined reduction from compression tools."
                     icon={HardDriveDownload}
                     tone="success"
                 />
                 <StatCard
                     title="Completed jobs"
-                    value={String(data.summary?.totalJobs ?? 0)}
+                    value={data.summary.totalJobs.toLocaleString("en-IN")}
                     description="Finished processing runs tracked in your workspace."
                     icon={BarChart3}
                 />
                 <StatCard
-                    title="Premium"
-                    value={data.activePlan?.billingStatus === "ACTIVE" ? "Active" : "Free"}
-                    description="Your current access level for premium tools and limits."
+                    title="Plan"
+                    value={isPro ? "Pro" : "Free"}
+                    description={
+                        isPro
+                            ? data.plan.isLifetime
+                                ? "Lifetime Pro access."
+                                : `Pro active until ${formatDateSafe(data.plan.expiresAt)}.`
+                            : "Upgrade for no ads and higher limits."
+                    }
                     icon={Crown}
                     tone="premium"
                 />
             </section>
 
-            {!hasAnyData ? (
-                <DashboardEmptyState />
-            ) : (
-                <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-                    <RecentJobsTable jobs={data.recentJobs ?? []} />
-                    <div className="space-y-6">
-                        <UsageBreakdownCard items={data.toolBreakdown ?? []} />
-                        <PremiumStatusCard activePlan={data.activePlan} />
-                    </div>
-                </section>
-            )}
+            <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+                <div className="min-w-0 space-y-6">
+                    {hasAnyData ? (
+                        <>
+                            <RecentJobsTable jobs={data.recentJobs} viewAllHref="/dashboard/activity" />
+                            <UsageBreakdownCard items={data.toolBreakdown} limit={5} />
+                        </>
+                    ) : (
+                        <DashboardEmptyState />
+                    )}
+                </div>
+                <PremiumStatusCard plan={data.plan} aiUsage={data.aiUsage} />
+            </section>
         </div>
     );
 }

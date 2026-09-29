@@ -40,12 +40,12 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions);
 
 
-        const isUser =
+        const sessionUserId =
             (session as { id?: string; user?: { id?: string } } | null)?.id ??
             (session as { user?: { id?: string } } | null)?.user?.id ??
             null;
 
-        if (!isUser) {
+        if (!sessionUserId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -54,16 +54,16 @@ export async function POST(req: Request) {
         });
 
 
-        if (!job) {
+        if (!job || job.userId !== sessionUserId) {
             return NextResponse.json({ error: "Job not found" }, { status: 404 });
         }
 
-        const sessionUserId =
-            (session as { id?: string; user?: { id?: string } } | null)?.id ??
-            (session as { user?: { id?: string } } | null)?.user?.id ??
-            null;
+        // A job is finished once; replays would double-count the summary.
+        if (job.status !== JobStatus.PROCESSING) {
+            return NextResponse.json({ ok: true });
+        }
 
-        const userId = job.userId ?? sessionUserId ?? null;
+        const userId = job.userId;
 
         const existingMetadata =
             job.metadata &&
@@ -81,8 +81,8 @@ export async function POST(req: Request) {
                 : undefined;
 
         await prisma.$transaction(async (tx) => {
-            await tx.toolJob.update({
-                where: { id: jobId },
+            const { count } = await tx.toolJob.updateMany({
+                where: { id: jobId, status: JobStatus.PROCESSING },
                 data: {
                     status:
                         status === "COMPLETED"
@@ -92,12 +92,12 @@ export async function POST(req: Request) {
                     savedBytes: BigInt(savedBytes),
                     compressionRate: compressionRate ?? null,
                     completedAt: new Date(),
-                    userId,
                     ...(nextMetadata !== undefined ? { metadata: nextMetadata } : {}),
                 },
             });
 
-            if (!userId) return;
+            // Failed runs and concurrent duplicates don't count toward totals.
+            if (count === 0 || status !== "COMPLETED") return;
 
             const incrementImage =
                 job.toolType === "IMAGE_COMPRESS" ||

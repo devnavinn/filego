@@ -302,3 +302,17 @@ export const categoryIconMap: Record<string, LucideIcon> = {
 export function getCategoryIcon(categorySlug: string): LucideIcon {
     return categoryIconMap[categorySlug] ?? Sparkles
 }
+/** Standalone landing pages that host a catalog tool, keyed by their path segment. */
+const standaloneToolSlugs: Record<string, string> = {
+    "merge-pdf": "pdf-merge",
+    "split-pdf": "pdf-split",
+    "add-watermark": "pdf-watermark",
+    "image-squoosh": "image-compressor",
+    "bulk-image-compressor": "image-compressor",
+}
+
+/** Finds a catalog tool by its slug or by a standalone page's path segment. */
+export function findToolBySlug(slug: string): SearchableTool | null {
+    const catalogSlug = standaloneToolSlugs[slug] ?? slug
+    return getAllTools().find((tool) => tool.slug === catalogSlug) ?? null
+}
