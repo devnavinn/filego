@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { WordToPdfTool } from "@/components/tools/word-to-pdf-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 export const metadata: Metadata = {
   title: "Free Word to PDF Converter Online – Convert DOCX to PDF | Filego",
@@ -54,6 +55,7 @@ export default function WordToPdfPage() {
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <WordToPdfTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

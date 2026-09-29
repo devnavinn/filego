@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BulkImageUploadEntry } from "@/components/bulk-image-upload-entry";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const siteUrl = "https://www.filego.in";
 const pageUrl = `${siteUrl}/bulk-image-compress`;
@@ -218,6 +219,8 @@ export default function BulkImageCompressPage() {
           </div>
         </div>
       </section>
+
+      <AdSlot placement="tool" className="px-4 pt-10 md:px-6" />
 
       <section className="container mx-auto max-w-7xl px-4 py-10 md:px-6">
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">

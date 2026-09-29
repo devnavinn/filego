@@ -1,6 +1,7 @@
 import { PdfRotateTool } from "@/components/tools/pdf-rotate-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/rotate-pdf";
 const title = "Rotate PDF – Rotate PDF Pages Online | Filego";
@@ -36,6 +37,7 @@ export default function RotatePdfPage() {
     <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfRotateTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

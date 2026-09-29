@@ -1,6 +1,7 @@
 import { PdfToWordTool } from "@/components/tools/pdf-to-word-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/pdf-to-word";
 const title = "PDF to Word Converter – Convert PDF to DOCX Online | Filego";
@@ -37,6 +38,7 @@ export default function PdfToWordPage() {
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfToWordTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

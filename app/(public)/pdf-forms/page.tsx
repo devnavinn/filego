@@ -3,6 +3,7 @@ import { ChevronRight, ListChecks, Upload } from "lucide-react";
 import { FORM_TEMPLATES } from "@/lib/pdf-form-templates";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/pdf-forms";
 const title = "PDF Forms – Fill & Create Fillable PDF Forms Online | Filego";
@@ -100,6 +101,7 @@ export default function PdfFormsPage() {
           </Link>
         </div>
       </div>
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

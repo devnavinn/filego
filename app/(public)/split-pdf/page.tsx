@@ -1,6 +1,7 @@
 import { PdfSplitTool } from "@/components/tools/pdf-split-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/split-pdf";
 const title = "Split PDF – Split PDF Pages Online | Filego";
@@ -38,6 +39,7 @@ export default function SplitPdfPage() {
     <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfSplitTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

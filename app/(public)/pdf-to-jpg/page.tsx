@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PdfToJpgClient } from "./pdf-to-jpg-client";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 export const metadata: Metadata = {
   title: "Free PDF to JPG Converter Online – Convert PDF to Images | Filego",
   description:
@@ -54,6 +55,7 @@ export default function PdfToJpgPage() {
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfToJpgClient />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

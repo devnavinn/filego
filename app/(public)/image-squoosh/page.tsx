@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ImageSquooshLanding } from "@/components/image-squoosh-landing";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 export const metadata: Metadata = {
   title: "Free Image Compressor Without Losing Quality Online | Filego",
@@ -59,6 +60,7 @@ export default function ImageCompressPage() {
     <>
       <JsonLd data={jsonLd} />
       <ImageSquooshLanding />
+      <AdSlot placement="tool" className="px-4 pb-12 md:px-6" />
     </>
   );
 }

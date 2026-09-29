@@ -1,6 +1,7 @@
 import { PdfMergeTool } from "@/components/tools/pdf-merge-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/merge-pdf";
 const title = "Merge PDF – Combine PDF Files Online | Filego";
@@ -39,6 +40,7 @@ export default function MergePdfPage() {
     <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfMergeTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

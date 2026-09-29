@@ -1,6 +1,7 @@
 import { PdfEditorTool } from "@/components/tools/pdf-editor-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/edit-pdf";
 const title = "Edit PDF – Add Text, Images, Shapes & More Online | Filego";
@@ -38,6 +39,7 @@ export default function EditPdfPage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfEditorTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }

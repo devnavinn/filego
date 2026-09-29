@@ -1,6 +1,7 @@
 import { PdfWatermarkTool } from "@/components/tools/pdf-watermark-tool";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolMetadata, buildToolJsonLd } from "@/lib/seo";
+import { AdSlot } from "@/components/ads/ad-slot";
 
 const path = "/add-watermark";
 const title = "Add Watermark to PDF Online | Filego";
@@ -37,6 +38,7 @@ export default function AddWatermarkPage() {
     <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
       <JsonLd data={jsonLd} />
       <PdfWatermarkTool />
+      <AdSlot placement="tool" className="mt-10" />
     </main>
   );
 }
