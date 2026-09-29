@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, Sparkles } from "lucide-react"
+import { AdSlot } from "@/components/ads/ad-slot"
 import { ToolCard } from "@/components/tool-card"
 import { cn } from "@/lib/utils"
 import { categoryIconMap, getCategoryBySlug, toolCategories } from "@/lib/tools-data"
@@ -115,6 +116,8 @@ export default async function ToolCategoryPage({ params }: Props) {
                     ))}
                 </div>
             </section>
+
+            <AdSlot placement="category" className="px-4 pb-12 md:px-6" />
         </main>
     )
 }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { BadgeCheck, ChevronRight, Lock, Sparkles, Zap } from "lucide-react"
 
 import { JsonLd } from "@/components/seo/json-ld"
+import { AdSlot } from "@/components/ads/ad-slot"
 import { ToolCard } from "@/components/tool-card"
 import { ToolRenderer } from "@/components/tools/tool-renderer"
 import { categoryIconMap, getToolBySlugs, toolCategories } from "@/lib/tools-data"
@@ -162,6 +163,8 @@ export default async function SingleToolPage({ params }: Props) {
                     />
                 </section>
             </div>
+
+            <AdSlot placement="tool" className="px-4 pb-10 md:px-6" />
 
             {relatedTools.length > 0 && (
                 <section className="border-t border-border/60 bg-muted/20">

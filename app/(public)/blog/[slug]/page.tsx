@@ -9,6 +9,7 @@ import { CalendarDays, ChevronLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublishedBlogPostBySlug } from "@/lib/blog";
+import { AdSlot } from "@/components/ads/ad-slot";
 type Props = {
     params: Promise<{ slug: string }>;
 };
@@ -190,6 +191,8 @@ export default async function BlogPostPage({ params }: Props) {
                             </div>
                         </div>
                     </article>
+
+                    <AdSlot placement="blog" className="mt-12" />
                 </div>
             </section>
         </main>
