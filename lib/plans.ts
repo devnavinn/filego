@@ -55,7 +55,7 @@ const MB = 1024 * 1024;
 
 export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     guest: { aiDaily: 0, maxFileBytes: 50 * MB, maxBatchFiles: 5, showAds: true },
-    free: { aiDaily: 5, maxFileBytes: 100 * MB, maxBatchFiles: 20, showAds: true },
+    free: { aiDaily: 5, maxFileBytes: 500 * MB, maxBatchFiles: 50, showAds: true },
     pro: { aiDaily: 500, maxFileBytes: 2048 * MB, maxBatchFiles: null, showAds: false },
 };
 
