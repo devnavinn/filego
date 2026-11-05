@@ -32,6 +32,9 @@ const footerLinks = {
   ],
 };
 
+const BUILDER_URL =
+  "https://devnavin.in/services?utm_source=filego&utm_medium=footer&utm_campaign=built_by#pricing";
+
 const socialLinks = [
   { label: "GitHub", href: "https://github.com/devnavinn" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/devnavin/" },
@@ -103,7 +106,30 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-4 border-t pt-6 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+        <a
+          href={BUILDER_URL}
+          target="_blank"
+          rel="noopener"
+          className="group mt-10 flex flex-col gap-2 rounded-2xl border border-border/60 bg-background/60 px-5 py-4 text-sm transition-colors hover:border-primary/40 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              Built by Navin Kumar
+            </span>{" "}
+            — Need a fast custom web app or AI tool for your business?
+          </p>
+          <span className="shrink-0 font-semibold text-primary">
+            See fixed-price packages at devnavin.in{" "}
+            <span
+              aria-hidden
+              className="inline-block transition-transform group-hover:translate-x-0.5"
+            >
+              →
+            </span>
+          </span>
+        </a>
+
+        <div className="mt-6 flex flex-col gap-4 border-t pt-6 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>© 2026 Filego. All rights reserved.</p>
 
           <div className="flex flex-wrap gap-4">
