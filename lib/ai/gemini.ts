@@ -1,10 +1,51 @@
-import { GoogleGenAI, Type } from "@google/genai"
-import type { Part } from "@google/genai"
+import { ApiError, GoogleGenAI, Type } from "@google/genai"
+import type { GenerateContentParameters, GenerateContentResponse, Part } from "@google/genai"
 import type { McqQuiz } from "@/lib/pdf-form-types"
 
-const MODEL = "gemini-3.5-flash-lite"
+/**
+ * Models tried in order. When one is rate limited (429) or overloaded (503) the
+ * request is retried on the next one. Override with a comma-separated GEMINI_MODELS env var.
+ */
+const MODELS = (process.env.GEMINI_MODELS ?? "gemini-3.8-flash,gemini-3.5-flash-lite")
+    .split(",")
+    .map((model) => model.trim())
+    .filter(Boolean)
 
-/** Keeps prompts within a predictable cost/latency budget on the lite model. */
+/** How long a rate-limited model is skipped before being tried again. */
+const RATE_LIMIT_COOLDOWN_MS = 60_000
+const rateLimitedUntil = new Map<string, number>()
+
+function isRetryableError(error: unknown): boolean {
+    if (error instanceof ApiError) return error.status === 429 || error.status === 503
+    const message = error instanceof Error ? error.message : String(error)
+    return /\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|rate limit|quota/i.test(message)
+}
+
+async function generateContent(params: Omit<GenerateContentParameters, "model">): Promise<GenerateContentResponse> {
+    const ai = getClient()
+    const now = Date.now()
+    const available = MODELS.filter((model) => (rateLimitedUntil.get(model) ?? 0) <= now)
+    // If every model is cooling down, try them all anyway rather than failing outright.
+    const candidates = available.length > 0 ? available : MODELS
+
+    let lastError: unknown
+    for (const model of candidates) {
+        try {
+            const response = await ai.models.generateContent({ ...params, model })
+            rateLimitedUntil.delete(model)
+            return response
+        } catch (error) {
+            if (!isRetryableError(error)) throw error
+            lastError = error
+            rateLimitedUntil.set(model, Date.now() + RATE_LIMIT_COOLDOWN_MS)
+            console.warn(`[gemini] ${model} is rate limited or unavailable, trying next model`)
+        }
+    }
+    console.error("[gemini] all models rate limited", lastError)
+    throw new Error("The AI is busy right now. Please try again in a minute.")
+}
+
+/** Keeps prompts within a predictable cost/latency budget. */
 export const MAX_DOCUMENT_CHARS = 60_000
 
 /** Upper bound on scanned pages sent to the AI in a single PDF OCR request. */
@@ -52,10 +93,8 @@ export type GenerateMcqQuizInput = {
 }
 
 export async function generateMcqQuiz(input: GenerateMcqQuizInput): Promise<McqQuiz> {
-    const ai = getClient()
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents:
             `Create a ${input.difficulty} difficulty multiple-choice quiz about "${input.topic}" ` +
             `with exactly ${input.questionCount} questions. Each question must have exactly 4 distinct, ` +
@@ -114,11 +153,9 @@ const summaryResponseSchema = {
 export type DocumentSummary = { summary: string; keyPoints: string[] }
 
 export async function summarizeDocument(text: string): Promise<DocumentSummary> {
-    const ai = getClient()
     const document = truncateDocument(text)
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents:
             "Summarize the following document in a clear, concise paragraph (3-6 sentences), " +
             "then list the 4-8 most important key points as short bullet strings.\n\n" +
@@ -196,11 +233,9 @@ export type ParsedResume = {
 }
 
 export async function parseResume(text: string): Promise<ParsedResume> {
-    const ai = getClient()
     const document = truncateDocument(text)
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents:
             "Extract structured information from the following resume/CV text. " +
             "Leave a field empty rather than guessing if it is not present.\n\n" +
@@ -265,7 +300,6 @@ export async function answerFileQuestion(input: {
     question: string
     history: ChatMessage[]
 }): Promise<string> {
-    const ai = getClient()
     const document = truncateDocument(input.documentText)
 
     const historyText = input.history
@@ -273,8 +307,7 @@ export async function answerFileQuestion(input: {
         .map((message) => `${message.role === "user" ? "User" : "Assistant"}: ${message.content}`)
         .join("\n")
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents:
             "You are answering questions about the document below. Only use information from the " +
             "document; if the answer isn't in it, say so clearly. Keep answers concise.\n\n" +
@@ -305,7 +338,6 @@ const OCR_FORMATTING_RULE =
     "Na⁺ for a superscript plus, CO₂ for a subscript 2)."
 
 export async function recognizeImageText(input: OcrImageInput): Promise<string> {
-    const ai = getClient()
 
     const instruction =
         input.mode === "handwritten"
@@ -315,8 +347,7 @@ export async function recognizeImageText(input: OcrImageInput): Promise<string> 
             : "Extract all readable text from this image exactly as it appears, preserving line breaks " +
               `and layout as closely as possible. ${OCR_FORMATTING_RULE} Return only the extracted text, with no commentary or explanation.`
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents: [{ inlineData: { data: input.imageBase64, mimeType: input.mimeType } }, { text: instruction }],
     })
 
@@ -340,15 +371,13 @@ const pdfOcrResponseSchema = {
 export type OcrPageInput = { imageBase64: string; mimeType: string }
 
 export async function recognizePdfPages(pages: OcrPageInput[]): Promise<string[]> {
-    const ai = getClient()
 
     const pageParts: Part[] = pages.flatMap((page, index) => [
         { text: `Page ${index + 1}:` },
         { inlineData: { data: page.imageBase64, mimeType: page.mimeType } },
     ])
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents: [
             {
                 text:
@@ -384,10 +413,8 @@ export async function recognizePdfPages(pages: OcrPageInput[]): Promise<string[]
 export type TranscribeAudioInput = { audioBase64: string; mimeType: string }
 
 export async function transcribeAudio(input: TranscribeAudioInput): Promise<string> {
-    const ai = getClient()
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
+    const response = await generateContent({
         contents: [
             { inlineData: { data: input.audioBase64, mimeType: input.mimeType } },
             {
