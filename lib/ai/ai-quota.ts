@@ -57,3 +57,15 @@ export async function consumeAiQuota(userId: string): Promise<AiQuotaResult> {
 
     return { allowed: true, limit, remaining: Math.max(0, limit - updated.usageConsumed), isPro }
 }
+
+/** Gives back one unit consumed by `consumeAiQuota`, e.g. when the AI call itself failed. */
+export async function refundAiQuota(userId: string): Promise<void> {
+    try {
+        await prisma.featureEntitlement.updateMany({
+            where: { userId, key: ENTITLEMENT_KEY, usageConsumed: { gt: 0 } },
+            data: { usageConsumed: { decrement: 1 } },
+        })
+    } catch (error) {
+        console.error("[AI_QUOTA_REFUND_ERROR]", error)
+    }
+}

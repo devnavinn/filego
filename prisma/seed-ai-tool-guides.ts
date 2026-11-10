@@ -435,6 +435,60 @@ The translator covers 35+ languages, including 11 Indian languages: Hindi, Benga
 
 Need a document in another language? [Translate your file now →](/tools/ai-tools/document-translator)`,
     },
+    {
+        slug: "how-to-summarize-a-youtube-video-with-ai",
+        title: "How to Summarize a YouTube Video with AI (Free, with Timestamps)",
+        excerpt:
+            "Turn a long YouTube video into a short summary, key points, and clickable chapters in seconds, in English, Hindi, or 35+ other languages.",
+        seoTitle: "YouTube Video Summarizer: Summarize Any Video with AI Free | Filego",
+        seoDescription:
+            "Summarize any public YouTube video with AI. Get a summary, key points, and timestamped chapters in English, Hindi, Tamil, and 35+ languages. Free daily use.",
+        category: "AI Guides",
+        tags: ["youtube summarizer", "video summary", "ai tools", "youtube to text"],
+        toolLabel: "YouTube Summarizer",
+        toolPath: "/tools/ai-tools/youtube-summarizer",
+        content: `A 40-minute lecture or podcast often has five minutes of ideas you actually need. An AI YouTube summarizer watches the video for you and gives you the main points, plus chapters with timestamps so you can jump straight to the part that matters.
+
+## When a YouTube summary is useful
+
+- Revising a long lecture, tutorial, or exam-prep video before a test
+- Deciding whether a podcast or interview is worth watching in full
+- Taking notes from a conference talk or product demo
+- Getting the gist of a video in a language you don't speak. Pick your own language for the summary.
+
+## How to summarize a YouTube video, step by step
+
+1. Copy the video's link from YouTube (the Share button, or the address bar).
+2. Open the [YouTube Summarizer](/tools/ai-tools/youtube-summarizer) and sign in (AI tools require an account).
+3. Paste the link. Regular videos, Shorts, live replays, and youtu.be links all work.
+4. Choose **Quick** for a short overview or **Detailed** for fuller notes.
+5. Pick the language you want the summary in.
+6. Click **Summarize**. Long videos can take a minute or two.
+7. Click any chapter timestamp to open the video at that moment, or copy or download the notes as Markdown.
+
+## What you get
+
+- **Summary:** a short paragraph (Quick) or several paragraphs (Detailed) covering the whole video
+- **Key points:** the main ideas as a bullet list
+- **Chapters:** the sections of the video with start times, a title, and one line about each
+
+The AI uses both what is said and what is shown on screen, so it works for slides, coding tutorials, and demos as well as talking-head videos.
+
+## Limits to know about
+
+- **Public videos only:** private, members-only, and age-restricted videos can't be opened.
+- **Length:** free accounts get summaries of the first 60 minutes of a video; Pro covers up to 2 hours.
+- **Daily use:** each summary uses one AI generation from your daily quota. If the AI fails, the generation is refunded.
+- **Accuracy:** summaries are very good but can miss details. Check the chapter timestamps for anything important.
+
+## Tips for better summaries
+
+- Use **Detailed** for lectures and tutorials, **Quick** for news and vlogs.
+- For a written transcript instead of a summary, download the audio and use [Speech to Text](/tools/ai-tools/speech-to-text).
+- Long video? Summarize it in your own language, then use the chapter links to rewatch only the parts you need.
+
+Got a long video to get through? [Summarize it now →](/tools/ai-tools/youtube-summarizer)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

@@ -1,4 +1,4 @@
-import { ApiError, GoogleGenAI, Type } from "@google/genai"
+import { ApiError, GoogleGenAI, MediaResolution, Type } from "@google/genai"
 import type { GenerateContentParameters, GenerateContentResponse, Part } from "@google/genai"
 import type { McqQuiz } from "@/lib/pdf-form-types"
 
@@ -21,7 +21,19 @@ function isRetryableError(error: unknown): boolean {
     return /\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|rate limit|quota/i.test(message)
 }
 
-async function generateContent(params: Omit<GenerateContentParameters, "model">): Promise<GenerateContentResponse> {
+function isTimeoutError(error: unknown): boolean {
+    return error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")
+}
+
+type GenerateOptions = {
+    /** Abort an attempt that takes longer than this and move on to the next model. */
+    attemptTimeoutMs?: number
+}
+
+async function generateContent(
+    params: Omit<GenerateContentParameters, "model">,
+    options: GenerateOptions = {}
+): Promise<GenerateContentResponse> {
     const ai = getClient()
     const now = Date.now()
     const available = MODELS.filter((model) => (rateLimitedUntil.get(model) ?? 0) <= now)
@@ -31,14 +43,17 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">)
     let lastError: unknown
     for (const model of candidates) {
         try {
-            const response = await ai.models.generateContent({ ...params, model })
+            const config = options.attemptTimeoutMs
+                ? { ...params.config, abortSignal: AbortSignal.timeout(options.attemptTimeoutMs) }
+                : params.config
+            const response = await ai.models.generateContent({ ...params, config, model })
             rateLimitedUntil.delete(model)
             return response
         } catch (error) {
-            if (!isRetryableError(error)) throw error
+            if (!isRetryableError(error) && !isTimeoutError(error)) throw error
             lastError = error
             rateLimitedUntil.set(model, Date.now() + RATE_LIMIT_COOLDOWN_MS)
-            console.warn(`[gemini] ${model} is rate limited or unavailable, trying next model`)
+            console.warn(`[gemini] ${model} ${isTimeoutError(error) ? "timed out" : "is rate limited or unavailable"}, trying next model`)
         }
     }
     console.error("[gemini] all models rate limited", lastError)
@@ -486,6 +501,103 @@ export async function translateDocument(input: TranslateDocumentInput): Promise<
 
     await Promise.all(Array.from({ length: Math.min(TRANSLATE_CONCURRENCY, chunks.length) }, worker))
     return results.join("\n\n")
+}
+
+const videoSummaryResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        summary: { type: Type.STRING },
+        keyPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
+        chapters: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    startSeconds: { type: Type.NUMBER },
+                    title: { type: Type.STRING },
+                    summary: { type: Type.STRING },
+                },
+                required: ["startSeconds", "title"],
+            },
+        },
+    },
+    required: ["summary", "keyPoints", "chapters"],
+}
+
+/** Two attempts (primary + fallback model) must fit inside the route's maxDuration. */
+const VIDEO_ATTEMPT_TIMEOUT_MS = 120_000
+
+export type VideoChapter = { startSeconds: number; title: string; summary: string | null }
+export type VideoSummary = { summary: string; keyPoints: string[]; chapters: VideoChapter[] }
+
+export type SummarizeYouTubeInput = {
+    videoUrl: string
+    /** Only the first `maxSeconds` of the video are sent to the model (cost and latency cap). */
+    maxSeconds: number
+    detail: "short" | "detailed"
+    /** Human-readable output language, e.g. "Hindi". */
+    language: string
+}
+
+export async function summarizeYouTubeVideo(input: SummarizeYouTubeInput): Promise<VideoSummary> {
+    const length =
+        input.detail === "detailed"
+            ? "a thorough summary of 2-4 paragraphs, 6-12 key points, and a chapter for each major section"
+            : "a concise summary of 3-5 sentences, 4-6 key points, and 3-8 chapters"
+
+    const response = await generateContent({
+        contents: [
+            {
+                fileData: { fileUri: input.videoUrl },
+                videoMetadata: { endOffset: `${input.maxSeconds}s`, fps: 0.5 },
+            },
+            {
+                text:
+                    `Summarize this video using what is said and shown. Write ${length}. ` +
+                    "Each chapter needs the second (from the start of the video) where it begins, a short title, " +
+                    "and a one-sentence summary; chapters must be in order and the first starts at 0. " +
+                    `Write everything in ${input.language}. Do not invent details that are not in the video.`,
+            },
+        ],
+        config: {
+            mediaResolution: MediaResolution.MEDIA_RESOLUTION_LOW,
+            responseMimeType: "application/json",
+            responseSchema: videoSummaryResponseSchema,
+        },
+    }, { attemptTimeoutMs: VIDEO_ATTEMPT_TIMEOUT_MS })
+
+    const raw = response.text
+    if (!raw) throw new Error("The AI returned an empty response.")
+
+    let parsed: {
+        summary?: string
+        keyPoints?: string[]
+        chapters?: { startSeconds?: number; title?: string; summary?: string }[]
+    }
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        throw new Error("The AI returned an unreadable response.")
+    }
+
+    const summary = parsed.summary?.trim()
+    if (!summary) throw new Error("The AI did not return a summary.")
+
+    const chapters = (parsed.chapters ?? [])
+        .filter((c) => typeof c.title === "string" && c.title.trim() && Number.isFinite(c.startSeconds))
+        .map((c) => ({
+            startSeconds: Math.min(Math.max(0, Math.round(c.startSeconds as number)), input.maxSeconds),
+            title: (c.title as string).trim(),
+            summary: c.summary?.trim() || null,
+        }))
+        .sort((a, b) => a.startSeconds - b.startSeconds)
+        .slice(0, 30)
+
+    return {
+        summary,
+        keyPoints: (parsed.keyPoints ?? []).map((p) => p.trim()).filter(Boolean).slice(0, 15),
+        chapters,
+    }
 }
 
 export type TranscribeAudioInput = { audioBase64: string; mimeType: string }

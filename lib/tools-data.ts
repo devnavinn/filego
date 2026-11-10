@@ -242,7 +242,7 @@ export const toolCategories: ToolCategory[] = [
         id: "ai",
         slug: "ai-tools",
         title: "AI-Powered Tools",
-        description: "OCR, translation, parsing, summarization, and question-answering workflows.",
+        description: "OCR, translation, video and document summaries, parsing, and file Q&A.",
         heroDescription:
             "Deliver document intelligence with OCR, parsing, summarization, and AI-powered file interactions.",
         accent: "from-purple-600 via-fuchsia-500 to-orange-400 text-white",
@@ -260,6 +260,12 @@ export const toolCategories: ToolCategory[] = [
                 seoTitle: "AI Document Translator – Translate PDF & Word Files Online Free",
                 seoDescription:
                     "Translate PDF, DOCX, and TXT files into Hindi, Tamil, Bengali, Spanish, Arabic and 35+ languages with AI. Download as Word or PDF.",
+            },
+            {
+                ...createTool("YouTube Summarizer", "Summarize any YouTube video with key points and timestamped chapters."),
+                seoTitle: "YouTube Video Summarizer – Free AI Summary with Timestamps",
+                seoDescription:
+                    "Paste a YouTube link and get an AI summary, key points, and clickable timestamped chapters in English, Hindi, and 35+ languages. Free to try.",
             },
             createTool("Resume Parser", "Extract structured data from resumes."),
             createTool("AI File Chat", "Ask questions and get answers from PDFs and documents."),
