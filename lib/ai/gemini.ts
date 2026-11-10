@@ -410,6 +410,84 @@ export async function recognizePdfPages(pages: OcrPageInput[]): Promise<string[]
     return result
 }
 
+/** Each translation request is kept small so output never hits the model's token cap. */
+const TRANSLATE_CHUNK_CHARS = 6_000
+const TRANSLATE_CONCURRENCY = 4
+
+/** Splits text on paragraph (then line) boundaries into chunks of at most `max` characters. */
+function splitIntoChunks(text: string, max: number): string[] {
+    const chunks: string[] = []
+    let current = ""
+
+    const push = (piece: string, separator: string) => {
+        if (current && current.length + separator.length + piece.length > max) {
+            chunks.push(current)
+            current = ""
+        }
+        current = current ? current + separator + piece : piece
+    }
+
+    for (const paragraph of text.split(/\n{2,}/)) {
+        if (paragraph.length <= max) {
+            push(paragraph, "\n\n")
+            continue
+        }
+        // Very long paragraph: fall back to lines, then hard slices.
+        paragraph.split("\n").forEach((line, lineIndex) => {
+            const separator = lineIndex === 0 ? "\n\n" : "\n"
+            if (line.length <= max) {
+                push(line, separator)
+            } else {
+                for (let i = 0; i < line.length; i += max) push(line.slice(i, i + max), i === 0 ? separator : "")
+            }
+        })
+    }
+    if (current) chunks.push(current)
+    return chunks
+}
+
+async function translateChunk(chunk: string, targetLanguage: string, sourceLanguage: string | null): Promise<string> {
+    const from = sourceLanguage ? `from ${sourceLanguage} ` : ""
+    const response = await generateContent({
+        contents:
+            `Translate the following document text ${from}into ${targetLanguage}. ` +
+            "Keep the meaning, tone, and formatting: preserve every line break, blank line, list marker, " +
+            "number, and heading order. Translate every sentence and label, including words that appear next to " +
+            "links. Leave only the URLs, email addresses, code snippets, and brand names themselves unchanged. " +
+            "If some text is already in the target language, keep it as is. " +
+            "Return only the translated text, with no commentary, notes, or quotation marks around it.\n\n" +
+            `Text:\n"""\n${chunk}\n"""`,
+    })
+
+    const translated = response.text?.trim()
+    if (!translated) throw new Error("The AI returned an empty translation.")
+    return translated.replace(/^"""\s*|\s*"""$/g, "")
+}
+
+export type TranslateDocumentInput = {
+    text: string
+    /** Human-readable target language name, e.g. "Hindi". */
+    targetLanguage: string
+    /** Human-readable source language name, or null to auto-detect. */
+    sourceLanguage: string | null
+}
+
+export async function translateDocument(input: TranslateDocumentInput): Promise<string> {
+    const chunks = splitIntoChunks(input.text.trim(), TRANSLATE_CHUNK_CHARS)
+    const results: string[] = new Array(chunks.length)
+
+    let next = 0
+    async function worker() {
+        while (next < chunks.length) {
+            const index = next++
+            results[index] = await translateChunk(chunks[index], input.targetLanguage, input.sourceLanguage)
+        }
+    }
+
+    await Promise.all(Array.from({ length: Math.min(TRANSLATE_CONCURRENCY, chunks.length) }, worker))
+    return results.join("\n\n")
+}
+
 export type TranscribeAudioInput = { audioBase64: string; mimeType: string }
 
 export async function transcribeAudio(input: TranscribeAudioInput): Promise<string> {

@@ -3,7 +3,12 @@ import type { PdfJsLib } from "@/lib/use-pdfjs"
 
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
-async function extractPdfText(file: File, pdfjsLib: PdfJsLib): Promise<string> {
+type ExtractOptions = {
+    /** Keep the PDF's line breaks instead of joining each page into one line. */
+    preserveLines?: boolean
+}
+
+async function extractPdfText(file: File, pdfjsLib: PdfJsLib, options: ExtractOptions): Promise<string> {
     const buffer = new Uint8Array(await file.arrayBuffer())
     const doc = await pdfjsLib.getDocument({ data: buffer }).promise
 
@@ -11,7 +16,17 @@ async function extractPdfText(file: File, pdfjsLib: PdfJsLib): Promise<string> {
     for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber++) {
         const page = await doc.getPage(pageNumber)
         const content = await page.getTextContent()
-        pages.push(content.items.map((item) => item.str).join(" "))
+        if (options.preserveLines) {
+            pages.push(
+                content.items
+                    .map((item) => (item.str ?? "") + (item.hasEOL ? "\n" : ""))
+                    .join("")
+                    .replace(/[ \t]+\n/g, "\n")
+                    .trim()
+            )
+        } else {
+            pages.push(content.items.map((item) => item.str).join(" "))
+        }
     }
 
     return pages.join("\n\n")
@@ -21,12 +36,16 @@ async function extractPdfText(file: File, pdfjsLib: PdfJsLib): Promise<string> {
  * Extracts plain text from a PDF, DOCX, or plain-text file for sending to the AI.
  * `pdfjsLib` must already be loaded (via `usePdfJs`) when the file is a PDF.
  */
-export async function extractTextFromFile(file: File, pdfjsLib: PdfJsLib | null): Promise<string> {
+export async function extractTextFromFile(
+    file: File,
+    pdfjsLib: PdfJsLib | null,
+    options: ExtractOptions = {}
+): Promise<string> {
     const name = file.name.toLowerCase()
 
     if (file.type === "application/pdf" || name.endsWith(".pdf")) {
         if (!pdfjsLib) throw new Error("The PDF engine is still loading. Try again in a moment.")
-        const text = await extractPdfText(file, pdfjsLib)
+        const text = await extractPdfText(file, pdfjsLib, options)
         if (!text.trim()) throw new Error("No readable text found in this PDF. Scanned/image-only PDFs aren't supported yet.")
         return text
     }

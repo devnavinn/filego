@@ -20,6 +20,8 @@ export type PdfJsTextItem = {
     transform: [number, number, number, number, number, number]
     width: number
     height: number
+    /** True when this run is the last one on its line. */
+    hasEOL?: boolean
 }
 
 export type PdfJsPage = {

@@ -386,6 +386,55 @@ Pull the audio out first with [Extract Audio from Video](/tools/video-tools/extr
 
 Have a recording you'd rather read than replay? [Transcribe your audio for free →](/tools/ai-tools/speech-to-text)`,
     },
+    {
+        slug: "how-to-translate-a-pdf-or-word-document-online-with-ai",
+        title: "How to Translate a PDF or Word Document Online with AI (Free)",
+        excerpt:
+            "Translate a whole PDF, DOCX, or text file into Hindi, Tamil, Bengali, Spanish, Arabic and 35+ other languages, then download it as Word or PDF.",
+        seoTitle: "Translate PDF or Word Document Online Free with AI | Filego",
+        seoDescription:
+            "Translate PDF, DOCX, and TXT files online with AI into Hindi, Tamil, Bengali, Marathi, Spanish, Arabic and 35+ languages. Download the translation as Word or PDF.",
+        category: "AI Guides",
+        tags: ["translate pdf", "document translator", "ai tools", "hindi translation"],
+        toolLabel: "AI Document Translator",
+        toolPath: "/tools/ai-tools/document-translator",
+        content: `Copy-pasting a document into a translator page by page is slow, and it breaks the formatting. An AI document translator reads the whole file, translates it while keeping paragraphs and lists in place, and hands you back a file you can actually use.
+
+## When document translation is useful
+
+- Translating a government form, notice, or circular into Hindi or your regional language
+- Turning an English assignment, report, or study material into Tamil, Bengali, Marathi or another language
+- Reading a contract, manual, or research paper that arrived in a language you don't know
+- Sharing a policy or announcement with a team that works in several languages
+
+## How to translate a document, step by step
+
+1. Open the [AI Document Translator](/tools/ai-tools/document-translator) and sign in (AI tools require an account).
+2. Upload a PDF, DOCX, or TXT file.
+3. Leave **From** on *Detect automatically*, or pick the source language yourself.
+4. Choose the language you want in **To** (Hindi, Tamil, Telugu, Bengali, Urdu, Spanish, Arabic, Chinese and more).
+5. Click **Translate**. Long documents can take up to a minute.
+6. Review and edit the result in the text box, then download it as **Word (.docx)**, save it as **PDF**, or copy it.
+
+## Supported languages
+
+The translator covers 35+ languages, including 11 Indian languages: Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, and Urdu. It also handles major world languages such as Spanish, French, German, Portuguese, Russian, Arabic, Persian, Hebrew, Chinese, Japanese, Korean, Indonesian, Thai, and Vietnamese. Right-to-left languages like Arabic and Urdu are exported with the correct text direction.
+
+## Limits to know about
+
+- **Length:** free accounts can translate up to 20,000 characters per document (roughly 8–10 pages). Pro raises this to 60,000 characters.
+- **Daily use:** each translation uses one AI generation from your daily quota.
+- **Scanned PDFs:** image-only PDFs have no text layer to read. Run them through [PDF OCR](/tools/ai-tools/pdf-ocr) first, then translate the extracted text.
+- **Layout:** the translation keeps paragraphs, line breaks, and lists, but not images, tables, or exact page design.
+
+## Tips for better translations
+
+- Pick the source language yourself when a document mixes several languages.
+- Proofread names, figures, and legal or medical terms. AI translation is very good, but it is not a certified translation.
+- Split very long books or reports into chapters for faster results.
+
+Need a document in another language? [Translate your file now →](/tools/ai-tools/document-translator)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

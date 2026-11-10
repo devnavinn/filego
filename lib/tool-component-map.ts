@@ -28,6 +28,7 @@ import { QrCodeScannerTool } from "@/components/tools/qr-code-scanner-tool"
 import { WebsiteToMarkdownTool } from "@/components/tools/website-to-markdown-tool"
 import { LoremIpsumGeneratorTool } from "@/components/tools/lorem-ipsum-generator-tool"
 import { DocumentSummarizerTool } from "@/components/tools/document-summarizer-tool"
+import { DocumentTranslatorTool } from "@/components/tools/document-translator-tool"
 import { ResumeParserTool } from "@/components/tools/resume-parser-tool"
 import { AiFileChatTool } from "@/components/tools/ai-file-chat-tool"
 import { OcrImageToTextTool } from "@/components/tools/ocr-image-to-text-tool"
@@ -122,6 +123,7 @@ export const toolComponentMap = {
     "website-to-markdown": WebsiteToMarkdownTool,
     "lorem-ipsum-generator": LoremIpsumGeneratorTool,
     "document-summarizer": DocumentSummarizerTool,
+    "document-translator": DocumentTranslatorTool,
     "resume-parser": ResumeParserTool,
     "ai-file-chat": AiFileChatTool,
     "ocr-image-to-text": OcrImageToTextTool,
