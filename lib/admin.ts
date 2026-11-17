@@ -1,6 +1,7 @@
 import { BillingStatus, PlanType, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { TOOL_TYPE_LABELS } from "@/lib/tool-labels";
+import { formatMoney } from "@/lib/pricing";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -46,8 +47,10 @@ export async function getAdminOverview() {
             distinct: ["userId"],
             select: { userId: true },
         }),
-        prisma.subscription.aggregate({ where: paidWhere, _sum: { amount: true }, _count: true }),
-        prisma.subscription.aggregate({
+        // Grouped by currency: amounts in different currencies can't be added together.
+        prisma.subscription.groupBy({ by: ["currency"], where: paidWhere, _sum: { amount: true }, _count: true }),
+        prisma.subscription.groupBy({
+            by: ["currency"],
             where: { ...paidWhere, purchasedAt: { gte: since30d } },
             _sum: { amount: true },
             _count: true,
@@ -100,8 +103,8 @@ export async function getAdminOverview() {
         userCount,
         newUsers7d,
         proUserCount: proUsers.length,
-        revenueAll: { amount: revenueAll._sum.amount ?? 0, count: revenueAll._count },
-        revenue30d: { amount: revenue30d._sum.amount ?? 0, count: revenue30d._count },
+        revenueAll: summarizeRevenue(revenueAll),
+        revenue30d: summarizeRevenue(revenue30d),
         jobs30d,
         newContactCount,
         subscriberCount,
@@ -196,9 +199,24 @@ export function passName(sub: { planType: string; billingPeriod: string | null; 
 }
 
 export function formatPaise(amount: number | null | undefined, currency = "INR") {
-    return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-    }).format((amount ?? 0) / 100);
+    return formatMoney(amount ?? 0, currency, currency === "INR" ? "en-IN" : "en-US");
+}
+
+export type RevenueSummary = {
+    /** One entry per currency, largest first. */
+    byCurrency: { currency: string; amount: number; count: number }[];
+    count: number;
+};
+
+function summarizeRevenue(rows: { currency: string | null; _sum: { amount: number | null }; _count: number }[]): RevenueSummary {
+    const byCurrency = rows
+        .map((row) => ({ currency: row.currency ?? "INR", amount: row._sum.amount ?? 0, count: row._count }))
+        .sort((a, b) => b.count - a.count);
+    return { byCurrency, count: byCurrency.reduce((sum, row) => sum + row.count, 0) };
+}
+
+/** "₹12,450 + $49.90 + €9.98", or "₹0" when there is no revenue. */
+export function formatRevenue(summary: RevenueSummary): string {
+    if (summary.byCurrency.length === 0) return formatPaise(0);
+    return summary.byCurrency.map((row) => formatPaise(row.amount, row.currency)).join(" + ");
 }

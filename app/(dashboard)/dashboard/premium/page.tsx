@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getUserPlan } from "@/lib/entitlements";
 import { PlanCards } from "@/components/pricing/plan-cards";
+import { getRequestCountry } from "@/lib/geo";
+import { formatMoney, getPricing } from "@/lib/pricing";
 import { PLAN_LIMITS } from "@/lib/plans";
 import { getBillingHistory } from "@/lib/dashboard";
 import { formatDateSafe } from "@/lib/dashboard-formatters";
@@ -23,12 +25,13 @@ function passName(payment: { planType: string; billingPeriod: string | null }) {
 
 function formatAmount(amount: number | null, currency: string | null) {
     if (amount == null) return "—";
-    return new Intl.NumberFormat("en-IN", { style: "currency", currency: currency ?? "INR", maximumFractionDigits: 0 }).format(amount / 100);
+    return formatMoney(amount, currency ?? "INR", currency === "INR" || !currency ? "en-IN" : "en-US");
 }
 
 export default async function PremiumPage() {
     const user = await requireUser();
-    const [plan, payments] = await Promise.all([getUserPlan(user.id), getBillingHistory(user.id)]);
+    const [plan, payments, country] = await Promise.all([getUserPlan(user.id), getBillingHistory(user.id), getRequestCountry()]);
+    const pricing = getPricing(country);
     const now = new Date();
     const isPro = plan.tier === "pro";
 
@@ -50,6 +53,7 @@ export default async function PremiumPage() {
 
             <PlanCards
                 tier={plan.tier}
+                pricing={pricing}
                 expiresAt={plan.expiresAt}
                 isLifetime={plan.isLifetime}
                 callbackUrl="/dashboard/premium"

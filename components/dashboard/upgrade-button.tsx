@@ -23,12 +23,15 @@ type RazorpaySuccessResponse = {
 
 type UpgradeButtonProps = {
     plan: PassKey;
+    /** The currency the page showed, so the server can catch a stale price. */
+    currency?: string;
     label?: string;
     className?: string;
 };
 
 export function UpgradeButton({
     plan,
+    currency,
     label,
     className,
 }: UpgradeButtonProps) {
@@ -44,7 +47,7 @@ export function UpgradeButton({
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ plan }),
+                body: JSON.stringify({ plan, currency }),
             });
 
             const orderData = await orderRes.json().catch(() => null);
@@ -52,6 +55,7 @@ export function UpgradeButton({
             if (!orderRes.ok) {
                 toast.error(orderData?.error || "Failed to create order");
                 setLoading(false);
+                if (orderData?.code === "PRICE_CHANGED") router.refresh();
                 return;
             }
 

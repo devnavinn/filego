@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
 
 import { PlanCards } from "@/components/pricing/plan-cards";
+import { getRequestCountry } from "@/lib/geo";
+import { getPricing } from "@/lib/pricing";
 import { authOptions } from "@/lib/auth-provider";
 import { getUserPlan } from "@/lib/entitlements";
 
 export const metadata: Metadata = {
   title: "Pricing | Filego",
   description:
-    "Filego is free to use. Upgrade to Filego Pro for bigger files, unlimited batches, more AI generations and no ads, from ₹199 a month.",
+    "Filego is free to use. Upgrade to Filego Pro for bigger files, unlimited batches, more AI generations and no ads, with a one-time payment in your local currency.",
   alternates: { canonical: "/pricing" },
 };
 
@@ -23,7 +25,11 @@ const faqs = [
   },
   {
     q: "Which payment methods can I use?",
-    a: "UPI, cards, net banking and wallets, all through Razorpay.",
+    a: "In India: UPI, cards, net banking and wallets. Everywhere else: Visa, Mastercard and other international cards, charged in your local currency where available. All payments are processed securely by Razorpay.",
+  },
+  {
+    q: "Why is the price different in my country?",
+    a: "Prices are set for each country so Pro is fairly priced wherever you live. The price you see is the price you pay, shown in your local currency or US dollars.",
   },
   {
     q: "Are my files uploaded?",
@@ -33,7 +39,8 @@ const faqs = [
 
 export default async function PricingPage() {
   const session = await getServerSession(authOptions);
-  const plan = await getUserPlan(session?.user?.id);
+  const [plan, country] = await Promise.all([getUserPlan(session?.user?.id), getRequestCountry()]);
+  const pricing = getPricing(country);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -49,7 +56,7 @@ export default async function PricingPage() {
         </div>
 
         <div className="mt-12">
-          <PlanCards tier={plan.tier} expiresAt={plan.expiresAt} isLifetime={plan.isLifetime} />
+          <PlanCards tier={plan.tier} pricing={pricing} expiresAt={plan.expiresAt} isLifetime={plan.isLifetime} />
         </div>
       </section>
 

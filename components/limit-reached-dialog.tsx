@@ -50,7 +50,7 @@ export function LimitReachedDialog() {
                             {describe(hit)}{" "}
                             {isGuest
                                 ? `A free account raises this to ${formatLimitBytes(PLAN_LIMITS.free.maxFileBytes)} files and ${PLAN_LIMITS.free.maxBatchFiles} per batch. Pro goes up to ${formatLimitBytes(PLAN_LIMITS.pro.maxFileBytes)} with unlimited batches.`
-                                : `Pro handles files up to ${formatLimitBytes(PLAN_LIMITS.pro.maxFileBytes)} with unlimited batches and no ads, from ₹199 a month.`}
+                                : `Pro handles files up to ${formatLimitBytes(PLAN_LIMITS.pro.maxFileBytes)} with unlimited batches and no ads, for a one-time payment.`}
                         </DialogDescription>
 
                         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

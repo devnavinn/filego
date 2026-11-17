@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UpgradeButton } from "@/components/dashboard/upgrade-button";
 import { PLAN_LIMITS, PRO_PASSES, formatLimitBytes, type PassKey, type PlanTier } from "@/lib/plans";
+import type { Pricing } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
 const freeFeatures = [
@@ -24,13 +25,15 @@ const proFeatures = [
 
 type PlanCardsProps = {
     tier: PlanTier;
+    /** Country-based prices, from getPricing(await getRequestCountry()) on the server. */
+    pricing: Pricing;
     expiresAt?: Date | string | null;
     isLifetime?: boolean;
     /** Where to send guests after they sign in to buy. */
     callbackUrl?: string;
 };
 
-export function PlanCards({ tier, expiresAt, isLifetime, callbackUrl = "/pricing" }: PlanCardsProps) {
+export function PlanCards({ tier, pricing, expiresAt, isLifetime, callbackUrl = "/pricing" }: PlanCardsProps) {
     const isPro = tier === "pro";
     const loginHref = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
@@ -38,7 +41,7 @@ export function PlanCards({ tier, expiresAt, isLifetime, callbackUrl = "/pricing
         <div className="grid gap-5 md:grid-cols-3">
             <div className="flex flex-col rounded-3xl border border-border bg-card p-6 shadow-sm">
                 <p className="text-sm font-semibold text-muted-foreground">Free</p>
-                <p className="mt-3 font-heading text-4xl font-bold tracking-tight">₹0</p>
+                <p className="mt-3 font-heading text-4xl font-bold tracking-tight">{pricing.freeLabel}</p>
                 <p className="mt-1 text-sm text-muted-foreground">With a free account.</p>
                 <FeatureList items={freeFeatures} />
                 <div className="mt-auto pt-6">
@@ -57,7 +60,7 @@ export function PlanCards({ tier, expiresAt, isLifetime, callbackUrl = "/pricing
             {(Object.keys(PRO_PASSES) as PassKey[]).map((key) => {
                 const pass = PRO_PASSES[key];
                 const featured = key === "PRO_YEARLY";
-                const monthlyEquivalent = Math.round(pass.amount / 100 / 12);
+                const price = pricing.passes[key];
 
                 return (
                     <div
@@ -74,12 +77,12 @@ export function PlanCards({ tier, expiresAt, isLifetime, callbackUrl = "/pricing
                         ) : null}
                         <p className="text-sm font-semibold text-muted-foreground">{pass.name}</p>
                         <p className="mt-3 font-heading text-4xl font-bold tracking-tight">
-                            {pass.priceLabel}
+                            {price.label}
                             <span className="text-base font-normal text-muted-foreground">/{pass.periodLabel}</span>
                         </p>
                         <p className="mt-1 text-sm text-muted-foreground">
                             {pass.period === "YEARLY"
-                                ? `About ₹${monthlyEquivalent}/month. One payment, no auto-renew.`
+                                ? `About ${price.perMonthLabel}/month. One payment, no auto-renew.`
                                 : `${pass.days} days of Pro. One payment, no auto-renew.`}
                         </p>
                         <FeatureList items={proFeatures} />
@@ -93,6 +96,7 @@ export function PlanCards({ tier, expiresAt, isLifetime, callbackUrl = "/pricing
                             ) : (
                                 <UpgradeButton
                                     plan={key}
+                                    currency={pricing.currency}
                                     label={isPro ? `Add ${pass.days} days` : `Get ${pass.name}`}
                                     className="w-full rounded-xl bg-primary text-primary-foreground hover:opacity-90"
                                 />
@@ -101,6 +105,13 @@ export function PlanCards({ tier, expiresAt, isLifetime, callbackUrl = "/pricing
                     </div>
                 );
             })}
+
+            <p className="text-center text-xs text-muted-foreground md:col-span-3">
+                {pricing.countryName ? `Prices for ${pricing.countryName}, in ${pricing.currency}. ` : `Prices in ${pricing.currency}. `}
+                {pricing.currency === "INR"
+                    ? "Pay with UPI, cards, net banking or wallets."
+                    : "Pay securely with an international card. Your bank may add a currency conversion fee."}
+            </p>
 
             {isPro && !isLifetime && expiresAt ? (
                 <p className="text-sm text-muted-foreground md:col-span-3">

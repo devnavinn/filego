@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PLAN_LIMITS, formatLimitBytes } from "@/lib/plans";
 
 const SITE_URL = "https://www.filego.in";
 
@@ -108,7 +109,7 @@ const faqGroups: FaqGroup[] = [
     items: [
       {
         q: "What do the paid plans include?",
-        a: "Pro (₹199/month or ₹499/year) raises your daily AI limit to 100 generations and unlocks higher processing limits across tools. Lifetime (₹1,999 one-time) gives the same benefits with no recurring payment.",
+        a: `Pro raises your daily AI limit to ${PLAN_LIMITS.pro.aiDaily} generations, accepts files up to ${formatLimitBytes(PLAN_LIMITS.pro.maxFileBytes)} with unlimited batches, and removes ads. It's a one-time payment for a month or a year with no auto-renew, priced for your country. See the pricing page for your local price.`,
       },
       {
         q: "How do I upgrade, downgrade, or cancel?",

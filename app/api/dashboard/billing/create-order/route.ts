@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { BillingPeriod, BillingStatus, PlanType } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
+import type { Orders } from "razorpay/dist/types/orders";
 import { razorpay } from "@/lib/razorpay";
 import { prisma } from "@/lib/prisma";
 import { PRO_PASSES, isPassKey } from "@/lib/plans";
+import { countryFromHeaders } from "@/lib/geo";
+import { getPricing } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -29,18 +32,48 @@ export async function POST(req: Request) {
         }
 
         const pass = PRO_PASSES[planKey];
+        // The price always comes from the server's view of the buyer's country, never from the browser.
+        const pricing = getPricing(countryFromHeaders(req.headers));
+        const price = pricing.passes[pass.key];
+
+        // The page showed prices for another country (e.g. the buyer switched network or VPN).
+        if (typeof body?.currency === "string" && body.currency !== pricing.currency) {
+            return NextResponse.json(
+                { ok: false, error: "Prices for your location have changed. Please refresh the page.", code: "PRICE_CHANGED" },
+                { status: 409 }
+            );
+        }
+
         const receipt = `fg_${user.id.slice(-8)}_${Date.now().toString().slice(-8)}`;
 
-        const order = await razorpay.orders.create({
-            amount: pass.amount,
-            currency: "INR",
-            receipt,
-            notes: {
-                userId: user.id,
-                planType: PlanType.PRO,
-                plan: pass.key,
-            },
-        });
+        let order: Orders.RazorpayOrder;
+        try {
+            order = await razorpay.orders.create({
+                amount: price.amount,
+                currency: pricing.currency,
+                receipt,
+                notes: {
+                    userId: user.id,
+                    planType: PlanType.PRO,
+                    plan: pass.key,
+                    country: pricing.country ?? "unknown",
+                    pricingRegion: pricing.region,
+                },
+            });
+        } catch (error) {
+            // Most often: international payments aren't enabled on the Razorpay account for this currency.
+            console.error("[CREATE_ORDER_RAZORPAY_ERROR]", { currency: pricing.currency, country: pricing.country }, error);
+            return NextResponse.json(
+                {
+                    ok: false,
+                    error:
+                        pricing.currency === "INR"
+                            ? "Failed to create order"
+                            : `Payments in ${pricing.currency} aren't available right now. Please try again later or contact support.`,
+                },
+                { status: 502 }
+            );
+        }
 
         const amount = Number(order.amount);
 

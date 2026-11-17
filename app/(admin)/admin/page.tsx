@@ -1,8 +1,8 @@
 // app/admin/page.tsx
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
-import { formatPaise, getAdminOverview, passName } from "@/lib/admin";
-import { Crown, IndianRupee, Inbox, Mail, Users, Wrench } from "lucide-react";
+import { formatPaise, formatRevenue, getAdminOverview, passName } from "@/lib/admin";
+import { Crown, Wallet, Inbox, Mail, Users, Wrench } from "lucide-react";
 import { DashboardKpiCards } from "@/components/admin/dashboard-kpi-cards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -63,12 +63,12 @@ export default async function AdminPage() {
         },
         {
             title: "Revenue (30 days)",
-            value: formatPaise(data.revenue30d.amount),
-            description: `${data.revenue30d.count} passes · ${formatPaise(data.revenueAll.amount)} all time`,
+            value: formatRevenue(data.revenue30d),
+            description: `${data.revenue30d.count} passes · ${formatRevenue(data.revenueAll)} all time`,
             trendLabel: `${data.revenueAll.count} paid passes total`,
             trendDirection: "neutral" as const,
             href: "/admin/payments",
-            icon: IndianRupee,
+            icon: Wallet,
         },
         {
             title: "New messages",

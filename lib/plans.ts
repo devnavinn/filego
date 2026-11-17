@@ -8,10 +8,12 @@ export type ProPass = {
     key: PassKey;
     name: string;
     period: "MONTHLY" | "YEARLY";
-    /** Price in paise. */
+    /**
+     * Original INR price in paise. Only used to recognise old orders saved before billingPeriod existed;
+     * live, country-based prices are in lib/pricing.ts.
+     */
     amount: number;
     days: number;
-    priceLabel: string;
     periodLabel: string;
 };
 
@@ -23,7 +25,6 @@ export const PRO_PASSES: Record<PassKey, ProPass> = {
         period: "MONTHLY",
         amount: 19900,
         days: 30,
-        priceLabel: "₹199",
         periodLabel: "month",
     },
     PRO_YEARLY: {
@@ -32,7 +33,6 @@ export const PRO_PASSES: Record<PassKey, ProPass> = {
         period: "YEARLY",
         amount: 49900,
         days: 365,
-        priceLabel: "₹499",
         periodLabel: "year",
     },
 };

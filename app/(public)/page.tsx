@@ -419,7 +419,7 @@ export default function HomePage() {
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-white/85">
               Unlock AI tools and track your activity. Need more? Filego Pro removes ads and raises
-              your limits, from ₹199 a month.
+              your limits, with a one-time payment and no subscription.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
