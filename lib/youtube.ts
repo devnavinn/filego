@@ -50,3 +50,45 @@ export function formatTimestamp(totalSeconds: number): string {
 
 /** How much of a video the AI watches per request: free accounts vs Pro (minutes). */
 export const YOUTUBE_MINUTE_LIMITS = { free: 60, pro: 120 } as const
+
+/** Parses an ISO 8601 duration like "PT1H3M34S" into seconds. */
+export function parseIsoDuration(value: string): number | null {
+    const match = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(value)
+    if (!match) return null
+    const [, d, h, m, s] = match.map((part) => Number(part ?? 0))
+    const total = d * 86400 + h * 3600 + m * 60 + s
+    return total > 0 ? total : null
+}
+
+/**
+ * Server-only: reads the video's real length from its watch page (oEmbed doesn't expose it).
+ * Returns null if YouTube doesn't answer or the page layout changes, so callers must cope without it.
+ */
+export async function fetchYouTubeDurationSeconds(videoId: string): Promise<number | null> {
+    try {
+        const res = await fetch(youTubeWatchUrl(videoId), {
+            signal: AbortSignal.timeout(10_000),
+            cache: "no-store",
+            headers: {
+                "User-Agent": "Mozilla/5.0 (compatible; FileGo/1.0)",
+                "Accept-Language": "en-US,en;q=0.9",
+                // Skip the EU cookie-consent interstitial, which has no video metadata.
+                Cookie: "CONSENT=YES+1; SOCS=CAI",
+            },
+        })
+        if (!res.ok) return null
+        const html = await res.text()
+
+        const seconds = /"lengthSeconds":"(\d+)"/.exec(html)?.[1]
+        if (seconds && Number(seconds) > 0) return Number(seconds)
+
+        const iso = /itemprop="duration" content="([^"]+)"/.exec(html)?.[1]
+        if (iso) return parseIsoDuration(iso)
+
+        const ms = /"approxDurationMs":"(\d+)"/.exec(html)?.[1]
+        if (ms && Number(ms) > 0) return Math.round(Number(ms) / 1000)
+        return null
+    } catch {
+        return null
+    }
+}

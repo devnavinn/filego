@@ -513,11 +513,12 @@ const videoSummaryResponseSchema = {
             items: {
                 type: Type.OBJECT,
                 properties: {
-                    startSeconds: { type: Type.NUMBER },
+                    // MM:SS strings: Gemini reads video timestamps far more accurately in this form than as raw seconds.
+                    start: { type: Type.STRING },
                     title: { type: Type.STRING },
                     summary: { type: Type.STRING },
                 },
-                required: ["startSeconds", "title"],
+                required: ["start", "title"],
             },
         },
     },
@@ -526,6 +527,8 @@ const videoSummaryResponseSchema = {
 
 /** Two attempts (primary + fallback model) must fit inside the route's maxDuration. */
 const VIDEO_ATTEMPT_TIMEOUT_MS = 120_000
+/** Videos up to this length are sampled at 1 frame/s for sharper timestamps; longer ones at 0.5 to save tokens. */
+const VIDEO_FULL_FPS_MAX_SECONDS = 20 * 60
 
 export type VideoChapter = { startSeconds: number; title: string; summary: string | null }
 export type VideoSummary = { summary: string; keyPoints: string[]; chapters: VideoChapter[] }
@@ -534,29 +537,111 @@ export type SummarizeYouTubeInput = {
     videoUrl: string
     /** Only the first `maxSeconds` of the video are sent to the model (cost and latency cap). */
     maxSeconds: number
+    /** The video's real length, when known. Used to keep chapter timestamps inside the video. */
+    durationSeconds: number | null
     detail: "short" | "detailed"
     /** Human-readable output language, e.g. "Hindi". */
     language: string
 }
 
+function formatClock(totalSeconds: number): string {
+    const s = Math.max(0, Math.floor(totalSeconds))
+    const h = Math.floor(s / 3600)
+    const m = Math.floor((s % 3600) / 60)
+    const sec = String(s % 60).padStart(2, "0")
+    return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${String(m).padStart(2, "0")}:${sec}`
+}
+
+/** Accepts "MM:SS", "H:MM:SS", "1m30s", or a bare number of seconds. */
+function parseClock(value: unknown): number | null {
+    if (typeof value === "number") return Number.isFinite(value) && value >= 0 ? value : null
+    if (typeof value !== "string") return null
+    const text = value.trim()
+    if (/^\d+(\.\d+)?$/.test(text)) return Number(text)
+    const clock = /^(?:(\d+):)?(\d{1,3}):(\d{1,2})(?:\.\d+)?$/.exec(text)
+    if (clock) return Number(clock[1] ?? 0) * 3600 + Number(clock[2]) * 60 + Number(clock[3])
+    const units = /^(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?$/i.exec(text)
+    if (units && (units[1] || units[2] || units[3])) {
+        return Number(units[1] ?? 0) * 3600 + Number(units[2] ?? 0) * 60 + Number(units[3] ?? 0)
+    }
+    return null
+}
+
+/**
+ * Makes model-reported chapter starts trustworthy: sorted, unique, starting at 0 and inside the
+ * part of the video that was actually watched. If the model's timeline overshoots the video
+ * (e.g. 7:00 chapters for a 4:00 video) but its order looks right, it is scaled back to fit
+ * instead of throwing most chapters away.
+ */
+function normalizeChapters(
+    raw: { start: number; title: string; summary: string | null }[],
+    limitSeconds: number,
+    durationKnown: boolean
+): VideoChapter[] {
+    let chapters = [...raw].sort((a, b) => a.start - b.start)
+    if (chapters.length === 0) return []
+
+    const lastStart = chapters[chapters.length - 1].start
+    const outOfRange = chapters.filter((c) => c.start >= limitSeconds).length
+    if (durationKnown && outOfRange > 0) {
+        if (outOfRange >= 2 || outOfRange / chapters.length > 0.25) {
+            // Whole timeline is stretched: rescale so the last chapter starts a little before the end.
+            const target = limitSeconds * 0.9
+            const scale = target / Math.max(lastStart, 1)
+            chapters = chapters.map((c) => ({ ...c, start: c.start * scale }))
+        } else {
+            chapters = chapters.filter((c) => c.start < limitSeconds)
+        }
+    } else {
+        chapters = chapters.filter((c) => c.start < limitSeconds)
+    }
+
+    const result: VideoChapter[] = []
+    for (const c of chapters) {
+        const startSeconds = Math.round(c.start)
+        // Drop duplicates and chapters squeezed within a few seconds of the previous one.
+        if (result.length > 0 && startSeconds - result[result.length - 1].startSeconds < 5) continue
+        result.push({ startSeconds, title: c.title, summary: c.summary })
+    }
+    if (result.length > 0) result[0].startSeconds = 0
+    return result.slice(0, 30)
+}
+
 export async function summarizeYouTubeVideo(input: SummarizeYouTubeInput): Promise<VideoSummary> {
+    const duration = input.durationSeconds && input.durationSeconds > 0 ? input.durationSeconds : null
+    // The span the model actually watches.
+    const watchedSeconds = duration ? Math.min(duration, input.maxSeconds) : input.maxSeconds
+    const truncated = !duration || duration > input.maxSeconds
+
     const length =
         input.detail === "detailed"
             ? "a thorough summary of 2-4 paragraphs, 6-12 key points, and a chapter for each major section"
             : "a concise summary of 3-5 sentences, 4-6 key points, and 3-8 chapters"
 
+    const timing = duration
+        ? truncated
+            ? `You are given only the first ${formatClock(watchedSeconds)} of a ${formatClock(duration)} video. `
+            : `The video is exactly ${formatClock(duration)} long. `
+        : ""
+    const lastAllowed = formatClock(Math.max(0, watchedSeconds - 1))
+
     const response = await generateContent({
         contents: [
             {
                 fileData: { fileUri: input.videoUrl },
-                videoMetadata: { endOffset: `${input.maxSeconds}s`, fps: 0.5 },
+                videoMetadata: {
+                    ...(truncated ? { endOffset: `${input.maxSeconds}s` } : {}),
+                    fps: watchedSeconds <= VIDEO_FULL_FPS_MAX_SECONDS ? 1 : 0.5,
+                },
             },
             {
                 text:
+                    timing +
                     `Summarize this video using what is said and shown. Write ${length}. ` +
-                    "Each chapter needs the second (from the start of the video) where it begins, a short title, " +
-                    "and a one-sentence summary; chapters must be in order and the first starts at 0. " +
-                    `Write everything in ${input.language}. Do not invent details that are not in the video.`,
+                    "Each chapter needs `start` (the MM:SS timestamp, or H:MM:SS, where the section begins, read from the video's own timeline), " +
+                    "a short title, and a one-sentence summary. Chapters must be in chronological order, the first starts at 00:00, " +
+                    `and no timestamp may be later than ${lastAllowed}. ` +
+                    `Write everything in ${input.language}. Do not invent details or timestamps that are not in the video.`,
             },
         ],
         config: {
@@ -572,7 +657,7 @@ export async function summarizeYouTubeVideo(input: SummarizeYouTubeInput): Promi
     let parsed: {
         summary?: string
         keyPoints?: string[]
-        chapters?: { startSeconds?: number; title?: string; summary?: string }[]
+        chapters?: { start?: unknown; startSeconds?: unknown; title?: string; summary?: string }[]
     }
     try {
         parsed = JSON.parse(raw)
@@ -580,23 +665,24 @@ export async function summarizeYouTubeVideo(input: SummarizeYouTubeInput): Promi
         throw new Error("The AI returned an unreadable response.")
     }
 
-    const summary = parsed.summary?.trim()
+    const summary = typeof parsed.summary === "string" ? parsed.summary.trim() : ""
     if (!summary) throw new Error("The AI did not return a summary.")
 
-    const chapters = (parsed.chapters ?? [])
-        .filter((c) => typeof c.title === "string" && c.title.trim() && Number.isFinite(c.startSeconds))
-        .map((c) => ({
-            startSeconds: Math.min(Math.max(0, Math.round(c.startSeconds as number)), input.maxSeconds),
-            title: (c.title as string).trim(),
-            summary: c.summary?.trim() || null,
-        }))
-        .sort((a, b) => a.startSeconds - b.startSeconds)
-        .slice(0, 30)
+    const rawChapters = (Array.isArray(parsed.chapters) ? parsed.chapters : []).flatMap((c) => {
+        const start = parseClock(c?.start ?? c?.startSeconds)
+        const title = typeof c?.title === "string" ? c.title.trim() : ""
+        if (start === null || !title) return []
+        return [{ start, title, summary: typeof c.summary === "string" && c.summary.trim() ? c.summary.trim() : null }]
+    })
 
     return {
         summary,
-        keyPoints: (parsed.keyPoints ?? []).map((p) => p.trim()).filter(Boolean).slice(0, 15),
-        chapters,
+        keyPoints: (Array.isArray(parsed.keyPoints) ? parsed.keyPoints : [])
+            .filter((p): p is string => typeof p === "string")
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .slice(0, 15),
+        chapters: normalizeChapters(rawChapters, watchedSeconds, duration !== null),
     }
 }
 

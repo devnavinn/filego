@@ -21,6 +21,7 @@ type Result = VideoSummary & {
     author: string | null
     thumbnailUrl: string | null
     maxMinutes: number
+    durationSeconds: number | null
 }
 
 type Status =
@@ -280,8 +281,12 @@ export function YouTubeSummarizerTool() {
                     )}
 
                     <p className="text-xs text-muted-foreground">
-                        Videos longer than {result.maxMinutes} minutes are summarized up to that point. AI summaries can contain
-                        mistakes.
+                        {result.durationSeconds && result.durationSeconds > result.maxMinutes * 60
+                            ? `This video is ${formatTimestamp(result.durationSeconds)} long; only the first ${result.maxMinutes} minutes were summarized. `
+                            : result.durationSeconds
+                              ? ""
+                              : `Videos longer than ${result.maxMinutes} minutes are summarized up to that point. `}
+                        AI summaries can contain mistakes.
                     </p>
                 </div>
             )}

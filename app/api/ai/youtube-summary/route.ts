@@ -5,7 +5,7 @@ import { consumeAiQuota, refundAiQuota } from "@/lib/ai/ai-quota"
 import { summarizeYouTubeVideo } from "@/lib/ai/gemini"
 import { getUserPlan } from "@/lib/entitlements"
 import { findTranslateLanguage } from "@/lib/translate-languages"
-import { YOUTUBE_MINUTE_LIMITS, parseYouTubeVideoId, youTubeWatchUrl } from "@/lib/youtube"
+import { YOUTUBE_MINUTE_LIMITS, fetchYouTubeDurationSeconds, parseYouTubeVideoId, youTubeWatchUrl } from "@/lib/youtube"
 
 export const dynamic = "force-dynamic"
 // Watching a long video can take a couple of minutes, plus one fallback attempt.
@@ -51,7 +51,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: false, error: "Choose a supported language." }, { status: 400 })
     }
 
-    const video = await fetchVideoInfo(videoId)
+    // Duration lets the AI keep chapter timestamps inside the video; it's optional if YouTube hides it.
+    const [video, durationSeconds] = await Promise.all([fetchVideoInfo(videoId), fetchYouTubeDurationSeconds(videoId)])
     if (!video) {
         return NextResponse.json(
             { ok: false, error: "We couldn't open this video. Make sure it's public (not private or age-restricted)." },
@@ -74,12 +75,13 @@ export async function POST(req: Request) {
         const summary = await summarizeYouTubeVideo({
             videoUrl: youTubeWatchUrl(videoId),
             maxSeconds: maxMinutes * 60,
+            durationSeconds,
             detail,
             language: language.label,
         })
         return NextResponse.json({
             ok: true,
-            result: { videoId, ...video, maxMinutes, ...summary },
+            result: { videoId, ...video, maxMinutes, durationSeconds, ...summary },
             quota,
         })
     } catch (error) {
