@@ -601,6 +601,68 @@ No job description yet? Leave the box empty for a general ATS check of your resu
 
 Applying for a job this week? [Check your resume's ATS score now →](/tools/ai-tools/ats-resume-checker)`,
     },
+    {
+        slug: "how-to-make-a-quiz-and-flashcards-from-a-pdf",
+        title: "How to Turn a PDF into a Quiz and Flashcards with AI (Free)",
+        excerpt:
+            "Turn class notes, textbook chapters, and lecture slides into a practice quiz with answers and explanations, plus flashcards you can export to Anki or Quizlet.",
+        seoTitle: "PDF to Quiz & Flashcards: Free AI Quiz Generator for Students | Filego",
+        seoDescription:
+            "Upload a PDF, notes, or NCERT chapter and get a multiple-choice quiz with answers and explanations, plus flashcards for Anki and Quizlet. Works in Hindi and 35+ languages.",
+        category: "AI Guides",
+        tags: ["pdf to quiz", "flashcard maker", "quiz generator", "study tools", "exam preparation"],
+        toolLabel: "PDF to Quiz & Flashcards",
+        toolPath: "/tools/ai-tools/pdf-to-quiz-flashcards",
+        content: `Re-reading notes feels productive, but testing yourself is what makes things stick. Students who practise recalling answers remember far more than those who only read. The problem is that writing good quiz questions and flashcards takes hours. An AI quiz generator does it in under a minute from the material you already have.
+
+## What you can use it for
+
+- **School and board exams:** turn an NCERT or textbook chapter into chapter-wise MCQs
+- **Competitive exams:** practise from your coaching notes for NEET, JEE, UPSC, SSC, or banking exams
+- **College:** revise lecture slides and handouts before tests
+- **Teachers:** create a quick class test or worksheet with an answer key
+- **Work:** learn training material, policies, or certification guides
+
+## How to make a quiz from a PDF, step by step
+
+1. Open [PDF to Quiz & Flashcards](/tools/ai-tools/pdf-to-quiz-flashcards) and sign in.
+2. Upload a PDF, DOCX, or TXT file, or paste your notes as text.
+3. For a long PDF, choose the page range, for example a single chapter.
+4. Choose **Quiz + flashcards**, **Quiz**, or **Flashcards**, then how many questions and cards you want.
+5. Pick a difficulty (Mixed works well for revision) and the language. Choose Hindi or another language to study in it, even if the PDF is in English.
+6. Click **Generate**. It takes 20 to 60 seconds.
+
+## Practising with your quiz
+
+- Click an answer to see straight away whether you're right, with a short explanation and the exact line from your document it came from, including the page number.
+- When you finish, you get your score. **Retry the ones I missed** quizzes you only on your mistakes.
+- **Retake all** shuffles the answer order, so you can't just remember the position.
+- **Print quiz** creates a worksheet with an answer key on a separate page. Save it as a PDF or print it for class.
+
+## Studying with flashcards
+
+- Tap a card or press Space to flip it.
+- Mark each card **Got it** or **Still learning**. At the end of a round, review only the cards you're still learning, until you know them all.
+- Export to **Anki or Quizlet**: download the .txt file and import it. Front and back are separated by a tab, which both apps detect automatically.
+
+## Scanned PDFs and photos of notes
+
+If your PDF is a scan (pages saved as images), the AI reads the page images directly. Select up to 15 pages at a time on a free account, or 50 with Pro.
+
+## Limits
+
+- **Free:** up to 15 questions and 25 flashcards per set, from about 16 pages of text
+- **Pro:** up to 40 questions and 60 flashcards per set, from about 60 pages
+- Each set uses one AI generation from your daily quota. If generation fails, it's refunded.
+
+## Tips for better questions
+
+- Use one chapter or topic per set. Focused material gives sharper questions.
+- Use **Hard** difficulty the week before an exam to test application, not just recall.
+- AI can make mistakes. If an answer looks wrong, check the quoted line and page.
+
+Got an exam coming up? [Make your quiz now →](/tools/ai-tools/pdf-to-quiz-flashcards)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

@@ -242,7 +242,7 @@ export const toolCategories: ToolCategory[] = [
         id: "ai",
         slug: "ai-tools",
         title: "AI-Powered Tools",
-        description: "OCR, translation, subtitles, ATS resume checks, summaries, parsing, and file Q&A.",
+        description: "OCR, translation, subtitles, quizzes, ATS resume checks, summaries, and file Q&A.",
         heroDescription:
             "Deliver document intelligence with OCR, parsing, summarization, and AI-powered file interactions.",
         accent: "from-purple-600 via-fuchsia-500 to-orange-400 text-white",
@@ -261,6 +261,12 @@ export const toolCategories: ToolCategory[] = [
                     "Upload a video or audio file and get timed SRT or VTT subtitles for YouTube, Reels, and Shorts. Translate captions into Hindi and 35+ languages. Free to try.",
             },
             createTool("Document Summarizer", "Summarize long documents quickly."),
+            {
+                ...createTool("PDF to Quiz & Flashcards", "Turn notes and PDFs into a practice quiz and flashcards with AI."),
+                seoTitle: "PDF to Quiz & Flashcards Maker – Free AI Quiz Generator",
+                seoDescription:
+                    "Upload a PDF, notes, or textbook chapter and get a multiple-choice quiz with answers and explanations, plus flashcards for Anki and Quizlet. Works in Hindi and 35+ languages.",
+            },
             {
                 ...createTool("Document Translator", "Translate PDF, Word, and text files into 35+ languages with AI."),
                 seoTitle: "AI Document Translator – Translate PDF & Word Files Online Free",

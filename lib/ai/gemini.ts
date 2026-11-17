@@ -2,6 +2,7 @@ import { ApiError, GoogleGenAI, MediaResolution, Type } from "@google/genai"
 import type { GenerateContentParameters, GenerateContentResponse, Part } from "@google/genai"
 import type { McqQuiz } from "@/lib/pdf-form-types"
 import { looseText, type BulletRewrite, type FixPriority, type JobKeyword, type ResumeFix } from "@/lib/ats"
+import { normalizeFlashcards, normalizeQuestions, type RawFlashcard, type RawQuestion, type StudyDifficulty, type StudySet } from "@/lib/study-set"
 import { SUBTITLE_STYLE_RULES, normalizeCues, type RawCue, type SubtitleCue, type SubtitleStyle } from "@/lib/subtitles"
 
 /**
@@ -966,4 +967,122 @@ export async function analyzeResumeForJob(input: { resumeText: string; jobText: 
         bulletRewrites: bulletRewrites.slice(0, 5),
         tailoredSummary: str(parsed.tailoredSummary),
     }
+}
+
+const studySetResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        title: { type: Type.STRING },
+        questions: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    question: { type: Type.STRING },
+                    options: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    correctIndex: { type: Type.INTEGER },
+                    explanation: { type: Type.STRING },
+                    quote: { type: Type.STRING },
+                    page: { type: Type.INTEGER },
+                },
+                required: ["question", "options", "correctIndex", "explanation"],
+            },
+        },
+        flashcards: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    front: { type: Type.STRING },
+                    back: { type: Type.STRING },
+                    page: { type: Type.INTEGER },
+                },
+                required: ["front", "back"],
+            },
+        },
+    },
+    required: ["title", "questions", "flashcards"],
+}
+
+/** Two attempts (primary + fallback model) must fit inside the study-set route's maxDuration. */
+const STUDY_ATTEMPT_TIMEOUT_MS = 90_000
+
+export type GenerateStudySetInput = {
+    /** Either extracted text (with "[Page N]" markers for PDFs) or a scanned PDF. */
+    source: { kind: "text"; text: string } | { kind: "pdf"; base64: string }
+    /** Pages in the source, when known, to validate page references. */
+    pageCount: number | null
+    questionCount: number
+    cardCount: number
+    difficulty: StudyDifficulty
+    /** Human-readable output language, or null for the document's own language. */
+    language: string | null
+    fileName: string | null
+}
+
+export async function generateStudySet(input: GenerateStudySetInput): Promise<Omit<StudySet, "truncated">> {
+    const difficulty =
+        input.difficulty === "mixed"
+            ? "a mix of easy recall, medium understanding, and hard application questions"
+            : `${input.difficulty} questions`
+    const hasPages = input.source.kind === "pdf" || /\[Page \d+\]/.test(input.source.kind === "text" ? input.source.text : "")
+
+    const instructions = [
+        "You are an expert teacher creating study material from the document provided. Use only facts stated in the document; never add outside knowledge.",
+        "Cover the whole document evenly, from beginning to end, focusing on the most important concepts, definitions, facts, causes and effects, and processes. Skip trivia such as page numbers, headers, author names, and references.",
+        input.questionCount > 0
+            ? `questions: exactly ${input.questionCount} multiple-choice questions, ${difficulty}. Each has exactly 4 options: one clearly correct answer and 3 plausible but clearly wrong distractors of similar length and style. No "all of the above" or "none of the above". correctIndex is the 0-based index of the correct option. explanation: one or two sentences on why it is correct. quote: a short passage (10-25 words) copied word for word from the document that supports the answer, in the document's original language.${hasPages ? " page: the page number where it appears ([Page N] markers)." : ""}`
+            : "questions: return an empty list.",
+        input.cardCount > 0
+            ? `flashcards: exactly ${input.cardCount} flashcards. front: a key term, concept, or short question. back: a concise, self-contained answer or definition (at most 2 sentences).${hasPages ? " page: the page number it comes from." : ""} Don't repeat the quiz questions word for word.`
+            : "flashcards: return an empty list.",
+        `title: a short title for this study set${input.fileName ? ` (the file is called "${input.fileName}")` : ""}.`,
+        input.language
+            ? `Write the title, questions, options, explanations, and flashcards in ${input.language}.`
+            : "Write everything in the same language as the document.",
+    ].join("\n")
+
+    const contents =
+        input.source.kind === "pdf"
+            ? [{ inlineData: { data: input.source.base64, mimeType: "application/pdf" } }, { text: instructions }]
+            : `${instructions}\n\nDocument:\n"""\n${input.source.text}\n"""`
+
+    const response = await generateContent({
+        contents,
+        config: {
+            temperature: 0.4,
+            responseMimeType: "application/json",
+            responseSchema: studySetResponseSchema,
+        },
+    }, { attemptTimeoutMs: STUDY_ATTEMPT_TIMEOUT_MS })
+
+    const raw = response.text
+    if (!raw) throw new Error("The AI returned an empty response.")
+
+    let parsed: { title?: unknown; questions?: RawQuestion[]; flashcards?: RawFlashcard[] }
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        throw new Error("The AI returned an unreadable response.")
+    }
+
+    const newId = () => crypto.randomUUID()
+    const questions = normalizeQuestions(Array.isArray(parsed.questions) ? parsed.questions : [], {
+        sourceText: input.source.kind === "text" ? input.source.text : null,
+        pageCount: input.pageCount,
+        max: input.questionCount,
+        newId,
+    })
+    const flashcards = normalizeFlashcards(Array.isArray(parsed.flashcards) ? parsed.flashcards : [], {
+        pageCount: input.pageCount,
+        max: input.cardCount,
+        newId,
+    })
+
+    if (questions.length === 0 && flashcards.length === 0) {
+        throw new Error("The AI did not return any usable questions or flashcards.")
+    }
+
+    const title = typeof parsed.title === "string" && parsed.title.trim() ? parsed.title.trim().slice(0, 120) : "Study set"
+    return { title, questions, flashcards }
 }
