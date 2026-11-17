@@ -242,7 +242,7 @@ export const toolCategories: ToolCategory[] = [
         id: "ai",
         slug: "ai-tools",
         title: "AI-Powered Tools",
-        description: "OCR, translation, video and document summaries, parsing, and file Q&A.",
+        description: "OCR, translation, subtitles, video and document summaries, parsing, and file Q&A.",
         heroDescription:
             "Deliver document intelligence with OCR, parsing, summarization, and AI-powered file interactions.",
         accent: "from-purple-600 via-fuchsia-500 to-orange-400 text-white",
@@ -254,6 +254,12 @@ export const toolCategories: ToolCategory[] = [
             createTool("PDF OCR", "Recognize text from scanned PDF documents."),
             createTool("Handwriting to Text", "Convert handwriting into editable text."),
             createTool("Speech to Text", "Transcribe spoken audio into text with AI."),
+            {
+                ...createTool("Subtitle Generator", "Create SRT and VTT subtitles from any video or audio with AI."),
+                seoTitle: "AI Subtitle Generator – Free SRT & VTT Captions from Video",
+                seoDescription:
+                    "Upload a video or audio file and get timed SRT or VTT subtitles for YouTube, Reels, and Shorts. Translate captions into Hindi and 35+ languages. Free to try.",
+            },
             createTool("Document Summarizer", "Summarize long documents quickly."),
             {
                 ...createTool("Document Translator", "Translate PDF, Word, and text files into 35+ languages with AI."),

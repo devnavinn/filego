@@ -489,6 +489,61 @@ The AI uses both what is said and what is shown on screen, so it works for slide
 
 Got a long video to get through? [Summarize it now →](/tools/ai-tools/youtube-summarizer)`,
     },
+    {
+        slug: "how-to-add-subtitles-to-a-video-with-ai",
+        title: "How to Create Subtitles for a Video with AI (Free SRT & VTT)",
+        excerpt:
+            "Turn any video or audio file into timed SRT or VTT subtitles for YouTube, Instagram Reels, and Shorts, in the spoken language or translated into 35+ others.",
+        seoTitle: "AI Subtitle Generator: Free SRT & VTT Captions for YouTube and Reels | Filego",
+        seoDescription:
+            "Create SRT and VTT subtitles from any video with AI. Captions for YouTube, Reels, and Shorts, with translation into Hindi, Tamil, and 35+ languages. Free daily use.",
+        category: "AI Guides",
+        tags: ["subtitle generator", "srt generator", "auto captions", "ai tools", "reels captions"],
+        toolLabel: "Subtitle Generator",
+        toolPath: "/tools/ai-tools/subtitle-generator",
+        content: `Most people watch social videos with the sound off, so captions decide whether a viewer stays or scrolls past. Typing subtitles by hand takes hours; an AI subtitle generator listens to your video and writes timed captions you can upload straight to YouTube or drop into your editor.
+
+## Who this is for
+
+- **YouTubers:** upload an SRT file so viewers get accurate captions instead of YouTube's auto-generated ones, and reach viewers in other languages
+- **Reels and Shorts creators:** get short, punchy one-line captions to import into CapCut, Premiere Pro, or DaVinci Resolve
+- **Teachers and course creators:** make lectures accessible and searchable
+- **Podcasters:** turn an episode into captions for video clips
+
+## How to generate subtitles, step by step
+
+1. Open the [Subtitle Generator](/tools/ai-tools/subtitle-generator) and sign in (AI tools require an account).
+2. Upload your video or audio: MP4, MOV, WEBM, MKV, MP3, WAV, or M4A.
+3. Pick a caption style: **YouTube** for standard two-line subtitles, or **Reels / Shorts** for short one-line captions.
+4. Choose the subtitle language: keep the spoken language, or translate into Hindi, Tamil, Spanish, Arabic, and 35+ others.
+5. Click **Generate subtitles**. Long videos are processed in parts, and lines appear as each part is ready.
+6. Play the video to check the captions. Click any time to jump to it, fix any word, and use **Shift all** if the timing is slightly early or late.
+7. Download **SRT** (YouTube, Premiere, CapCut, VLC) or **VTT** (web players).
+
+## SRT or VTT: which one do you need?
+
+- **SRT** is the most widely supported format. Use it for YouTube, Facebook, LinkedIn, and almost every video editor.
+- **VTT (WebVTT)** is the format HTML5 web players use. Choose it if you host videos on your own website.
+
+## How to add the subtitles to YouTube
+
+In YouTube Studio, open the video, go to **Subtitles**, choose the language, click **Add** next to Subtitles, then **Upload file** and select **With timing**. Pick the SRT file you downloaded.
+
+## Privacy and limits
+
+- **Your video stays on your device.** The audio is extracted in your browser; only the compressed audio is sent to the AI.
+- **Length:** free accounts can subtitle videos up to 30 minutes; Pro covers up to 2 hours.
+- **Daily use:** each video uses one AI generation from your daily quota, however many parts it is split into. If the first part fails, the generation is refunded.
+- **Accuracy:** clear speech gives the best results. Check names and technical terms before publishing.
+
+## Tips for better captions
+
+- Reduce background music before exporting if you can; clear voice means more accurate subtitles.
+- For a plain transcript without timings, use [Speech to Text](/tools/ai-tools/speech-to-text).
+- Want a summary of a YouTube video instead? Try the [YouTube Summarizer](/tools/ai-tools/youtube-summarizer).
+
+Ready to caption your next video? [Generate subtitles now →](/tools/ai-tools/subtitle-generator)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

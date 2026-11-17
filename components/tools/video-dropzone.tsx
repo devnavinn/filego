@@ -72,7 +72,7 @@ export const VideoDropzone = forwardRef<HTMLVideoElement, VideoDropzoneProps>(fu
                         <p className="truncate text-xs font-medium">{file.name}</p>
                         <p className="text-[11px] text-muted-foreground">
                             {formatBytes(file.size)}
-                            {meta && ` · ${formatDuration(meta.duration)} · ${meta.width}x${meta.height}`}
+                            {meta && ` · ${formatDuration(meta.duration)}${meta.width > 0 ? ` · ${meta.width}x${meta.height}` : ""}`}
                         </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1.5">

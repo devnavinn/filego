@@ -36,6 +36,7 @@ import { OcrImageToTextTool } from "@/components/tools/ocr-image-to-text-tool"
 import { PdfOcrTool } from "@/components/tools/pdf-ocr-tool"
 import { HandwritingToTextTool } from "@/components/tools/handwriting-to-text-tool"
 import { SpeechToTextTool } from "@/components/tools/speech-to-text-tool"
+import { SubtitleGeneratorTool } from "@/components/tools/subtitle-generator-tool"
 import {
     PngToJpgTool,
     JpgToPngTool,
@@ -132,6 +133,7 @@ export const toolComponentMap = {
     "pdf-ocr": PdfOcrTool,
     "handwriting-to-text": HandwritingToTextTool,
     "speech-to-text": SpeechToTextTool,
+    "subtitle-generator": SubtitleGeneratorTool,
     "image-compressor": ImageCompressorRedirectTool,
     "image-resizer": ImageResizerTool,
     "image-cropper": ImageCropperTool,

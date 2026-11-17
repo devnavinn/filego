@@ -1,6 +1,7 @@
 import { ApiError, GoogleGenAI, MediaResolution, Type } from "@google/genai"
 import type { GenerateContentParameters, GenerateContentResponse, Part } from "@google/genai"
 import type { McqQuiz } from "@/lib/pdf-form-types"
+import { SUBTITLE_STYLE_RULES, normalizeCues, type RawCue, type SubtitleCue, type SubtitleStyle } from "@/lib/subtitles"
 
 /**
  * Models tried in order. When one is rate limited (429) or overloaded (503) the
@@ -708,4 +709,81 @@ export async function transcribeAudio(input: TranscribeAudioInput): Promise<stri
     if (!text) throw new Error("No speech could be transcribed from this audio.")
 
     return text
+}
+
+const subtitleResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        cues: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    // MM:SS.s strings: Gemini places audio timestamps more accurately in this form than as raw seconds.
+                    start: { type: Type.STRING },
+                    end: { type: Type.STRING },
+                    text: { type: Type.STRING },
+                },
+                required: ["start", "end", "text"],
+            },
+        },
+    },
+    required: ["cues"],
+}
+
+/** Two attempts (primary + fallback model) must fit inside the subtitles route's maxDuration. */
+const SUBTITLE_ATTEMPT_TIMEOUT_MS = 75_000
+
+export type GenerateSubtitlesInput = {
+    audioBase64: string
+    mimeType: string
+    /** Length of this audio part in seconds. */
+    durationSeconds: number
+    style: SubtitleStyle
+    /** Human-readable target language, or null to keep the spoken language. */
+    language: string | null
+}
+
+/** Transcribes one audio part into timed subtitle cues, with times relative to the part's start. */
+export async function generateSubtitles(input: GenerateSubtitlesInput): Promise<SubtitleCue[]> {
+    const rules = SUBTITLE_STYLE_RULES[input.style]
+    const length = formatClock(input.durationSeconds)
+    const languageRule = input.language
+        ? `Translate the speech into ${input.language}; keep the timing of the original speech.`
+        : "Write the subtitles in the language that is spoken (do not translate). If several languages are mixed, write each part as spoken."
+    const styleRule =
+        input.style === "short"
+            ? "Make short, punchy captions for vertical videos: 2 to 5 words each, at most 3 seconds on screen."
+            : `Make standard subtitles: one sentence or clause per cue, at most ${rules.maxLineChars * rules.maxLines} characters and ${rules.maxCueSeconds} seconds each.`
+
+    const response = await generateContent({
+        contents: [
+            { inlineData: { data: input.audioBase64, mimeType: input.mimeType } },
+            {
+                text:
+                    `This audio is ${length} long. Create subtitles for all speech in it. ${styleRule} ` +
+                    "Give each cue `start` and `end` as MM:SS.s timestamps measured from the start of this audio " +
+                    "(e.g. 01:07.5), marking exactly when the words begin and end. Cues must be in order, must not overlap, " +
+                    `and no timestamp may be later than ${length}. Cover every spoken word; skip silence, music, and noise ` +
+                    "(no [music] tags). Use natural punctuation. " +
+                    `${languageRule} If there is no speech at all, return an empty list.`,
+            },
+        ],
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: subtitleResponseSchema,
+        },
+    }, { attemptTimeoutMs: SUBTITLE_ATTEMPT_TIMEOUT_MS })
+
+    const raw = response.text
+    if (!raw) throw new Error("The AI returned an empty response.")
+
+    let parsed: { cues?: RawCue[] }
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        throw new Error("The AI returned an unreadable response.")
+    }
+
+    return normalizeCues(Array.isArray(parsed.cues) ? parsed.cues : [], input.durationSeconds, input.style)
 }
