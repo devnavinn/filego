@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { PRO_PASSES, isPassKey } from "@/lib/plans";
 import { countryFromHeaders } from "@/lib/geo";
 import { getPricing } from "@/lib/pricing";
+import { CREDIT_PACKS, isCreditPackKey } from "@/lib/photo-credits";
 
 export const dynamic = "force-dynamic";
 
@@ -23,18 +24,20 @@ export async function POST(req: Request) {
 
         const body = await req.json().catch(() => null);
         const planKey: unknown = body?.plan;
+        const packKey: unknown = body?.pack;
+        const pass = isPassKey(planKey) ? PRO_PASSES[planKey] : null;
+        const pack = isCreditPackKey(packKey) ? CREDIT_PACKS[packKey] : null;
 
-        if (!isPassKey(planKey)) {
+        if (!pass && !pack) {
             return NextResponse.json(
                 { ok: false, error: "Unknown plan" },
                 { status: 400 }
             );
         }
 
-        const pass = PRO_PASSES[planKey];
         // The price always comes from the server's view of the buyer's country, never from the browser.
         const pricing = getPricing(countryFromHeaders(req.headers));
-        const price = pricing.passes[pass.key];
+        const priceAmount = pass ? pricing.passes[pass.key].amount : pricing.packs[pack!.key].amount;
 
         // The page showed prices for another country (e.g. the buyer switched network or VPN).
         if (typeof body?.currency === "string" && body.currency !== pricing.currency) {
@@ -49,13 +52,12 @@ export async function POST(req: Request) {
         let order: Orders.RazorpayOrder;
         try {
             order = await razorpay.orders.create({
-                amount: price.amount,
+                amount: priceAmount,
                 currency: pricing.currency,
                 receipt,
                 notes: {
                     userId: user.id,
-                    planType: PlanType.PRO,
-                    plan: pass.key,
+                    ...(pass ? { planType: PlanType.PRO, plan: pass.key } : { product: "PHOTO_CREDITS", pack: pack!.key }),
                     country: pricing.country ?? "unknown",
                     pricingRegion: pricing.region,
                 },
@@ -77,19 +79,32 @@ export async function POST(req: Request) {
 
         const amount = Number(order.amount);
 
-        // One row per order, so renewals keep their own history.
-        await prisma.subscription.create({
-            data: {
-                userId: user.id,
-                planType: PlanType.PRO,
-                billingPeriod: BillingPeriod[pass.period],
-                billingStatus: BillingStatus.INACTIVE,
-                provider: "RAZORPAY",
-                providerOrderId: order.id,
-                amount,
-                currency: order.currency,
-            },
-        });
+        if (pass) {
+            // One row per order, so renewals keep their own history.
+            await prisma.subscription.create({
+                data: {
+                    userId: user.id,
+                    planType: PlanType.PRO,
+                    billingPeriod: BillingPeriod[pass.period],
+                    billingStatus: BillingStatus.INACTIVE,
+                    provider: "RAZORPAY",
+                    providerOrderId: order.id,
+                    amount,
+                    currency: order.currency,
+                },
+            });
+        } else {
+            await prisma.photoCreditPurchase.create({
+                data: {
+                    userId: user.id,
+                    pack: pack!.key,
+                    credits: pack!.credits,
+                    providerOrderId: order.id,
+                    amount,
+                    currency: order.currency,
+                },
+            });
+        }
 
         return NextResponse.json({
             ok: true,
@@ -98,7 +113,8 @@ export async function POST(req: Request) {
                 amount,
                 currency: order.currency,
                 key: process.env.RAZORPAY_KEY_ID,
-                plan: pass.key,
+                plan: pass?.key ?? null,
+                pack: pack?.key ?? null,
                 prefill: {
                     name: user.name ?? "",
                     email: user.email ?? "",

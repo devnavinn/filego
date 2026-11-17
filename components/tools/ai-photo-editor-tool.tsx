@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { Brush, Crown, Download, Eraser, Loader2, RefreshCw, SplitSquareHorizontal, Undo2, Wand2, X } from "lucide-react"
+import { Brush, Coins, Crown, Download, Eraser, Loader2, RefreshCw, SplitSquareHorizontal, Undo2, Wand2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageDropzone } from "@/components/tools/image-dropzone"
+import { CreditPacks, type CreditPackPricing } from "@/components/pricing/credit-packs"
 import { ToolSegmentedControl } from "@/components/tools/tool-segmented-control"
 import { usePlan } from "@/hooks/use-plan"
 import { fileToBase64 } from "@/lib/file-to-base64"
@@ -18,6 +19,7 @@ import {
     PHOTO_EDIT_PRESETS,
     type PhotoEditQuality,
 } from "@/lib/photo-edit"
+import { PHOTO_EDIT_COST, PRO_PHOTO_BONUS, type PhotoCreditBalance } from "@/lib/photo-credits"
 import { cn } from "@/lib/utils"
 
 type Status =
@@ -26,7 +28,7 @@ type Status =
     | { kind: "editing" }
     | { kind: "error"; message: string }
     | { kind: "auth-required" }
-    | { kind: "quota-exceeded"; message: string }
+    | { kind: "no-credits"; message: string }
 
 /** One step in the edit history. Version 0 is the uploaded photo. */
 type Version = { url: string; blob: Blob; width: number; height: number; label: string }
@@ -95,6 +97,27 @@ function drawStrokes(ctx: CanvasRenderingContext2D, strokes: Stroke[], scale: nu
 export function AiPhotoEditorTool() {
     const { tier } = usePlan()
     const isPro = tier === "pro"
+    const signedIn = tier === "free" || tier === "pro"
+
+    const [balance, setBalance] = useState<PhotoCreditBalance | null>(null)
+    const [packPricing, setPackPricing] = useState<CreditPackPricing | null>(null)
+
+    const refreshBalance = useCallback(async () => {
+        try {
+            const res = await fetch("/api/ai/photo-edit", { credentials: "same-origin", cache: "no-store" })
+            const data = await res.json()
+            if (data?.pricing) setPackPricing(data.pricing)
+            setBalance(data?.balance ?? null)
+        } catch {
+            // The balance is a hint; the server still checks credits on every edit.
+        }
+    }, [])
+
+    useEffect(() => {
+        if (tier === null) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- loads data from the server
+        void refreshBalance()
+    }, [tier, refreshBalance])
 
     const [file, setFile] = useState<File | null>(null)
     const [versions, setVersions] = useState<Version[]>([])
@@ -226,6 +249,16 @@ export function AiPhotoEditorTool() {
             setStatus({ kind: "error", message: "Describe the edit you want, or pick one of the quick edits." })
             return
         }
+        if (!signedIn) return setStatus({ kind: "auth-required" })
+        if (balance && balance.total < PHOTO_EDIT_COST[quality]) {
+            return setStatus({
+                kind: "no-credits",
+                message:
+                    balance.total > 0
+                        ? `HD edits use ${PHOTO_EDIT_COST.hd} credits and you have ${balance.total}. Switch to Standard or buy more.`
+                        : "You're out of photo edits. Buy a credit pack to keep editing.",
+            })
+        }
         setStatus({ kind: "editing" })
         setCompare(false)
         try {
@@ -242,8 +275,10 @@ export function AiPhotoEditorTool() {
             })
             const data = await res.json().catch(() => null)
             if (res.status === 401) return setStatus({ kind: "auth-required" })
-            if (res.status === 429) return setStatus({ kind: "quota-exceeded", message: data?.error || "Daily AI limit reached." })
+            if (data?.balance) setBalance(data.balance)
+            if (res.status === 402) return setStatus({ kind: "no-credits", message: data?.error || "You're out of photo edits." })
             if (!res.ok || !data?.ok || typeof data.image !== "string") {
+                void refreshBalance()
                 return setStatus({ kind: "error", message: data?.error || "AI couldn't edit this photo. Please try again." })
             }
 
@@ -305,6 +340,9 @@ export function AiPhotoEditorTool() {
                         )}
                     </p>
                 )}
+                <div className="mt-3">
+                    <CreditLine balance={balance} isPro={isPro} signedIn={signedIn} />
+                </div>
                 <div className="mt-6 flex flex-wrap gap-2">
                     {["Remove a person or object", "Change the background", "Professional headshot", "Product photo", "Enhance a photo"].map((label) => (
                         <span key={label} className="rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground">
@@ -506,10 +544,10 @@ export function AiPhotoEditorTool() {
                         <div className="flex items-center justify-between gap-2">
                             <ToolSegmentedControl
                                 value={quality}
-                                onChange={(value) => setQuality(value === "hd" && !isPro ? "standard" : value)}
+                                onChange={setQuality}
                                 options={[
                                     { value: "standard", label: "Standard" },
-                                    { value: "hd", label: isPro ? "HD" : "HD (Pro)" },
+                                    { value: "hd", label: `HD · ${PHOTO_EDIT_COST.hd} credits` },
                                 ]}
                             />
                             <Button type="submit" className="rounded-full" disabled={isBusy || prompt.trim().length < 3}>
@@ -517,15 +555,7 @@ export function AiPhotoEditorTool() {
                                 Apply
                             </Button>
                         </div>
-                        {!isPro && (
-                            <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                                <Crown className="h-3 w-3" />
-                                <Link href="/dashboard/premium" className="underline">
-                                    Pro
-                                </Link>{" "}
-                                unlocks HD: a higher-quality model at 2K resolution.
-                            </p>
-                        )}
+                        <CreditLine balance={balance} isPro={isPro} signedIn={signedIn} />
                     </form>
 
                     {status.kind === "auth-required" && (
@@ -536,14 +566,32 @@ export function AiPhotoEditorTool() {
                             to edit photos with AI.
                         </p>
                     )}
-                    {status.kind === "quota-exceeded" && (
-                        <p className="text-sm text-amber-600 dark:text-amber-400">
-                            {status.message}{" "}
-                            <Link href="/dashboard/premium" className="underline">
-                                Upgrade for more
-                            </Link>
-                            .
-                        </p>
+                    {status.kind === "no-credits" && (
+                        <div className="space-y-3 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-3">
+                            <p className="text-sm text-amber-700 dark:text-amber-400">{status.message}</p>
+                            {packPricing && (
+                                <CreditPacks
+                                    pricing={packPricing}
+                                    signedIn={signedIn}
+                                    callbackUrl={TOOL_PATH}
+                                    compact
+                                    onPurchased={() => {
+                                        setStatus({ kind: "idle" })
+                                        void refreshBalance()
+                                    }}
+                                />
+                            )}
+                            {!isPro && (
+                                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Crown className="h-3 w-3" />
+                                    Or get{" "}
+                                    <Link href="/pricing" className="underline">
+                                        Pro
+                                    </Link>
+                                    : {PRO_PHOTO_BONUS} edits every 30 days, no ads, and higher limits.
+                                </p>
+                            )}
+                        </div>
                     )}
                     {status.kind === "error" && <p className="text-sm text-destructive">{status.message}</p>}
 
@@ -558,7 +606,7 @@ export function AiPhotoEditorTool() {
                         </Button>
                     </div>
                     <p className="text-[11px] leading-4 text-muted-foreground">
-                        Each edit uses one AI generation. Edited images carry Google&apos;s invisible SynthID watermark. Only
+                        Standard edits use {PHOTO_EDIT_COST.standard} credit, HD edits {PHOTO_EDIT_COST.hd}. Failed edits are refunded. Edited images carry Google&apos;s invisible SynthID watermark. Only
                         edit photos you have the right to use, and don&apos;t use edits to mislead or impersonate anyone.
                     </p>
                 </div>
@@ -576,5 +624,42 @@ function Header() {
                 or create a professional headshot. Brush over an area to change just that part.
             </p>
         </>
+    )
+}
+
+/** "12 edits left" with what they're made of, or how to get some. */
+function CreditLine({ balance, isPro, signedIn }: { balance: PhotoCreditBalance | null; isPro: boolean; signedIn: boolean }) {
+    if (!signedIn) {
+        return (
+            <p className="text-xs text-muted-foreground">
+                <Link href={`/login?callbackUrl=${TOOL_PATH}`} className="underline">
+                    Sign in
+                </Link>{" "}
+                to edit. Edits use{" "}
+                <Link href="/pricing#photo-credits" className="underline">
+                    photo credits
+                </Link>
+                ; Pro includes {PRO_PHOTO_BONUS} every 30 days.
+            </p>
+        )
+    }
+    if (!balance) return null
+
+    const parts = [
+        isPro ? `${balance.bonus} of ${PRO_PHOTO_BONUS} Pro edits` : null,
+        balance.purchased > 0 || !isPro ? `${balance.purchased} purchased` : null,
+    ].filter(Boolean)
+
+    return (
+        <p className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+            <Coins className="h-3.5 w-3.5 text-primary" />
+            <span className="font-medium text-foreground">
+                {balance.total} {balance.total === 1 ? "credit" : "credits"} left
+            </span>
+            <span>({parts.join(" + ")})</span>
+            <Link href="/pricing#photo-credits" className="ms-1 underline">
+                {balance.total > 0 ? "Buy more" : "Buy credits"}
+            </Link>
+        </p>
     )
 }

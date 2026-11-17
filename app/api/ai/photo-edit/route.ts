@@ -2,9 +2,11 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import sharp from "sharp"
 import { authOptions } from "@/lib/auth-provider"
-import { consumeAiQuota, refundAiQuota } from "@/lib/ai/ai-quota"
+import { consumePhotoCredits, getPhotoCreditBalance, refundPhotoCredits } from "@/lib/ai/photo-credit-ledger"
 import { ImageEditRefusedError, editPhoto } from "@/lib/ai/gemini"
-import { getUserPlan } from "@/lib/entitlements"
+import { PHOTO_EDIT_COST } from "@/lib/photo-credits"
+import { countryFromHeaders } from "@/lib/geo"
+import { getPricing } from "@/lib/pricing"
 import { PHOTO_EDIT_MAX_BASE64, PHOTO_EDIT_MAX_PROMPT, closestAspectRatio, type PhotoEditQuality } from "@/lib/photo-edit"
 
 export const dynamic = "force-dynamic"
@@ -33,6 +35,18 @@ async function readImage(base64: unknown): Promise<{ data: string; width: number
     }
 }
 
+/** The signed-in user's photo credit balance, plus credit pack prices for their country. */
+export async function GET(req: Request) {
+    const pricing = getPricing(countryFromHeaders(req.headers))
+    const packs = { currency: pricing.currency, packs: pricing.packs }
+    const session = await getServerSession(authOptions)
+    const userId = session?.user?.id
+    return NextResponse.json(
+        { ok: true, balance: userId ? await getPhotoCreditBalance(userId) : null, pricing: packs },
+        { headers: { "Cache-Control": "private, no-store" } }
+    )
+}
+
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
     const userId = session?.user?.id
@@ -50,14 +64,23 @@ export async function POST(req: Request) {
     const marked = body?.marked ? await readImage(body.marked) : null
     if (body?.marked && !marked) return badRequest("Couldn't read the brushed area. Please try again.")
 
-    const plan = await getUserPlan(userId)
-    const quality: PhotoEditQuality = body?.quality === "hd" && plan.tier === "pro" ? "hd" : "standard"
+    const quality: PhotoEditQuality = body?.quality === "hd" ? "hd" : "standard"
+    const cost = PHOTO_EDIT_COST[quality]
 
-    const quota = await consumeAiQuota(userId)
-    if (!quota.allowed) {
+    // Photo edits are paid with photo credits (Pro bonus, then purchased packs), not the daily AI quota.
+    const spent = await consumePhotoCredits(userId, cost)
+    if (!spent.ok) {
         return NextResponse.json(
-            { ok: false, error: "You've reached today's AI generation limit. Upgrade for more.", quota },
-            { status: 429 }
+            {
+                ok: false,
+                code: "NO_CREDITS",
+                error:
+                    spent.balance.total > 0
+                        ? `HD edits use ${cost} credits and you have ${spent.balance.total}. Switch to Standard or buy more credits.`
+                        : "You're out of photo edits. Buy a credit pack or get Pro to keep editing.",
+                balance: spent.balance,
+            },
+            { status: 402 }
         )
     }
 
@@ -76,17 +99,22 @@ export async function POST(req: Request) {
             output = await sharp(output.data).jpeg({ quality: 80 }).toBuffer({ resolveWithObject: true })
         }
 
+        // Charged for HD but a standard model made it: give the difference back.
+        if (quality === "hd" && !result.servedHd) {
+            await refundPhotoCredits(userId, spent.charge, PHOTO_EDIT_COST.hd - PHOTO_EDIT_COST.standard)
+        }
+
         return NextResponse.json({
             ok: true,
             image: output.data.toString("base64"),
             mimeType: "image/jpeg",
             width: output.info.width,
             height: output.info.height,
-            quality,
-            quota,
+            quality: quality === "hd" && !result.servedHd ? "standard" : quality,
+            balance: await getPhotoCreditBalance(userId),
         })
     } catch (error) {
-        await refundAiQuota(userId)
+        await refundPhotoCredits(userId, spent.charge)
         if (error instanceof ImageEditRefusedError) {
             const blocked = /SAFETY|PROHIBITED|BLOCK|SPII|RECITATION/i.test(error.message)
             return NextResponse.json(

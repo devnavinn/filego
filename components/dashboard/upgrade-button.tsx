@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { invalidatePlan } from "@/hooks/use-plan";
 import { PRO_PASSES, type PassKey } from "@/lib/plans";
+import { CREDIT_PACKS, type CreditPackKey } from "@/lib/photo-credits";
 declare global {
     interface Window {
         Razorpay: new (options: Record<string, unknown>) => {
@@ -22,7 +23,12 @@ type RazorpaySuccessResponse = {
 };
 
 type UpgradeButtonProps = {
-    plan: PassKey;
+    /** Buy a Pro pass... */
+    plan?: PassKey;
+    /** ...or an AI Photo Editor credit pack. */
+    pack?: CreditPackKey;
+    /** Called after the payment is verified. */
+    onSuccess?: () => void;
     /** The currency the page showed, so the server can catch a stale price. */
     currency?: string;
     label?: string;
@@ -31,6 +37,8 @@ type UpgradeButtonProps = {
 
 export function UpgradeButton({
     plan,
+    pack,
+    onSuccess,
     currency,
     label,
     className,
@@ -47,7 +55,7 @@ export function UpgradeButton({
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ plan, currency }),
+                body: JSON.stringify(pack ? { pack, currency } : { plan, currency }),
             });
 
             const orderData = await orderRes.json().catch(() => null);
@@ -69,7 +77,7 @@ export function UpgradeButton({
                 amount: orderData.data.amount,
                 currency: orderData.data.currency,
                 name: "Filego",
-                description: `Filego ${PRO_PASSES[plan].name}`,
+                description: pack ? `Filego AI Photo Editor: ${CREDIT_PACKS[pack].name}` : `Filego ${PRO_PASSES[plan ?? "PRO_MONTHLY"].name}`,
                 order_id: orderData.data.orderId,
                 prefill: orderData.data.prefill,
                 theme: {
@@ -100,8 +108,13 @@ export function UpgradeButton({
                             toast.error(verifyData?.error || "Payment verification failed");
                             return;
                         }
-                        invalidatePlan();
-                        toast.success("Filego Pro is active. Thanks for upgrading!");
+                        if (pack) {
+                            toast.success(`${CREDIT_PACKS[pack].credits} photo edits added. Thanks for your purchase!`);
+                        } else {
+                            invalidatePlan();
+                            toast.success("Filego Pro is active. Thanks for upgrading!");
+                        }
+                        onSuccess?.();
                         router.refresh();
                     } catch (error) {
                         console.error("verify payment error", error);

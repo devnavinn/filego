@@ -665,12 +665,12 @@ Got an exam coming up? [Make your quiz now →](/tools/ai-tools/pdf-to-quiz-flas
     },
     {
         slug: "how-to-edit-photos-with-ai-remove-objects-change-background",
-        title: "How to Edit Photos with AI: Remove Objects and Change Backgrounds (Free)",
+        title: "How to Edit Photos with AI: Remove Objects and Change Backgrounds",
         excerpt:
             "Remove people and objects, change the background, or turn a selfie into a professional headshot just by describing the edit. No Photoshop skills needed.",
         seoTitle: "AI Photo Editor: Remove Objects & Change Backgrounds by Typing | Filego",
         seoDescription:
-            "Edit photos with AI by describing what you want. Remove people and objects, replace or whiten backgrounds, create LinkedIn headshots and product photos. Free to try.",
+            "Edit photos with AI by describing what you want. Remove people and objects, replace or whiten backgrounds, create LinkedIn headshots and product photos. Pay per edit, no subscription.",
         category: "AI Guides",
         tags: ["ai photo editor", "object remover", "change background", "magic eraser", "headshot generator"],
         toolLabel: "AI Photo Editor",
@@ -687,7 +687,7 @@ Got an exam coming up? [Make your quiz now →](/tools/ai-tools/pdf-to-quiz-flas
 
 ## How to edit a photo, step by step
 
-1. Open the [AI Photo Editor](/tools/ai-tools/ai-photo-editor) and sign in.
+1. Open the [AI Photo Editor](/tools/ai-tools/ai-photo-editor) and sign in. You'll need Pro or a [credit pack](/pricing#photo-credits).
 2. Upload a JPG, PNG, or WebP photo.
 3. Pick a **quick edit**, or type what you want in your own words.
 4. To change only one part, tap **Brush an area**, paint over it, then choose **Erase what I brushed** or describe what should go there (for example "replace with a plant").
@@ -705,7 +705,7 @@ Got an exam coming up? [Make your quiz now →](/tools/ai-tools/pdf-to-quiz-flas
 
 ## Things to know
 
-- Each edit uses one AI generation from your daily quota. If an edit fails, it's refunded.
+- Edits use photo credits: a standard edit uses 1 credit and an HD edit uses 2. Pro includes 15 edits every 30 days, and you can buy [credit packs](/pricing#photo-credits) that last a year. If an edit fails, the credits are refunded.
 - Edited images carry Google's invisible SynthID watermark, which identifies them as AI-edited.
 - Some edits are blocked by safety rules, such as edits that sexualise people or are meant to deceive.
 - Only edit photos you have the right to use, and never use edits to mislead or impersonate anyone.

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyRazorpayWebhook } from "@/lib/razorpay";
 import { activatePass } from "@/lib/entitlements";
+import { activateCreditPurchase } from "@/lib/ai/photo-credit-ledger";
 
 export const dynamic = "force-dynamic";
 
@@ -42,8 +43,11 @@ export async function POST(req: Request) {
     }
 
     try {
-        const result = await activatePass({ orderId: payment.order_id, paymentId: payment.id });
-        // Orders without a subscription row aren't ours to handle; acknowledge so Razorpay stops retrying.
+        const paid = { orderId: payment.order_id, paymentId: payment.id };
+        let result: { status: string } = await activatePass(paid);
+        // Not a Pro pass order: it may be an AI Photo Editor credit pack.
+        if (result.status === "not_found") result = await activateCreditPurchase(paid);
+        // Orders without a subscription or credit-pack row aren't ours to handle; acknowledge so Razorpay stops retrying.
         return NextResponse.json({ ok: true, status: result.status });
     } catch (error) {
         console.error("[RAZORPAY_WEBHOOK_ERROR]", error);

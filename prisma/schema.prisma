@@ -79,6 +79,7 @@ model User {
   toolJobs             ToolJob[]
   subscriptions        Subscription[]
   entitlements         FeatureEntitlement[]
+  photoCreditPurchases PhotoCreditPurchase[]
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 }
@@ -271,6 +272,30 @@ model Subscription {
   @@index([userId, billingStatus, expiresAt])
   @@index([providerOrderId])
   @@index([providerPaymentId])
+}
+
+/// A paid pack of AI Photo Editor credits. Each pack keeps its own balance and expiry.
+model PhotoCreditPurchase {
+  id                String        @id @default(cuid())
+  userId            String
+  pack              String
+  credits           Int
+  creditsRemaining  Int           @default(0)
+  status            BillingStatus @default(INACTIVE)
+  provider          String        @default("RAZORPAY")
+  providerOrderId   String        @unique
+  providerPaymentId String?
+  providerSignature String?
+  amount            Int
+  currency          String
+  purchasedAt       DateTime?
+  expiresAt         DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, expiresAt])
 }
 
 model FeatureEntitlement {

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 
 import { PlanCards } from "@/components/pricing/plan-cards";
+import { CreditPacks } from "@/components/pricing/credit-packs";
+import { PRO_PHOTO_BONUS } from "@/lib/photo-credits";
 import { getRequestCountry } from "@/lib/geo";
 import { getPricing } from "@/lib/pricing";
 import { authOptions } from "@/lib/auth-provider";
@@ -32,6 +35,10 @@ const faqs = [
     a: "Prices are set for each country so Pro is fairly priced wherever you live. The price you see is the price you pay, shown in your local currency or US dollars.",
   },
   {
+    q: "How do AI Photo Editor credits work?",
+    a: `AI photo edits use a lot more computing power than other tools, so they're paid with credits instead of the daily AI limit. A standard edit uses 1 credit and an HD edit uses 2. Pro includes ${PRO_PHOTO_BONUS} edits every 30 days, and anyone can buy a credit pack that lasts a year. If an edit fails, the credits go back to you.`,
+  },
+  {
     q: "Are my files uploaded?",
     a: "Most tools run entirely in your browser on every plan. AI tools send the file to our AI provider to process it and don't store it.",
   },
@@ -57,6 +64,22 @@ export default async function PricingPage() {
 
         <div className="mt-12">
           <PlanCards tier={plan.tier} pricing={pricing} expiresAt={plan.expiresAt} isLifetime={plan.isLifetime} />
+        </div>
+      </section>
+
+      <section id="photo-credits" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-16 md:px-6">
+        <div className="max-w-2xl">
+          <h2 className="font-heading text-2xl font-bold tracking-tight">AI Photo Editor credits</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Remove objects, change backgrounds and create headshots with the{" "}
+            <Link href="/tools/ai-tools/ai-photo-editor" className="underline">
+              AI Photo Editor
+            </Link>
+            . Pro includes {PRO_PHOTO_BONUS} edits every 30 days. Need more, or don&apos;t want Pro? Buy a pack.
+          </p>
+        </div>
+        <div className="mt-8">
+          <CreditPacks pricing={pricing} signedIn={plan.tier !== "guest"} callbackUrl="/pricing#photo-credits" />
         </div>
       </section>
 

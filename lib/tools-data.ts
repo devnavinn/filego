@@ -252,9 +252,9 @@ export const toolCategories: ToolCategory[] = [
         tools: [
             {
                 ...createTool("AI Photo Editor", "Edit photos with a prompt: remove objects, change backgrounds, and more."),
-                seoTitle: "AI Photo Editor – Remove Objects & Change Backgrounds Free",
+                seoTitle: "AI Photo Editor – Remove Objects & Change Backgrounds Online",
                 seoDescription:
-                    "Edit photos by typing what you want. Remove people and objects, change or whiten the background, create professional headshots and product photos with AI. Free to try.",
+                    "Edit photos by typing what you want. Remove people and objects, change or whiten the background, create professional headshots and product photos with AI. Pay per edit, no subscription.",
             },
             createTool("OCR Image to Text", "Extract readable text from images."),
             createTool("PDF OCR", "Recognize text from scanned PDF documents."),

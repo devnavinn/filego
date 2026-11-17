@@ -1128,7 +1128,14 @@ export type EditPhotoInput = {
     quality: PhotoEditQuality
 }
 
-export async function editPhoto(input: EditPhotoInput): Promise<{ data: string; mimeType: string }> {
+export type EditPhotoResult = {
+    data: string
+    mimeType: string
+    /** True when an HD edit was actually made by the HD model (not a standard fallback). */
+    servedHd: boolean
+}
+
+export async function editPhoto(input: EditPhotoInput): Promise<EditPhotoResult> {
     const instructions = input.markedImage
         ? "You are a professional photo editor. The first image is the photo to edit. The second image is the same photo " +
           "with the area to change painted over in bright magenta. Apply this edit ONLY to that marked area, blending it " +
@@ -1162,7 +1169,12 @@ export async function editPhoto(input: EditPhotoInput): Promise<{ data: string; 
     const parts = candidate?.content?.parts ?? []
     // Thinking models can return draft images marked `thought`; the final image is the last non-thought one.
     const image = parts.filter((part) => part.inlineData?.data && !part.thought).at(-1)?.inlineData
-    if (image?.data) return { data: image.data, mimeType: image.mimeType ?? "image/png" }
+    if (image?.data) {
+        // modelVersion names the model that answered; if it's missing, assume the HD model did.
+        const version = response.modelVersion
+        const servedHd = hd && (!version || version.includes(IMAGE_HD_MODEL.replace(/-preview$/, "")))
+        return { data: image.data, mimeType: image.mimeType ?? "image/png", servedHd }
+    }
 
     const reason = response.promptFeedback?.blockReason ?? candidate?.finishReason ?? "NO_IMAGE"
     const text = parts.map((part) => (part.thought ? "" : part.text ?? "")).join(" ").trim()

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-provider";
 import { prisma } from "@/lib/prisma";
 import { verifyRazorpayPayment } from "@/lib/razorpay";
 import { activatePass } from "@/lib/entitlements";
+import { activateCreditPurchase } from "@/lib/ai/photo-credit-ledger";
 
 export async function POST(req: Request) {
     try {
@@ -40,6 +41,17 @@ export async function POST(req: Request) {
             );
         }
 
+        const payment = { orderId: razorpayOrderId, paymentId: razorpayPaymentId, signature: razorpaySignature };
+
+        const creditPurchase = await prisma.photoCreditPurchase.findFirst({
+            where: { userId, providerOrderId: razorpayOrderId },
+            select: { id: true },
+        });
+        if (creditPurchase) {
+            const result = await activateCreditPurchase(payment);
+            return NextResponse.json({ ok: true, product: "photo_credits", alreadyVerified: result.status === "already_active" });
+        }
+
         const owned = await prisma.subscription.findFirst({
             where: { userId, providerOrderId: razorpayOrderId },
             select: { id: true },
@@ -52,13 +64,9 @@ export async function POST(req: Request) {
             );
         }
 
-        const result = await activatePass({
-            orderId: razorpayOrderId,
-            paymentId: razorpayPaymentId,
-            signature: razorpaySignature,
-        });
+        const result = await activatePass(payment);
 
-        return NextResponse.json({ ok: true, alreadyVerified: result.status === "already_active" });
+        return NextResponse.json({ ok: true, product: "pro", alreadyVerified: result.status === "already_active" });
     } catch (error) {
         console.error("[BILLING_VERIFY_ERROR]", error);
 

@@ -2,6 +2,7 @@
 // (see lib/geo.ts); the browser never chooses its own price.
 
 import type { PassKey } from "@/lib/plans";
+import { CREDIT_PACKS, CREDIT_PACK_KEYS, type CreditPackKey } from "@/lib/photo-credits";
 
 export type PricingRegionId = "IN" | "EU" | "GB" | "CA" | "AU" | "SG" | "AE" | "US" | "REDUCED" | "LOW";
 
@@ -13,25 +14,27 @@ type PricingRegion = {
     locale: string;
     /** Prices in the currency's minor unit (paise, cents...). */
     amounts: Record<PassKey, number>;
+    /** AI Photo Editor credit packs. Each credit costs us ~$0.067 in AI fees, so keep every pack above ~$0.11/credit. */
+    packs: Record<CreditPackKey, number>;
 };
 
 /**
- * Edit prices here. India keeps the original INR passes; major markets pay in their own currency;
+ * Edit prices here. India pays in INR (₹199/month, ₹999/year); major markets pay in their own currency;
  * other countries pay in USD at a level adjusted for local purchasing power.
  */
 export const PRICING_REGIONS: Record<PricingRegionId, PricingRegion> = {
-    IN: { id: "IN", currency: "INR", locale: "en-IN", amounts: { PRO_MONTHLY: 19900, PRO_YEARLY: 49900 } },
-    US: { id: "US", currency: "USD", locale: "en-US", amounts: { PRO_MONTHLY: 499, PRO_YEARLY: 2499 } },
-    EU: { id: "EU", currency: "EUR", locale: "en-IE", amounts: { PRO_MONTHLY: 499, PRO_YEARLY: 2499 } },
-    GB: { id: "GB", currency: "GBP", locale: "en-GB", amounts: { PRO_MONTHLY: 399, PRO_YEARLY: 1999 } },
-    CA: { id: "CA", currency: "CAD", locale: "en-US", amounts: { PRO_MONTHLY: 699, PRO_YEARLY: 3499 } },
-    AU: { id: "AU", currency: "AUD", locale: "en-US", amounts: { PRO_MONTHLY: 799, PRO_YEARLY: 3999 } },
-    SG: { id: "SG", currency: "SGD", locale: "en-US", amounts: { PRO_MONTHLY: 699, PRO_YEARLY: 3499 } },
-    AE: { id: "AE", currency: "AED", locale: "en-AE", amounts: { PRO_MONTHLY: 1899, PRO_YEARLY: 8999 } },
+    IN: { id: "IN", currency: "INR", locale: "en-IN", amounts: { PRO_MONTHLY: 19900, PRO_YEARLY: 99900 }, packs: { PHOTO_10: 9900, PHOTO_30: 24900, PHOTO_70: 49900 } },
+    US: { id: "US", currency: "USD", locale: "en-US", amounts: { PRO_MONTHLY: 499, PRO_YEARLY: 2499 }, packs: { PHOTO_10: 199, PHOTO_30: 499, PHOTO_70: 999 } },
+    EU: { id: "EU", currency: "EUR", locale: "en-IE", amounts: { PRO_MONTHLY: 499, PRO_YEARLY: 2499 }, packs: { PHOTO_10: 199, PHOTO_30: 499, PHOTO_70: 999 } },
+    GB: { id: "GB", currency: "GBP", locale: "en-GB", amounts: { PRO_MONTHLY: 399, PRO_YEARLY: 1999 }, packs: { PHOTO_10: 179, PHOTO_30: 399, PHOTO_70: 799 } },
+    CA: { id: "CA", currency: "CAD", locale: "en-US", amounts: { PRO_MONTHLY: 699, PRO_YEARLY: 3499 }, packs: { PHOTO_10: 279, PHOTO_30: 699, PHOTO_70: 1399 } },
+    AU: { id: "AU", currency: "AUD", locale: "en-US", amounts: { PRO_MONTHLY: 799, PRO_YEARLY: 3999 }, packs: { PHOTO_10: 299, PHOTO_30: 749, PHOTO_70: 1499 } },
+    SG: { id: "SG", currency: "SGD", locale: "en-US", amounts: { PRO_MONTHLY: 699, PRO_YEARLY: 3499 }, packs: { PHOTO_10: 279, PHOTO_30: 699, PHOTO_70: 1349 } },
+    AE: { id: "AE", currency: "AED", locale: "en-AE", amounts: { PRO_MONTHLY: 1899, PRO_YEARLY: 8999 }, packs: { PHOTO_10: 749, PHOTO_30: 1849, PHOTO_70: 3699 } },
     /** Upper-middle-income countries (Latin America, Southeast Asia, Eastern Europe, Türkiye, South Africa...). */
-    REDUCED: { id: "REDUCED", currency: "USD", locale: "en-US", amounts: { PRO_MONTHLY: 299, PRO_YEARLY: 1499 } },
+    REDUCED: { id: "REDUCED", currency: "USD", locale: "en-US", amounts: { PRO_MONTHLY: 299, PRO_YEARLY: 1499 }, packs: { PHOTO_10: 149, PHOTO_30: 399, PHOTO_70: 799 } },
     /** Lower-income countries (South Asia, most of Africa...). */
-    LOW: { id: "LOW", currency: "USD", locale: "en-US", amounts: { PRO_MONTHLY: 199, PRO_YEARLY: 999 } },
+    LOW: { id: "LOW", currency: "USD", locale: "en-US", amounts: { PRO_MONTHLY: 199, PRO_YEARLY: 999 }, packs: { PHOTO_10: 149, PHOTO_30: 399, PHOTO_70: 799 } },
 };
 
 const EURO_COUNTRIES = "AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES AD MC SM VA ME XK".split(" ");
@@ -72,6 +75,14 @@ export type PassPrice = {
     perMonthLabel: string | null;
 };
 
+export type PackPrice = {
+    /** Minor units, exactly what Razorpay is charged. */
+    amount: number;
+    label: string;
+    /** Price per edit, e.g. "₹8.30". */
+    perCreditLabel: string;
+};
+
 export type Pricing = {
     /** ISO 3166 alpha-2, or null when unknown. */
     country: string | null;
@@ -79,6 +90,7 @@ export type Pricing = {
     region: PricingRegionId;
     currency: string;
     passes: Record<PassKey, PassPrice>;
+    packs: Record<CreditPackKey, PackPrice>;
     /** Formatted zero in this currency, for the Free plan card. */
     freeLabel: string;
 };
@@ -129,6 +141,18 @@ export function getPricing(country: string | null): Pricing {
                 perMonthLabel: format(region.currency === "INR" ? Math.round(yearly / 12 / 100) * 100 : Math.round(yearly / 12)),
             },
         },
+        packs: Object.fromEntries(
+            CREDIT_PACK_KEYS.map((key) => {
+                const amount = region.packs[key];
+                const perCredit = new Intl.NumberFormat(region.locale, {
+                    style: "currency",
+                    currency: region.currency,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(amount / 100 / CREDIT_PACKS[key].credits);
+                return [key, { amount, label: format(amount), perCreditLabel: perCredit }];
+            })
+        ) as Record<CreditPackKey, PackPrice>,
         freeLabel: formatMoney(0, region.currency, region.locale),
     };
 }

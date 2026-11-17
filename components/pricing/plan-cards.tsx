@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UpgradeButton } from "@/components/dashboard/upgrade-button";
 import { PLAN_LIMITS, PRO_PASSES, formatLimitBytes, type PassKey, type PlanTier } from "@/lib/plans";
 import type { Pricing } from "@/lib/pricing";
+import { PRO_PHOTO_BONUS } from "@/lib/photo-credits";
 import { cn } from "@/lib/utils";
 
 const freeFeatures = [
@@ -17,6 +18,7 @@ const freeFeatures = [
 
 const proFeatures = [
     `${PLAN_LIMITS.pro.aiDaily} AI generations a day`,
+    `${PRO_PHOTO_BONUS} AI photo edits every 30 days`,
     `Files up to ${formatLimitBytes(PLAN_LIMITS.pro.maxFileBytes)}`,
     "Unlimited files per batch",
     "No ads anywhere on Filego",
