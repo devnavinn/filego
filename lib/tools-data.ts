@@ -242,7 +242,7 @@ export const toolCategories: ToolCategory[] = [
         id: "ai",
         slug: "ai-tools",
         title: "AI-Powered Tools",
-        description: "OCR, translation, subtitles, quizzes, ATS resume checks, summaries, and file Q&A.",
+        description: "Photo editing, OCR, translation, subtitles, quizzes, resume checks, and file Q&A.",
         heroDescription:
             "Deliver document intelligence with OCR, parsing, summarization, and AI-powered file interactions.",
         accent: "from-purple-600 via-fuchsia-500 to-orange-400 text-white",
@@ -250,6 +250,12 @@ export const toolCategories: ToolCategory[] = [
         seoDescription:
             "Use AI-powered tools for OCR, handwriting recognition, document summarization, resume parsing, and PDF question answering.",
         tools: [
+            {
+                ...createTool("AI Photo Editor", "Edit photos with a prompt: remove objects, change backgrounds, and more."),
+                seoTitle: "AI Photo Editor – Remove Objects & Change Backgrounds Free",
+                seoDescription:
+                    "Edit photos by typing what you want. Remove people and objects, change or whiten the background, create professional headshots and product photos with AI. Free to try.",
+            },
             createTool("OCR Image to Text", "Extract readable text from images."),
             createTool("PDF OCR", "Recognize text from scanned PDF documents."),
             createTool("Handwriting to Text", "Convert handwriting into editable text."),

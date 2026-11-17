@@ -29,6 +29,7 @@ import { WebsiteToMarkdownTool } from "@/components/tools/website-to-markdown-to
 import { LoremIpsumGeneratorTool } from "@/components/tools/lorem-ipsum-generator-tool"
 import { DocumentSummarizerTool } from "@/components/tools/document-summarizer-tool"
 import { PdfToQuizTool } from "@/components/tools/pdf-to-quiz-tool"
+import { AiPhotoEditorTool } from "@/components/tools/ai-photo-editor-tool"
 import { DocumentTranslatorTool } from "@/components/tools/document-translator-tool"
 import { YouTubeSummarizerTool } from "@/components/tools/youtube-summarizer-tool"
 import { ResumeParserTool } from "@/components/tools/resume-parser-tool"
@@ -128,6 +129,7 @@ export const toolComponentMap = {
     "lorem-ipsum-generator": LoremIpsumGeneratorTool,
     "document-summarizer": DocumentSummarizerTool,
     "pdf-to-quiz-flashcards": PdfToQuizTool,
+    "ai-photo-editor": AiPhotoEditorTool,
     "document-translator": DocumentTranslatorTool,
     "youtube-summarizer": YouTubeSummarizerTool,
     "resume-parser": ResumeParserTool,

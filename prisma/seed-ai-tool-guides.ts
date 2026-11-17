@@ -663,6 +663,56 @@ If your PDF is a scan (pages saved as images), the AI reads the page images dire
 
 Got an exam coming up? [Make your quiz now →](/tools/ai-tools/pdf-to-quiz-flashcards)`,
     },
+    {
+        slug: "how-to-edit-photos-with-ai-remove-objects-change-background",
+        title: "How to Edit Photos with AI: Remove Objects and Change Backgrounds (Free)",
+        excerpt:
+            "Remove people and objects, change the background, or turn a selfie into a professional headshot just by describing the edit. No Photoshop skills needed.",
+        seoTitle: "AI Photo Editor: Remove Objects & Change Backgrounds by Typing | Filego",
+        seoDescription:
+            "Edit photos with AI by describing what you want. Remove people and objects, replace or whiten backgrounds, create LinkedIn headshots and product photos. Free to try.",
+        category: "AI Guides",
+        tags: ["ai photo editor", "object remover", "change background", "magic eraser", "headshot generator"],
+        toolLabel: "AI Photo Editor",
+        toolPath: "/tools/ai-tools/ai-photo-editor",
+        content: `Removing a stranger from a holiday photo or swapping a messy background used to take an hour in Photoshop. With an AI photo editor, you just type what you want, like "remove the man on the left" or "change the background to a beach", and get the edited photo in seconds.
+
+## What you can do
+
+- **Remove people and objects:** photobombers, power lines, bins, cars, or anything that spoils a shot
+- **Change the background:** a clean white background, an office, a beach, a city at night
+- **Professional headshots:** turn a casual photo into a LinkedIn-ready headshot with a studio background
+- **Product photos:** clean, evenly lit e-commerce photos for Amazon, Flipkart, Meesho, or Instagram shops
+- **Fix and enhance:** better lighting, colour, and sharpness, or a warm golden-hour look
+
+## How to edit a photo, step by step
+
+1. Open the [AI Photo Editor](/tools/ai-tools/ai-photo-editor) and sign in.
+2. Upload a JPG, PNG, or WebP photo.
+3. Pick a **quick edit**, or type what you want in your own words.
+4. To change only one part, tap **Brush an area**, paint over it, then choose **Erase what I brushed** or describe what should go there (for example "replace with a plant").
+5. Wait 10 to 40 seconds for the result.
+6. Keep editing: each edit builds on the last. Use **Compare** to see before and after, **Undo** to step back, or tap any earlier version in the history.
+7. Click **Download** to save your photo.
+
+## Tips for better results
+
+- **Be specific:** "remove the woman in the red dress on the right" works better than "remove the person".
+- **Use the brush for small things:** painting over the object tells the AI exactly what to remove.
+- **One change at a time:** do "remove the car", then "change the sky to sunset", rather than both in one go.
+- **Say what to keep:** add "keep my face exactly the same" for portraits.
+- **Pro HD mode** uses a higher-quality model at 2K resolution, better for prints and close-ups.
+
+## Things to know
+
+- Each edit uses one AI generation from your daily quota. If an edit fails, it's refunded.
+- Edited images carry Google's invisible SynthID watermark, which identifies them as AI-edited.
+- Some edits are blocked by safety rules, such as edits that sexualise people or are meant to deceive.
+- Only edit photos you have the right to use, and never use edits to mislead or impersonate anyone.
+- Need a transparent PNG cut-out? Use the free [Background Remover](/tools/image-tools/background-remover), which runs in your browser.
+
+Got a photo to fix? [Edit it now →](/tools/ai-tools/ai-photo-editor)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

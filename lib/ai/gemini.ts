@@ -3,6 +3,7 @@ import type { GenerateContentParameters, GenerateContentResponse, Part } from "@
 import type { McqQuiz } from "@/lib/pdf-form-types"
 import { looseText, type BulletRewrite, type FixPriority, type JobKeyword, type ResumeFix } from "@/lib/ats"
 import { normalizeFlashcards, normalizeQuestions, type RawFlashcard, type RawQuestion, type StudyDifficulty, type StudySet } from "@/lib/study-set"
+import type { PhotoEditQuality } from "@/lib/photo-edit"
 import { SUBTITLE_STYLE_RULES, normalizeCues, type RawCue, type SubtitleCue, type SubtitleStyle } from "@/lib/subtitles"
 
 /**
@@ -31,6 +32,17 @@ function isTimeoutError(error: unknown): boolean {
 type GenerateOptions = {
     /** Abort an attempt that takes longer than this and move on to the next model. */
     attemptTimeoutMs?: number
+    /** Models to try in order, instead of the default text models. */
+    models?: string[]
+}
+
+/**
+ * A 429 with a quota "limit: 0" means the model isn't available on this API key's tier at all
+ * (e.g. image models on Google's free tier). Retrying won't help; billing has to be enabled.
+ */
+function isUnavailableOnTier(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error)
+    return /limit:\s*0\b/.test(message) && /free_tier|FreeTier/i.test(message)
 }
 
 async function generateContent(
@@ -39,9 +51,10 @@ async function generateContent(
 ): Promise<GenerateContentResponse> {
     const ai = getClient()
     const now = Date.now()
-    const available = MODELS.filter((model) => (rateLimitedUntil.get(model) ?? 0) <= now)
+    const models = options.models?.length ? options.models : MODELS
+    const available = models.filter((model) => (rateLimitedUntil.get(model) ?? 0) <= now)
     // If every model is cooling down, try them all anyway rather than failing outright.
-    const candidates = available.length > 0 ? available : MODELS
+    const candidates = available.length > 0 ? available : models
 
     let lastError: unknown
     for (const model of candidates) {
@@ -55,6 +68,9 @@ async function generateContent(
         } catch (error) {
             if (!isRetryableError(error) && !isTimeoutError(error)) throw error
             lastError = error
+            if (isUnavailableOnTier(error)) {
+                console.error(`[gemini] ${model} is not available on this API key's free tier. Enable billing in Google AI Studio.`)
+            }
             rateLimitedUntil.set(model, Date.now() + RATE_LIMIT_COOLDOWN_MS)
             console.warn(`[gemini] ${model} ${isTimeoutError(error) ? "timed out" : "is rate limited or unavailable"}, trying next model`)
         }
@@ -1085,4 +1101,71 @@ export async function generateStudySet(input: GenerateStudySetInput): Promise<Om
 
     const title = typeof parsed.title === "string" && parsed.title.trim() ? parsed.title.trim().slice(0, 120) : "Study set"
     return { title, questions, flashcards }
+}
+
+/**
+ * Image models, tried in order. Override with comma-separated GEMINI_IMAGE_MODELS.
+ * HD (Pro accounts) uses the higher-quality model at 2K, falling back to the standard chain.
+ */
+const IMAGE_MODELS = (process.env.GEMINI_IMAGE_MODELS ?? "gemini-3.1-flash-image,gemini-2.5-flash-image")
+    .split(",")
+    .map((model) => model.trim())
+    .filter(Boolean)
+const IMAGE_HD_MODEL = process.env.GEMINI_IMAGE_HD_MODEL ?? "gemini-3-pro-image"
+
+/** Two attempts must fit inside the photo-edit route's maxDuration. */
+const IMAGE_ATTEMPT_TIMEOUT_MS = 75_000
+
+/** The model answered but produced no image (safety block, refusal, or it only replied in text). */
+export class ImageEditRefusedError extends Error {}
+
+export type EditPhotoInput = {
+    image: { data: string; mimeType: string }
+    /** The same photo with the area to edit painted over, for brush edits. */
+    markedImage: { data: string; mimeType: string } | null
+    prompt: string
+    aspectRatio: string
+    quality: PhotoEditQuality
+}
+
+export async function editPhoto(input: EditPhotoInput): Promise<{ data: string; mimeType: string }> {
+    const instructions = input.markedImage
+        ? "You are a professional photo editor. The first image is the photo to edit. The second image is the same photo " +
+          "with the area to change painted over in bright magenta. Apply this edit ONLY to that marked area, blending it " +
+          `seamlessly with its surroundings: ${input.prompt}\n` +
+          "Return the full edited version of the FIRST image, with no magenta marks. Keep everything outside the marked area " +
+          "exactly as it is, with the same framing, perspective, lighting, and resolution."
+        : "You are a professional photo editor. Edit this photo as follows: " +
+          `${input.prompt}\n` +
+          "Change only what the edit requires. Keep the framing, perspective, and all other details the same, and keep " +
+          "people's faces and identities exactly as they are unless asked otherwise. Make the result photorealistic."
+
+    const contents = [
+        { inlineData: input.image },
+        ...(input.markedImage ? [{ inlineData: input.markedImage }] : []),
+        { text: instructions },
+    ]
+
+    const hd = input.quality === "hd"
+    const response = await generateContent(
+        {
+            contents,
+            config: {
+                responseModalities: ["IMAGE", "TEXT"],
+                imageConfig: { aspectRatio: input.aspectRatio, ...(hd ? { imageSize: "2K" } : {}) },
+            },
+        },
+        { attemptTimeoutMs: IMAGE_ATTEMPT_TIMEOUT_MS, models: hd ? [IMAGE_HD_MODEL, ...IMAGE_MODELS] : IMAGE_MODELS }
+    )
+
+    const candidate = response.candidates?.[0]
+    const parts = candidate?.content?.parts ?? []
+    // Thinking models can return draft images marked `thought`; the final image is the last non-thought one.
+    const image = parts.filter((part) => part.inlineData?.data && !part.thought).at(-1)?.inlineData
+    if (image?.data) return { data: image.data, mimeType: image.mimeType ?? "image/png" }
+
+    const reason = response.promptFeedback?.blockReason ?? candidate?.finishReason ?? "NO_IMAGE"
+    const text = parts.map((part) => (part.thought ? "" : part.text ?? "")).join(" ").trim()
+    console.warn("[gemini] image edit returned no image", { reason, text: text.slice(0, 300) })
+    throw new ImageEditRefusedError(String(reason))
 }
