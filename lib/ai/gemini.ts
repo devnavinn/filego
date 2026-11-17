@@ -1,6 +1,7 @@
 import { ApiError, GoogleGenAI, MediaResolution, Type } from "@google/genai"
 import type { GenerateContentParameters, GenerateContentResponse, Part } from "@google/genai"
 import type { McqQuiz } from "@/lib/pdf-form-types"
+import { looseText, type BulletRewrite, type FixPriority, type JobKeyword, type ResumeFix } from "@/lib/ats"
 import { SUBTITLE_STYLE_RULES, normalizeCues, type RawCue, type SubtitleCue, type SubtitleStyle } from "@/lib/subtitles"
 
 /**
@@ -786,4 +787,183 @@ export async function generateSubtitles(input: GenerateSubtitlesInput): Promise<
     }
 
     return normalizeCues(Array.isArray(parsed.cues) ? parsed.cues : [], input.durationSeconds, input.style)
+}
+
+const atsResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        jobTitle: { type: Type.STRING },
+        keywords: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    term: { type: Type.STRING },
+                    aliases: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    importance: { type: Type.STRING, enum: ["required", "preferred"] },
+                    category: {
+                        type: Type.STRING,
+                        enum: ["skill", "tool", "certification", "qualification", "soft_skill", "domain"],
+                    },
+                },
+                required: ["term", "aliases", "importance", "category"],
+            },
+        },
+        experienceScore: { type: Type.NUMBER },
+        experienceNote: { type: Type.STRING },
+        impactScore: { type: Type.NUMBER },
+        impactNote: { type: Type.STRING },
+        fixes: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    priority: { type: Type.STRING, enum: ["high", "medium", "low"] },
+                    section: { type: Type.STRING },
+                    issue: { type: Type.STRING },
+                    fix: { type: Type.STRING },
+                },
+                required: ["priority", "section", "issue", "fix"],
+            },
+        },
+        bulletRewrites: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: { original: { type: Type.STRING }, improved: { type: Type.STRING } },
+                required: ["original", "improved"],
+            },
+        },
+        tailoredSummary: { type: Type.STRING },
+    },
+    required: ["keywords", "experienceScore", "experienceNote", "impactScore", "impactNote", "fixes", "bulletRewrites", "tailoredSummary"],
+}
+
+/** Two attempts (primary + fallback model) must fit inside the ats-check route's maxDuration. */
+const ATS_ATTEMPT_TIMEOUT_MS = 50_000
+
+export type ResumeJobAnalysis = {
+    jobTitle: string | null
+    keywords: JobKeyword[]
+    experienceScore: number
+    experienceNote: string | null
+    impactScore: number
+    impactNote: string | null
+    fixes: ResumeFix[]
+    bulletRewrites: BulletRewrite[]
+    tailoredSummary: string | null
+}
+
+const KEYWORD_IMPORTANCE = new Set(["required", "preferred"])
+const KEYWORD_CATEGORIES = new Set(["skill", "tool", "certification", "qualification", "soft_skill", "domain"])
+const FIX_PRIORITIES = new Set(["high", "medium", "low"])
+
+function clampScore(value: unknown): number {
+    const n = Number(value)
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 50
+}
+
+/**
+ * Reads a resume (and optionally a job description) the way a recruiter and an ATS would.
+ * Returns raw judgements only; keyword matching and the final score are computed in lib/ats.ts.
+ */
+export async function analyzeResumeForJob(input: { resumeText: string; jobText: string | null }): Promise<ResumeJobAnalysis> {
+    const hasJob = Boolean(input.jobText)
+    const instructions = hasJob
+        ? [
+              "You are an expert recruiter and ATS (applicant tracking system) specialist. Compare the resume with the job description.",
+              "keywords: the 12-30 most important hard skills, tools, certifications, qualifications, and domain terms an ATS would scan for in THIS JOB DESCRIPTION (never take them from the resume). Copy each `term` exactly as written in the job description. `aliases` are common alternative spellings or abbreviations (e.g. JavaScript → JS; Amazon Web Services → AWS). Mark `required` if the job says must/required or it is central to the role, otherwise `preferred`. Include at most 3 soft skills.",
+              "jobTitle: the job title from the job description.",
+              "experienceScore (0-100): how well the candidate's years, seniority, role history, and domain match what the job asks for. experienceNote: one or two sentences explaining it, naming the main gap if there is one.",
+          ]
+        : [
+              "You are an expert recruiter and ATS (applicant tracking system) specialist. Review this resume on its own (no job description was given).",
+              "keywords: return an empty list. jobTitle: the role the resume targets, if clear.",
+              "experienceScore (0-100): how clearly and convincingly the resume presents the candidate's experience and progression for the role they target. experienceNote: one or two sentences explaining it.",
+          ]
+
+    const response = await generateContent({
+        contents:
+            instructions.join("\n") +
+            "\nimpactScore (0-100): how well the bullet points show concrete achievements (action verbs, outcomes, numbers) rather than duties. impactNote: one sentence." +
+            "\nfixes: 5-10 specific, actionable fixes ordered by impact on getting shortlisted. Each names the resume section, the issue, and exactly what to change" +
+            (hasJob ? ", including where to naturally add missing job keywords the candidate plausibly has" : "") +
+            ". Use priority high for things that will get the resume rejected." +
+            "\nbulletRewrites: 3-5 of the weakest bullet points from the resume. `original` must be copied word for word from the resume. `improved` rewrites it with a strong action verb and a result" +
+            (hasJob ? ", using the job's wording where truthful" : "") +
+            ". Never invent numbers, employers, tools, or achievements: where a metric is needed but unknown, use a placeholder like [X%] or [N users]." +
+            "\ntailoredSummary: a 2-3 sentence professional summary for the top of this resume" +
+            (hasJob ? " aimed at this job" : "") +
+            ", using only facts from the resume." +
+            "\nBe honest and consistent; do not inflate scores. Write in English." +
+            `\n\nResume:\n"""\n${truncateDocument(input.resumeText)}\n"""` +
+            (hasJob ? `\n\nJob description:\n"""\n${truncateDocument(input.jobText as string)}\n"""` : ""),
+        config: {
+            temperature: 0,
+            responseMimeType: "application/json",
+            responseSchema: atsResponseSchema,
+        },
+    }, { attemptTimeoutMs: ATS_ATTEMPT_TIMEOUT_MS })
+
+    const raw = response.text
+    if (!raw) throw new Error("The AI returned an empty response.")
+
+    let parsed: Record<string, unknown>
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        throw new Error("The AI returned an unreadable response.")
+    }
+
+    const str = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null)
+    const list = (value: unknown) => (Array.isArray(value) ? (value as Record<string, unknown>[]) : [])
+
+    const keywords: JobKeyword[] = hasJob
+        ? list(parsed.keywords).flatMap((k) => {
+              const term = str(k?.term)
+              if (!term || term.length > 60) return []
+              return [{
+                  term,
+                  aliases: (Array.isArray(k.aliases) ? k.aliases : []).map(str).filter((a): a is string => Boolean(a)).slice(0, 5),
+                  importance: KEYWORD_IMPORTANCE.has(k.importance as string) ? (k.importance as JobKeyword["importance"]) : "preferred",
+                  category: KEYWORD_CATEGORIES.has(k.category as string) ? (k.category as JobKeyword["category"]) : "skill",
+              }]
+          }).slice(0, 30)
+        : []
+
+    const fixes: ResumeFix[] = list(parsed.fixes).flatMap((f) => {
+        const issue = str(f?.issue)
+        const fix = str(f?.fix)
+        if (!issue || !fix) return []
+        return [{
+            priority: FIX_PRIORITIES.has(f.priority as string) ? (f.priority as FixPriority) : "medium",
+            section: str(f.section) ?? "General",
+            issue,
+            fix,
+        }]
+    })
+    const order: Record<FixPriority, number> = { high: 0, medium: 1, low: 2 }
+    fixes.sort((a, b) => order[a.priority] - order[b.priority])
+
+    // Only keep rewrites of lines that really are in the resume (the AI sometimes paraphrases or invents them).
+    const resumeLoose = looseText(input.resumeText)
+    const bulletRewrites: BulletRewrite[] = list(parsed.bulletRewrites).flatMap((b) => {
+        const original = str(b?.original)
+        const improved = str(b?.improved)
+        if (!original || !improved || looseText(original) === looseText(improved)) return []
+        const probe = looseText(original).slice(0, 40)
+        return probe.length >= 15 && resumeLoose.includes(probe) ? [{ original, improved }] : []
+    })
+
+    return {
+        jobTitle: str(parsed.jobTitle),
+        keywords,
+        experienceScore: clampScore(parsed.experienceScore),
+        experienceNote: str(parsed.experienceNote),
+        impactScore: clampScore(parsed.impactScore),
+        impactNote: str(parsed.impactNote),
+        fixes: fixes.slice(0, 10),
+        bulletRewrites: bulletRewrites.slice(0, 5),
+        tailoredSummary: str(parsed.tailoredSummary),
+    }
 }

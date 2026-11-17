@@ -31,6 +31,7 @@ import { DocumentSummarizerTool } from "@/components/tools/document-summarizer-t
 import { DocumentTranslatorTool } from "@/components/tools/document-translator-tool"
 import { YouTubeSummarizerTool } from "@/components/tools/youtube-summarizer-tool"
 import { ResumeParserTool } from "@/components/tools/resume-parser-tool"
+import { AtsResumeCheckerTool } from "@/components/tools/ats-resume-checker-tool"
 import { AiFileChatTool } from "@/components/tools/ai-file-chat-tool"
 import { OcrImageToTextTool } from "@/components/tools/ocr-image-to-text-tool"
 import { PdfOcrTool } from "@/components/tools/pdf-ocr-tool"
@@ -128,6 +129,7 @@ export const toolComponentMap = {
     "document-translator": DocumentTranslatorTool,
     "youtube-summarizer": YouTubeSummarizerTool,
     "resume-parser": ResumeParserTool,
+    "ats-resume-checker": AtsResumeCheckerTool,
     "ai-file-chat": AiFileChatTool,
     "ocr-image-to-text": OcrImageToTextTool,
     "pdf-ocr": PdfOcrTool,

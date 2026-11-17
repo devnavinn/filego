@@ -544,6 +544,63 @@ In YouTube Studio, open the video, go to **Subtitles**, choose the language, cli
 
 Ready to caption your next video? [Generate subtitles now →](/tools/ai-tools/subtitle-generator)`,
     },
+    {
+        slug: "how-to-check-resume-ats-score",
+        title: "How to Check Your Resume's ATS Score Against a Job Description (Free)",
+        excerpt:
+            "Most resumes are filtered by software before a recruiter sees them. Check your ATS score, find missing keywords, and fix the problems that get resumes rejected.",
+        seoTitle: "ATS Resume Checker: Free Resume Score & Keyword Match for Any Job | Filego",
+        seoDescription:
+            "Check your resume's ATS score against any job description. Find missing keywords, formatting problems, and weak bullet points, with fixes for Naukri, LinkedIn, and company portals.",
+        category: "AI Guides",
+        tags: ["ats resume checker", "resume score", "ats score", "resume keywords", "job search"],
+        toolLabel: "ATS Resume Checker",
+        toolPath: "/tools/ai-tools/ats-resume-checker",
+        content: `Large companies and job portals receive hundreds of applications for every opening, so they use an applicant tracking system (ATS) to read resumes and rank them against the job description. If your resume doesn't use the job's keywords, or the software can't read it properly, it can be filtered out before a recruiter ever opens it.
+
+## What an ATS looks for
+
+- **Keywords from the job description:** skills, tools, certifications, and qualifications, usually in the exact words the job uses
+- **Readable text:** scanned PDFs, text inside images, and icon fonts can turn into gibberish or nothing at all
+- **Standard sections:** headings like Experience, Education, and Skills, so it knows where each detail belongs
+- **Contact details:** an email and phone number it can pick out
+- **Relevant experience:** job titles, years of experience, and achievements that match the role
+
+## How to check your resume, step by step
+
+1. Open the [ATS Resume Checker](/tools/ai-tools/ats-resume-checker) and sign in.
+2. Upload your resume as a PDF, DOCX, or TXT file.
+3. Copy the full job description from Naukri, LinkedIn, Indeed, or the company's careers page and paste it in.
+4. Click **Check match**. In about 20 seconds you get your score.
+5. Work through the report: add the missing keywords you genuinely have, fix any failed checks, then upload the updated resume and check again.
+
+No job description yet? Leave the box empty for a general ATS check of your resume's formatting, sections, and impact.
+
+## What's in the report
+
+- **ATS score out of 100**, split into keyword match, experience fit, impact, ATS formatting, and sections & contact
+- **Job keywords**, found and missing, with the required ones marked
+- **ATS checks** for contact details, standard headings, length, measurable results, unreadable characters, and unnecessary personal details
+- **Prioritised fixes** telling you exactly what to change and where
+- **With Pro:** the full fix list, your weakest bullet points rewritten with action verbs and results, and a profile summary written for the job
+
+## Common reasons resumes get rejected
+
+- **Scanned or image-only PDF.** If the checker can't read your resume, neither can an ATS. Export it from Word or Google Docs as a PDF instead.
+- **Missing exact keywords.** The job says "React.js" and your resume says "frontend frameworks". Use the job's own words where they're true for you.
+- **Personal details.** Date of birth, marital status, father's name, and religion are still common on Indian resumes but aren't needed. Remove them to save space and avoid bias.
+- **Duties instead of results.** "Responsible for testing" is weaker than "Cut regression bugs by 30% by automating 200 test cases".
+- **Creative layouts.** Tables, text boxes, and two-column templates can scramble the order an ATS reads your resume in.
+
+## Tips for a higher score
+
+- Tailor your resume for each job. Ten minutes per application makes a real difference.
+- Mirror the job title in your summary if it matches your experience.
+- Add numbers to at least a third of your bullet points.
+- Never add skills you don't have. Interviews will expose them.
+
+Applying for a job this week? [Check your resume's ATS score now →](/tools/ai-tools/ats-resume-checker)`,
+    },
 ];
 
 function withToolLink(guide: ToolGuide) {

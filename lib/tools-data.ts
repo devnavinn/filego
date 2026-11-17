@@ -242,7 +242,7 @@ export const toolCategories: ToolCategory[] = [
         id: "ai",
         slug: "ai-tools",
         title: "AI-Powered Tools",
-        description: "OCR, translation, subtitles, video and document summaries, parsing, and file Q&A.",
+        description: "OCR, translation, subtitles, ATS resume checks, summaries, parsing, and file Q&A.",
         heroDescription:
             "Deliver document intelligence with OCR, parsing, summarization, and AI-powered file interactions.",
         accent: "from-purple-600 via-fuchsia-500 to-orange-400 text-white",
@@ -274,6 +274,12 @@ export const toolCategories: ToolCategory[] = [
                     "Paste a YouTube link and get an AI summary, key points, and clickable timestamped chapters in English, Hindi, and 35+ languages. Free to try.",
             },
             createTool("Resume Parser", "Extract structured data from resumes."),
+            {
+                ...createTool("ATS Resume Checker", "Score your resume against a job description and get fixes."),
+                seoTitle: "ATS Resume Checker – Free Resume Score & Keyword Match",
+                seoDescription:
+                    "Check your resume against any job description. Get an ATS score, missing keywords, and specific fixes to get shortlisted on Naukri, LinkedIn, and company portals. Free.",
+            },
             createTool("AI File Chat", "Ask questions and get answers from PDFs and documents."),
         ],
     },
