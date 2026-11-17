@@ -71,22 +71,43 @@ function escapeRegExp(value: string) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
+/** Longest first. Only these endings are treated as the same word ("mentor", "mentored", "mentoring"). */
+const SUFFIXES = ["ements", "ement", "ments", "ment", "ings", "ing", "ers", "er", "ed", "es", "s", "e"]
+const SUFFIX_GROUP = `(?:${SUFFIXES.join("|")})?`
+
+/**
+ * Light stemmer for keyword matching: strips one common ending so variants of a word match.
+ * Returns null for words that shouldn't be stemmed (short tech terms like "REST", "Java", "AWS",
+ * and words ending in "ss").
+ */
+function stemWord(word: string): string | null {
+    if (!/^[a-z]+$/.test(word) || word.endsWith("ss")) return null
+    for (const suffix of SUFFIXES) {
+        if (word.endsWith(suffix) && word.length - suffix.length >= 4) return word.slice(0, -suffix.length)
+    }
+    return word.length >= 5 ? word : null
+}
+
 /**
  * Builds a matcher for one term. Word boundaries are "not a letter/digit" so terms with symbols
  * (C++, C#, .NET, CI/CD) work; separators inside the term match space, hyphen, dot, or nothing;
- * and a simple plural is allowed.
+ * longer words match their common variants (mentoring ↔ mentored ↔ mentor); and a simple
+ * plural is allowed on the last word.
  */
 function termPattern(term: string): RegExp | null {
     const cleaned = term.toLowerCase().trim().replace(/\s+/g, " ")
     if (!cleaned) return null
-    const body = cleaned
-        .split(/[\s\-.]+/)
-        .filter(Boolean)
-        .map(escapeRegExp)
+    const words = cleaned.split(/[\s\-.]+/).filter(Boolean)
+    if (words.length === 0) return null
+    const body = words
+        .map((word, index) => {
+            const stem = stemWord(word)
+            if (stem) return escapeRegExp(stem) + SUFFIX_GROUP
+            const isLast = index === words.length - 1
+            return escapeRegExp(word) + (isLast && /[a-z]$/.test(word) ? "(?:e?s)?" : "")
+        })
         .join("[\\s\\-.]?")
-    if (!body) return null
-    const plural = /[a-z]$/.test(cleaned) ? "(?:e?s)?" : ""
-    return new RegExp(`(?<![a-z0-9])${cleaned.startsWith(".") ? "\\." : ""}${body}${plural}(?![a-z0-9+#])`, "i")
+    return new RegExp(`(?<![a-z0-9])${cleaned.startsWith(".") ? "\\." : ""}${body}(?![a-z0-9+#])`, "i")
 }
 
 export function containsTerm(normalizedText: string, term: string): boolean {
